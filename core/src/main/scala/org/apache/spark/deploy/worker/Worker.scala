@@ -153,6 +153,7 @@ private[deploy] class Worker(
   )
 
   var coresUsed = 0
+  var coresAllocated: Map[String, List[Int]] = Map()
   var memoryUsed = 0
 
   def coresFree: Int = cores - coresUsed
@@ -458,12 +459,19 @@ private[deploy] class Worker(
               appDir.getAbsolutePath()
             }.toSeq)
           appDirectories(appId) = appLocalDirs
+
+          var unwanted: List[Int] = List()
+          coresAllocated.values.foreach(list => unwanted = unwanted ++ list)
+          val available = (0 to cores - 1).toList.filterNot(unwanted.toSet)
+          val cpuset = available.take(cores_).mkString(",")
+          coresAllocated += (appId + "/" + execId -> available.take(cores_))
           val manager = new ExecutorRunner(
             appId,
             execId,
             appDesc.copy(command = Worker.maybeUpdateSSLSettings(appDesc.command, conf)),
             cores_,
             memory_,
+            cpuset,
             self,
             workerId,
             host,
@@ -485,6 +493,7 @@ private[deploy] class Worker(
             if (executors.contains(appId + "/" + execId)) {
               executors(appId + "/" + execId).kill()
               executors -= appId + "/" + execId
+              coresAllocated -= appId + "/" + execId
             }
             sendToMaster(ExecutorStateChanged(appId, execId, ExecutorState.FAILED,
               Some(e.toString), None))
@@ -513,6 +522,7 @@ private[deploy] class Worker(
       val driver = new DriverRunner(
         conf,
         driverId,
+        cores,
         workDir,
         sparkHome,
         driverDesc.copy(command = Worker.maybeUpdateSSLSettings(driverDesc.command, conf)),
@@ -673,6 +683,7 @@ private[deploy] class Worker(
           trimFinishedExecutorsIfNecessary()
           coresUsed -= executor.cores
           memoryUsed -= executor.memory
+          coresAllocated -= fullId
         case None =>
           logInfo("Unknown Executor " + fullId + " finished with state " + state +
             message.map(" message " + _).getOrElse("") +

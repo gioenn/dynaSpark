@@ -42,13 +42,14 @@ object CommandUtils extends Logging {
       command: Command,
       securityMgr: SecurityManager,
       memory: Int,
+      cpuset: String,
       sparkHome: String,
       substituteArguments: String => String,
       classPaths: Seq[String] = Seq[String](),
       env: Map[String, String] = sys.env): ProcessBuilder = {
     val localCommand = buildLocalCommand(
       command, securityMgr, substituteArguments, classPaths, env)
-    val commandSeq = buildCommandSeq(localCommand, memory, sparkHome)
+    val commandSeq = buildCommandSeq(localCommand, memory, cpuset, sparkHome)
     val builder = new ProcessBuilder(commandSeq: _*)
     val environment = builder.environment()
     for ((key, value) <- localCommand.environment) {
@@ -57,11 +58,12 @@ object CommandUtils extends Logging {
     builder
   }
 
-  private def buildCommandSeq(command: Command, memory: Int, sparkHome: String): Seq[String] = {
+  private def buildCommandSeq(command: Command, memory: Int, cpuset: String, sparkHome: String): Seq[String] = {
     // SPARK-698: do not call the run.cmd script, as process.destroy()
     // fails to kill a process tree on Windows
     val cmd = new WorkerCommandBuilder(sparkHome, memory, command).buildCommand()
-    cmd.asScala ++ Seq(command.mainClass) ++ command.arguments
+    val dockerCMD = Seq("docker", "run", "-m", s"${memory}m", s"--cpuset-cpus='${cpuset}'", "-P" , "--net=host", "polimi/spark:1.6.1")
+    dockerCMD ++  cmd.asScala ++ Seq(command.mainClass) ++ command.arguments
   }
 
   /**
