@@ -522,8 +522,8 @@ private[deploy] class Worker(
       val driver = new DriverRunner(
         conf,
         driverId,
-        cores,
         workDir,
+        cores,
         sparkHome,
         driverDesc.copy(command = Worker.maybeUpdateSSLSettings(driverDesc.command, conf)),
         self,
