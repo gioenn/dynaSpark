@@ -17,6 +17,7 @@
 
 package org.apache.spark.deploy.worker
 
+import sys.process._
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -492,6 +493,7 @@ private[deploy] class Worker(
             logError(s"Failed to launch executor $appId/$execId for ${appDesc.name}.", e)
             if (executors.contains(appId + "/" + execId)) {
               executors(appId + "/" + execId).kill()
+              val exitCode = Seq("docker", "stop" ,"appId + '/' + execId").!
               executors -= appId + "/" + execId
               coresAllocated -= appId + "/" + execId
             }
@@ -512,6 +514,7 @@ private[deploy] class Worker(
           case Some(executor) =>
             logInfo("Asked to kill executor " + fullId)
             executor.kill()
+            val exitCode = Seq("docker", "stop" ,"appId + '/' + execId").!
           case None =>
             logInfo("Asked to kill unknown executor " + fullId)
         }
