@@ -81,6 +81,14 @@ private[spark] class WorkerInfo(
     }
   }
 
+  def scaleExecutor(exec: ExecutorDesc){
+    if (executors.contains(exec.fullId)) {
+      coresUsed += exec.cores - executors(exec.fullId).cores
+      memoryUsed += exec.memory - executors(exec.fullId).memory
+      executors(exec.fullId) = exec
+    }
+  }
+
   def hasExecutor(app: ApplicationInfo): Boolean = {
     executors.values.exists(_.application == app)
   }

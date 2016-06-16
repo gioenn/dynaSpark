@@ -502,6 +502,38 @@ private[deploy] class Worker(
         }
       }
 
+    case ScaleExecutor(masterUrl, appId, execId, appDesc, cores_) =>
+      if (masterUrl != activeMasterUrl) {
+        logWarning("Invalid Master (" + masterUrl + ") attempted to launch executor.")
+      } else {
+        try {
+          logInfo("Asked to scale executor %s/%d for %s".format(appId, execId, appDesc.name))
+          val fullId = appId + "/" + execId
+          var unwanted: List[Int] = List()
+          coresAllocated.filterKeys((fullId) => false).values.foreach(list => unwanted = unwanted ++ list)
+          val available = (0 to cores - 1).toList.filterNot(unwanted.toSet)
+          val cpuset = available.take(cores_ - executors(fullId).cores).mkString(",")
+          Seq("docker", "update" , "--cpuset-cpus='" + cpuset + "'", appId + "." + execId).!
+
+          coresAllocated += (appId + "/" + execId -> available.take(cores_))
+          executors(fullId).substituteVariables("CORES " + cores.toString)
+
+          sendToMaster(ExecutorStateChanged(appId, execId, ExecutorState.RUNNING, None, None))
+        } catch {
+          case e: Exception => {
+            logError(s"Failed to scale executor $appId/$execId for ${appDesc.name}.", e)
+            if (executors.contains(appId + "/" + execId)) {
+              executors(appId + "/" + execId).kill()
+              val exitCode = Seq("docker", "stop" , appId + "." + execId).!
+              executors -= appId + "/" + execId
+              coresAllocated -= appId + "/" + execId
+            }
+            sendToMaster(ExecutorStateChanged(appId, execId, ExecutorState.FAILED,
+              Some(e.toString), None))
+          }
+        }
+      }
+
     case executorStateChanged @ ExecutorStateChanged(appId, execId, state, message, exitStatus) =>
       handleExecutorStateChanged(executorStateChanged)
 
@@ -514,7 +546,7 @@ private[deploy] class Worker(
           case Some(executor) =>
             logInfo("Asked to kill executor " + fullId)
             executor.kill()
-            val exitCode = Seq("docker", "stop" ,appId + "." + execId).!
+            val exitCode = Seq("docker", "stop" , appId + "." + execId).!
           case None =>
             logInfo("Asked to kill unknown executor " + fullId)
         }
