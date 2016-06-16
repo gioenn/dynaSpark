@@ -142,6 +142,10 @@ private[deploy] object DeployMessages {
     Utils.checkHostPort(hostPort, "Required hostport")
   }
 
+  case class ExecutorScaled(id: Int, workerId: String, hostPort: String, cores: Int) {
+    Utils.checkHostPort(hostPort, "Required hostport")
+  }
+
   case class ExecutorUpdated(id: Int, state: ExecutorState, message: Option[String],
     exitStatus: Option[Int])
 
