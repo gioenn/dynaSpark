@@ -298,6 +298,12 @@ case class StructType(fields: Array[StructField]) extends DataType with Seq[Stru
     Utils.truncatedString(fieldTypes, "struct<", ",", ">")
   }
 
+  override def catalogString: String = {
+    // in catalogString, we should not truncate
+    val fieldTypes = fields.map(field => s"${field.name}:${field.dataType.catalogString}")
+    s"struct<${fieldTypes.mkString(",")}>"
+  }
+
   override def sql: String = {
     val fieldTypes = fields.map(f => s"${quoteIdentifier(f.name)}: ${f.dataType.sql}")
     s"STRUCT<${fieldTypes.mkString(", ")}>"
@@ -378,10 +384,10 @@ object StructType extends AbstractDataType {
     StructType(fields.asScala)
   }
 
-  protected[sql] def fromAttributes(attributes: Seq[Attribute]): StructType =
+  private[sql] def fromAttributes(attributes: Seq[Attribute]): StructType =
     StructType(attributes.map(a => StructField(a.name, a.dataType, a.nullable, a.metadata)))
 
-  def removeMetadata(key: String, dt: DataType): DataType =
+  private[sql] def removeMetadata(key: String, dt: DataType): DataType =
     dt match {
       case StructType(fields) =>
         val newFields = fields.map { f =>

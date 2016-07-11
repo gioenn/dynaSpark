@@ -34,6 +34,7 @@ from pyspark.traceback_utils import SCCallSiteSync
 from pyspark.sql.types import _parse_datatype_json_string
 from pyspark.sql.column import Column, _to_seq, _to_list, _to_java_column
 from pyspark.sql.readwriter import DataFrameWriter
+from pyspark.sql.streaming import DataStreamWriter
 from pyspark.sql.types import *
 
 __all__ = ["DataFrame", "DataFrameNaFunctions", "DataFrameStatFunctions"]
@@ -172,11 +173,25 @@ class DataFrame(object):
     @since(1.4)
     def write(self):
         """
-        Interface for saving the content of the :class:`DataFrame` out into external storage.
+        Interface for saving the content of the non-streaming :class:`DataFrame` out into external
+        storage.
 
         :return: :class:`DataFrameWriter`
         """
         return DataFrameWriter(self)
+
+    @property
+    @since(2.0)
+    def writeStream(self):
+        """
+        Interface for saving the content of the streaming :class:`DataFrame` out into external
+        storage.
+
+        .. note:: Experimental.
+
+        :return: :class:`DataStreamWriter`
+        """
+        return DataStreamWriter(self)
 
     @property
     @since(1.3)
@@ -243,8 +258,8 @@ class DataFrame(object):
     def isStreaming(self):
         """Returns true if this :class:`Dataset` contains one or more sources that continuously
         return data as it arrives. A :class:`Dataset` that reads data from a streaming source
-        must be executed as a :class:`ContinuousQuery` using the :func:`startStream` method in
-        :class:`DataFrameWriter`.  Methods that return a single answer, (e.g., :func:`count` or
+        must be executed as a :class:`StreamingQuery` using the :func:`start` method in
+        :class:`DataStreamWriter`.  Methods that return a single answer, (e.g., :func:`count` or
         :func:`collect`) will throw an :class:`AnalysisException` when there is a streaming
         source present.
 
@@ -1018,10 +1033,10 @@ class DataFrame(object):
         :func:`drop_duplicates` is an alias for :func:`dropDuplicates`.
 
         >>> from pyspark.sql import Row
-        >>> df = sc.parallelize([ \
-            Row(name='Alice', age=5, height=80), \
-            Row(name='Alice', age=5, height=80), \
-            Row(name='Alice', age=10, height=80)]).toDF()
+        >>> df = sc.parallelize([ \\
+        ...     Row(name='Alice', age=5, height=80), \\
+        ...     Row(name='Alice', age=5, height=80), \\
+        ...     Row(name='Alice', age=10, height=80)]).toDF()
         >>> df.dropDuplicates().show()
         +---+------+-----+
         |age|height| name|

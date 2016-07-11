@@ -147,10 +147,6 @@ private[hive] class HiveMetastoreCatalog(sparkSession: SparkSession) extends Log
     // it is better at here to invalidate the cache to avoid confusing waring logs from the
     // cache loader (e.g. cannot find data source provider, which is only defined for
     // data source table.).
-    invalidateTable(tableIdent)
-  }
-
-  def invalidateTable(tableIdent: TableIdentifier): Unit = {
     cachedDataSourceTables.invalidate(getQualifiedTableName(tableIdent))
   }
 
@@ -191,6 +187,7 @@ private[hive] class HiveMetastoreCatalog(sparkSession: SparkSession) extends Log
 
   private def getCached(
       tableIdentifier: QualifiedTableName,
+      pathsInMetastore: Seq[String],
       metastoreRelation: MetastoreRelation,
       schemaInMetastore: StructType,
       expectedFileFormat: Class[_ <: FileFormat],
@@ -200,7 +197,6 @@ private[hive] class HiveMetastoreCatalog(sparkSession: SparkSession) extends Log
     cachedDataSourceTables.getIfPresent(tableIdentifier) match {
       case null => None // Cache miss
       case logical @ LogicalRelation(relation: HadoopFsRelation, _, _) =>
-        val pathsInMetastore = metastoreRelation.catalogTable.storage.locationUri.toSeq
         val cachedRelationFileFormatClass = relation.fileFormat.getClass
 
         expectedFileFormat match {
@@ -265,9 +261,22 @@ private[hive] class HiveMetastoreCatalog(sparkSession: SparkSession) extends Log
         PartitionDirectory(values, location)
       }
       val partitionSpec = PartitionSpec(partitionSchema, partitions)
+      val partitionPaths = partitions.map(_.path.toString)
+
+      // By convention (for example, see MetaStorePartitionedTableFileCatalog), the definition of a
+      // partitioned table's paths depends on whether that table has any actual partitions.
+      // Partitioned tables without partitions use the location of the table's base path.
+      // Partitioned tables with partitions use the locations of those partitions' data locations,
+      // _omitting_ the table's base path.
+      val paths = if (partitionPaths.isEmpty) {
+        Seq(metastoreRelation.hiveQlTable.getDataLocation.toString)
+      } else {
+        partitionPaths
+      }
 
       val cached = getCached(
         tableIdentifier,
+        paths,
         metastoreRelation,
         metastoreSchema,
         fileFormatClass,
@@ -312,6 +321,7 @@ private[hive] class HiveMetastoreCatalog(sparkSession: SparkSession) extends Log
       val paths = Seq(metastoreRelation.hiveQlTable.getDataLocation.toString)
 
       val cached = getCached(tableIdentifier,
+        paths,
         metastoreRelation,
         metastoreSchema,
         fileFormatClass,
@@ -457,49 +467,6 @@ private[hive] class HiveMetastoreCatalog(sparkSession: SparkSession) extends Log
           allowExisting)
     }
   }
-
-  /**
-   * Casts input data to correct data types according to table definition before inserting into
-   * that table.
-   */
-  object PreInsertionCasts extends Rule[LogicalPlan] {
-    def apply(plan: LogicalPlan): LogicalPlan = plan.transform {
-      // Wait until children are resolved.
-      case p: LogicalPlan if !p.childrenResolved => p
-
-      case p @ InsertIntoTable(table: MetastoreRelation, _, child, _, _) =>
-        castChildOutput(p, table, child)
-    }
-
-    def castChildOutput(p: InsertIntoTable, table: MetastoreRelation, child: LogicalPlan)
-      : LogicalPlan = {
-      val childOutputDataTypes = child.output.map(_.dataType)
-      val numDynamicPartitions = p.partition.values.count(_.isEmpty)
-      val tableOutputDataTypes =
-        (table.attributes ++ table.partitionKeys.takeRight(numDynamicPartitions))
-          .take(child.output.length).map(_.dataType)
-
-      if (childOutputDataTypes == tableOutputDataTypes) {
-        InsertIntoHiveTable(table, p.partition, p.child, p.overwrite, p.ifNotExists)
-      } else if (childOutputDataTypes.size == tableOutputDataTypes.size &&
-        childOutputDataTypes.zip(tableOutputDataTypes)
-          .forall { case (left, right) => left.sameType(right) }) {
-        // If both types ignoring nullability of ArrayType, MapType, StructType are the same,
-        // use InsertIntoHiveTable instead of InsertIntoTable.
-        InsertIntoHiveTable(table, p.partition, p.child, p.overwrite, p.ifNotExists)
-      } else {
-        // Only do the casting when child output data types differ from table output data types.
-        val castedChildOutput = child.output.zip(table.output).map {
-          case (input, output) if input.dataType != output.dataType =>
-            Alias(Cast(input, output.dataType), input.name)()
-          case (input, _) => input
-        }
-
-        p.copy(child = logical.Project(castedChildOutput, child))
-      }
-    }
-  }
-
 }
 
 /**
@@ -544,7 +511,7 @@ private[hive] case class InsertIntoHiveTable(
     child: LogicalPlan,
     overwrite: Boolean,
     ifNotExists: Boolean)
-  extends LogicalPlan {
+  extends LogicalPlan with Command {
 
   override def children: Seq[LogicalPlan] = child :: Nil
   override def output: Seq[Attribute] = Seq.empty

@@ -1536,4 +1536,18 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       Utils.deleteRecursively(baseDir)
     }
   }
+
+  test("SPARK-15230: distinct() does not handle column name with dot properly") {
+    val df = Seq(1, 1, 2).toDF("column.with.dot")
+    checkAnswer(df.distinct(), Row(1) :: Row(2) :: Nil)
+  }
+
+  test("SPARK-16181: outer join with isNull filter") {
+    val left = Seq("x").toDF("col")
+    val right = Seq("y").toDF("col").withColumn("new", lit(true))
+    val joined = left.join(right, left("col") === right("col"), "left_outer")
+
+    checkAnswer(joined, Row("x", null, null))
+    checkAnswer(joined.filter($"new".isNull), Row("x", null, null))
+  }
 }

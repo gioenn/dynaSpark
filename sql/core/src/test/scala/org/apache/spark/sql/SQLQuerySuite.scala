@@ -21,10 +21,8 @@ import java.math.MathContext
 import java.sql.Timestamp
 
 import org.apache.spark.AccumulatorSuite
-import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.UnresolvedException
-import org.apache.spark.sql.catalyst.catalog.{CatalogTestUtils, ExternalCatalog, SessionCatalog}
-import org.apache.spark.sql.catalyst.expressions.{ExpressionDescription, SortOrder}
+import org.apache.spark.sql.catalyst.expressions.SortOrder
 import org.apache.spark.sql.catalyst.plans.logical.Aggregate
 import org.apache.spark.sql.catalyst.util.StringUtils
 import org.apache.spark.sql.execution.aggregate
@@ -61,7 +59,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   test("show functions") {
     def getFunctions(pattern: String): Seq[Row] = {
       StringUtils.filterPattern(
-        spark.sessionState.catalog.listFunctions("default").map(_.funcName), pattern)
+        spark.sessionState.catalog.listFunctions("default").map(_._1.funcName), pattern)
         .map(Row(_))
     }
 
@@ -80,13 +78,10 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     val functions = Array("ilog", "logi", "logii", "logiii", "crc32i", "cubei", "cume_disti",
       "isize", "ispace", "to_datei", "date_addi", "current_datei")
 
-    assert(sql("SHOW functions").collect().isEmpty)
-
     createFunction(functions)
 
     checkAnswer(sql("SHOW functions"), getFunctions("*"))
-    assert(sql("SHOW functions").collect().size === functions.size)
-    assert(sql("SHOW functions").collect().toSet === functions.map(Row(_)).toSet)
+    assert(sql("SHOW functions").collect().size > 200)
 
     Seq("^c*", "*e$", "log*", "*date*").foreach { pattern =>
       // For the pattern part, only '*' and '|' are allowed as wildcards.
@@ -665,16 +660,49 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("limit") {
     checkAnswer(
-      sql("SELECT * FROM testData LIMIT 10"),
+      sql("SELECT * FROM testData LIMIT 9 + 1"),
       testData.take(10).toSeq)
 
     checkAnswer(
-      sql("SELECT * FROM arrayData LIMIT 1"),
+      sql("SELECT * FROM arrayData LIMIT CAST(1 AS Integer)"),
       arrayData.collect().take(1).map(Row.fromTuple).toSeq)
 
     checkAnswer(
       sql("SELECT * FROM mapData LIMIT 1"),
       mapData.collect().take(1).map(Row.fromTuple).toSeq)
+  }
+
+  test("non-foldable expressions in LIMIT") {
+    val e = intercept[AnalysisException] {
+      sql("SELECT * FROM testData LIMIT key > 3")
+    }.getMessage
+    assert(e.contains("The limit expression must evaluate to a constant value, " +
+      "but got (testdata.`key` > 3)"))
+  }
+
+  test("Expressions in limit clause are not integer") {
+    var e = intercept[AnalysisException] {
+      sql("SELECT * FROM testData LIMIT true")
+    }.getMessage
+    assert(e.contains("The limit expression must be integer type, but got boolean"))
+
+    e = intercept[AnalysisException] {
+      sql("SELECT * FROM testData LIMIT 'a'")
+    }.getMessage
+    assert(e.contains("The limit expression must be integer type, but got string"))
+  }
+
+  test("negative in LIMIT or TABLESAMPLE") {
+    val expected = "The limit expression must be equal to or greater than 0, but got -1"
+    var e = intercept[AnalysisException] {
+      sql("SELECT * FROM testData TABLESAMPLE (-1 rows)")
+    }.getMessage
+    assert(e.contains(expected))
+
+    e = intercept[AnalysisException] {
+      sql("SELECT * FROM testData LIMIT -1")
+    }.getMessage
+    assert(e.contains(expected))
   }
 
   test("CTE feature") {
@@ -2120,6 +2148,37 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     }
   }
 
+  test("Star Expansion - table with zero column") {
+    withTempTable("temp_table_no_cols") {
+      val rddNoCols = sparkContext.parallelize(1 to 10).map(_ => Row.empty)
+      val dfNoCols = spark.createDataFrame(rddNoCols, StructType(Seq.empty))
+      dfNoCols.createTempView("temp_table_no_cols")
+
+      // ResolvedStar
+      checkAnswer(
+        dfNoCols,
+        dfNoCols.select(dfNoCols.col("*")))
+
+      // UnresolvedStar
+      checkAnswer(
+        dfNoCols,
+        sql("SELECT * FROM temp_table_no_cols"))
+      checkAnswer(
+        dfNoCols,
+        dfNoCols.select($"*"))
+
+      var e = intercept[AnalysisException] {
+        sql("SELECT a.* FROM temp_table_no_cols a")
+      }.getMessage
+      assert(e.contains("cannot resolve 'a.*' give input columns ''"))
+
+      e = intercept[AnalysisException] {
+        dfNoCols.select($"b.*")
+      }.getMessage
+      assert(e.contains("cannot resolve 'b.*' give input columns ''"))
+    }
+  }
+
   test("Common subexpression elimination") {
     // TODO: support subexpression elimination in whole stage codegen
     withSQLConf("spark.sql.codegen.wholeStage" -> "false") {
@@ -2869,9 +2928,5 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     checkAnswer(
       sql(s"SELECT '$literal' AS DUMMY"),
       Row(s"$expected") :: Nil)
-  }
-
-  test("SPARK-15887: hive-site.xml should be loaded") {
-    assert(spark.sessionState.newHadoopConf().get("hive.in.test") == "true")
   }
 }

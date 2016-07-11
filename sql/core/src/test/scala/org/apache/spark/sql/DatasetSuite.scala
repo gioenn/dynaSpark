@@ -34,6 +34,13 @@ class DatasetSuite extends QueryTest with SharedSQLContext {
 
   private implicit val ordering = Ordering.by((c: ClassData) => c.a -> c.b)
 
+  test("checkAnswer should compare map correctly") {
+    val data = Seq((1, "2", Map(1 -> 2, 2 -> 1)))
+    checkAnswer(
+      data.toDF(),
+      Seq(Row(1, "2", Map(2 -> 1, 1 -> 2))))
+  }
+
   test("toDS") {
     val data = Seq(("a", 1), ("b", 2), ("c", 3))
     checkDataset(
@@ -829,6 +836,13 @@ class DatasetSuite extends QueryTest with SharedSQLContext {
     checkDataset(
       ds.dropDuplicates("_1", "_2"),
       ("a", 1), ("a", 2), ("b", 1))
+  }
+
+  test("SPARK-16097: Encoders.tuple should handle null object correctly") {
+    val enc = Encoders.tuple(Encoders.tuple(Encoders.STRING, Encoders.STRING), Encoders.STRING)
+    val data = Seq((("a", "b"), "c"), (null, "d"))
+    val ds = spark.createDataset(data)(enc)
+    checkDataset(ds, (("a", "b"), "c"), (null, "d"))
   }
 }
 
