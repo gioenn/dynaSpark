@@ -65,7 +65,7 @@ object CommandUtils extends Logging {
     val app_id = command.arguments(command.arguments.indexOf("--app-id")+1)
     val executor_id = command.arguments(command.arguments.indexOf("--executor-id")+1)
     val docker_cmd = Seq("docker", "run", "-P", "--net=host")
-    val docker_resource = Seq("-m", s"${memory}m", s"--cpuset-cpus='${cpuset}'")
+    val docker_resource = Seq("-m", s"${memory}m", s"--cpuset-cpus=${cpuset}")
     val docker_name = Seq("--name=" + app_id + "." + executor_id)
     val docker_image_name = Seq("elfolink/spark:2.0")
     docker_cmd ++ docker_resource ++ docker_name ++ docker_image_name ++ cmd.asScala ++ Seq(command.mainClass) ++ command.arguments
