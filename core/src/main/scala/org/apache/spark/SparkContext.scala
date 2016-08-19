@@ -21,7 +21,7 @@ import java.io._
 import java.lang.reflect.Constructor
 import java.net.URI
 import java.util.{Arrays, Locale, Properties, ServiceLoader, UUID}
-import java.util.concurrent.ConcurrentMap
+import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger, AtomicReference}
 
 import scala.collection.JavaConverters._
@@ -35,7 +35,7 @@ import scala.util.control.NonFatal
 import com.google.common.collect.MapMaker
 import org.apache.commons.lang3.SerializationUtils
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.Path
+import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.hadoop.io.{ArrayWritable, BooleanWritable, BytesWritable, DoubleWritable,
   FloatWritable, IntWritable, LongWritable, NullWritable, Text, Writable}
 import org.apache.hadoop.mapred.{FileInputFormat, InputFormat, JobConf, SequenceFileInputFormat,
@@ -262,8 +262,8 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   private[spark] def env: SparkEnv = _env
 
   // Used to store a URL for each static file/jar together with the file's local timestamp
-  private[spark] val addedFiles = HashMap[String, Long]()
-  private[spark] val addedJars = HashMap[String, Long]()
+  private[spark] val addedFiles = new ConcurrentHashMap[String, Long]().asScala
+  private[spark] val addedJars = new ConcurrentHashMap[String, Long]().asScala
 
   // Keeps track of all persisted RDDs
   private[spark] val persistentRdds = {
@@ -960,6 +960,11 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       valueClass: Class[V],
       minPartitions: Int = defaultMinPartitions): RDD[(K, V)] = withScope {
     assertNotStopped()
+
+    // This is a hack to enforce loading hdfs-site.xml.
+    // See SPARK-11227 for details.
+    FileSystem.getLocal(conf)
+
     // Add necessary security credentials to the JobConf before broadcasting it.
     SparkHadoopUtil.get.addCredentials(conf)
     new HadoopRDD(this, conf, inputFormatClass, keyClass, valueClass, minPartitions)
@@ -980,6 +985,11 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       valueClass: Class[V],
       minPartitions: Int = defaultMinPartitions): RDD[(K, V)] = withScope {
     assertNotStopped()
+
+    // This is a hack to enforce loading hdfs-site.xml.
+    // See SPARK-11227 for details.
+    FileSystem.get(new URI(path), hadoopConfiguration)
+
     // A Hadoop configuration can be about 10 KB, which is pretty big, so broadcast it.
     val confBroadcast = broadcast(new SerializableConfiguration(hadoopConfiguration))
     val setInputPathsFunc = (jobConf: JobConf) => FileInputFormat.setInputPaths(jobConf, path)
@@ -1064,6 +1074,11 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       vClass: Class[V],
       conf: Configuration = hadoopConfiguration): RDD[(K, V)] = withScope {
     assertNotStopped()
+
+    // This is a hack to enforce loading hdfs-site.xml.
+    // See SPARK-11227 for details.
+    FileSystem.get(new URI(path), hadoopConfiguration)
+
     // The call to NewHadoopJob automatically adds security credentials to conf,
     // so we don't need to explicitly add them ourselves
     val job = NewHadoopJob.getInstance(conf)
@@ -1098,6 +1113,11 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       kClass: Class[K],
       vClass: Class[V]): RDD[(K, V)] = withScope {
     assertNotStopped()
+
+    // This is a hack to enforce loading hdfs-site.xml.
+    // See SPARK-11227 for details.
+    FileSystem.getLocal(conf)
+
     // Add necessary security credentials to the JobConf. Required to access secure HDFS.
     val jconf = new JobConf(conf)
     SparkHadoopUtil.get.addCredentials(jconf)
@@ -1429,14 +1449,14 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       schemeCorrectedPath
     }
     val timestamp = System.currentTimeMillis
-    addedFiles(key) = timestamp
-
-    // Fetch the file locally in case a job is executed using DAGScheduler.runLocally().
-    Utils.fetchFile(path, new File(SparkFiles.getRootDirectory()), conf, env.securityManager,
-      hadoopConfiguration, timestamp, useCache = false)
-
-    logInfo("Added file " + path + " at " + key + " with timestamp " + addedFiles(key))
-    postEnvironmentUpdate()
+    if (addedFiles.putIfAbsent(key, timestamp).isEmpty) {
+      logInfo(s"Added file $path at $key with timestamp $timestamp")
+      // Fetch the file locally so that closures which are run on the driver can still use the
+      // SparkFiles API to access files.
+      Utils.fetchFile(path, new File(SparkFiles.getRootDirectory()), conf, env.securityManager,
+        hadoopConfiguration, timestamp, useCache = false)
+      postEnvironmentUpdate()
+    }
   }
 
   /**
@@ -1472,7 +1492,8 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    *                             This includes running, pending, and completed tasks.
    * @return whether the request is acknowledged by the cluster manager.
    */
-  private[spark] override def requestTotalExecutors(
+  @DeveloperApi
+  override def requestTotalExecutors(
       numExecutors: Int,
       localityAwareTasks: Int,
       hostToLocalTaskCount: scala.collection.immutable.Map[String, Int]
@@ -1704,12 +1725,6 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
                 case exc: FileNotFoundException =>
                   logError(s"Jar not found at $path")
                   null
-                case e: Exception =>
-                  // For now just log an error but allow to go through so spark examples work.
-                  // The spark examples don't really need the jar distributed since its also
-                  // the app jar.
-                  logError("Error adding jar (" + e + "), was the --addJars option used?")
-                  null
               }
             }
           // A JAR file which exists locally on every worker node
@@ -1720,11 +1735,13 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
         }
       }
       if (key != null) {
-        addedJars(key) = System.currentTimeMillis
-        logInfo("Added JAR " + path + " at " + key + " with timestamp " + addedJars(key))
+        val timestamp = System.currentTimeMillis
+        if (addedJars.putIfAbsent(key, timestamp).isEmpty) {
+          logInfo(s"Added JAR $path at $key with timestamp $timestamp")
+          postEnvironmentUpdate()
+        }
       }
     }
-    postEnvironmentUpdate()
   }
 
   /**

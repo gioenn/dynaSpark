@@ -30,7 +30,7 @@ import org.apache.spark.unsafe.types.{CalendarInterval, UTF8String}
  * for classes whose fields are entirely defined by constructor params but should not be
  * case classes.
  */
-private[sql] trait DefinedByConstructorParams
+trait DefinedByConstructorParams
 
 
 /**
@@ -720,7 +720,7 @@ object ScalaReflection extends ScalaReflection {
   /**
    * Whether the fields of the given type is defined entirely by its constructor parameters.
    */
-  private[sql] def definedByConstructorParams(tpe: Type): Boolean = {
+  def definedByConstructorParams(tpe: Type): Boolean = {
     tpe <:< localTypeOf[Product] || tpe <:< localTypeOf[DefinedByConstructorParams]
   }
 

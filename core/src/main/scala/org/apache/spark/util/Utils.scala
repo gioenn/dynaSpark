@@ -824,7 +824,7 @@ private[spark] object Utils extends Logging {
    */
   def randomizeInPlace[T](arr: Array[T], rand: Random = new Random): Array[T] = {
     for (i <- (arr.length - 1) to 1 by -1) {
-      val j = rand.nextInt(i)
+      val j = rand.nextInt(i + 1)
       val tmp = arr(j)
       arr(j) = arr(i)
       arr(i) = tmp
@@ -2338,10 +2338,27 @@ private[spark] object Utils extends Logging {
    * Return the initial number of executors for dynamic allocation.
    */
   def getDynamicAllocationInitialExecutors(conf: SparkConf): Int = {
-    Seq(
+    if (conf.get(DYN_ALLOCATION_INITIAL_EXECUTORS) < conf.get(DYN_ALLOCATION_MIN_EXECUTORS)) {
+      logWarning(s"${DYN_ALLOCATION_INITIAL_EXECUTORS.key} less than " +
+        s"${DYN_ALLOCATION_MIN_EXECUTORS.key} is invalid, ignoring its setting, " +
+          "please update your configs.")
+    }
+
+    if (conf.get(EXECUTOR_INSTANCES).getOrElse(0) < conf.get(DYN_ALLOCATION_MIN_EXECUTORS)) {
+      logWarning(s"${EXECUTOR_INSTANCES.key} less than " +
+        s"${DYN_ALLOCATION_MIN_EXECUTORS.key} is invalid, ignoring its setting, " +
+          "please update your configs.")
+    }
+
+    val initialExecutors = Seq(
       conf.get(DYN_ALLOCATION_MIN_EXECUTORS),
       conf.get(DYN_ALLOCATION_INITIAL_EXECUTORS),
       conf.get(EXECUTOR_INSTANCES).getOrElse(0)).max
+
+    logInfo(s"Using initial executors = $initialExecutors, max of " +
+      s"${DYN_ALLOCATION_INITIAL_EXECUTORS.key}, ${DYN_ALLOCATION_MIN_EXECUTORS.key} and " +
+        s"${EXECUTOR_INSTANCES.key}")
+    initialExecutors
   }
 
   def tryWithResource[R <: Closeable, T](createResource: => R)(f: R => T): T = {
@@ -2388,9 +2405,9 @@ private[spark] object Utils extends Logging {
    * "spark.yarn.dist.jars" properties, while in other modes it returns the jar files pointed by
    * only the "spark.jars" property.
    */
-  def getUserJars(conf: SparkConf): Seq[String] = {
+  def getUserJars(conf: SparkConf, isShell: Boolean = false): Seq[String] = {
     val sparkJars = conf.getOption("spark.jars")
-    if (conf.get("spark.master") == "yarn") {
+    if (conf.get("spark.master") == "yarn" && isShell) {
       val yarnJars = conf.getOption("spark.yarn.dist.jars")
       unionFileLists(sparkJars, yarnJars).toSeq
     } else {

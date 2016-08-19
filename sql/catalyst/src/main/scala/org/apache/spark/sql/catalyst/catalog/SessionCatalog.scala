@@ -22,7 +22,7 @@ import javax.annotation.concurrent.GuardedBy
 import scala.collection.mutable
 
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.hadoop.fs.Path
 
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.AnalysisException
@@ -33,6 +33,10 @@ import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
 import org.apache.spark.sql.catalyst.expressions.{Expression, ExpressionInfo}
 import org.apache.spark.sql.catalyst.plans.logical.{LogicalPlan, SubqueryAlias}
 import org.apache.spark.sql.catalyst.util.StringUtils
+
+object SessionCatalog {
+  val DEFAULT_DATABASE = "default"
+}
 
 /**
  * An internal catalog that is used by a Spark Session. This internal catalog serves as a
@@ -47,6 +51,7 @@ class SessionCatalog(
     functionRegistry: FunctionRegistry,
     conf: CatalystConf,
     hadoopConf: Configuration) extends Logging {
+  import SessionCatalog._
   import CatalogTypes.TablePartitionSpec
 
   // For testing only.
@@ -77,7 +82,7 @@ class SessionCatalog(
   // the corresponding item in the current database.
   @GuardedBy("this")
   protected var currentDb = {
-    val defaultName = "default"
+    val defaultName = DEFAULT_DATABASE
     val defaultDbDefinition =
       CatalogDatabase(defaultName, "default database", conf.warehousePath, Map())
     // Initialize default database if it doesn't already exist
@@ -146,8 +151,10 @@ class SessionCatalog(
 
   def dropDatabase(db: String, ignoreIfNotExists: Boolean, cascade: Boolean): Unit = {
     val dbName = formatDatabaseName(db)
-    if (dbName == "default") {
+    if (dbName == DEFAULT_DATABASE) {
       throw new AnalysisException(s"Can not drop default database")
+    } else if (dbName == getCurrentDatabase) {
+      throw new AnalysisException(s"Can not drop current database `${dbName}`")
     }
     externalCatalog.dropDatabase(dbName, ignoreIfNotExists, cascade)
   }
@@ -246,9 +253,27 @@ class SessionCatalog(
   def getTableMetadata(name: TableIdentifier): CatalogTable = {
     val db = formatDatabaseName(name.database.getOrElse(getCurrentDatabase))
     val table = formatTableName(name.table)
-    requireDbExists(db)
-    requireTableExists(TableIdentifier(table, Some(db)))
-    externalCatalog.getTable(db, table)
+    val tid = TableIdentifier(table)
+    if (isTemporaryTable(name)) {
+      CatalogTable(
+        identifier = tid,
+        tableType = CatalogTableType.VIEW,
+        storage = CatalogStorageFormat.empty,
+        schema = tempTables(table).output.map { c =>
+          CatalogColumn(
+            name = c.name,
+            dataType = c.dataType.catalogString,
+            nullable = c.nullable,
+            comment = Option(c.name)
+          )
+        },
+        properties = Map(),
+        viewText = None)
+    } else {
+      requireDbExists(db)
+      requireTableExists(TableIdentifier(table, Some(db)))
+      externalCatalog.getTable(db, table)
+    }
   }
 
   /**
@@ -425,10 +450,10 @@ class SessionCatalog(
   def tableExists(name: TableIdentifier): Boolean = synchronized {
     val db = formatDatabaseName(name.database.getOrElse(currentDb))
     val table = formatTableName(name.table)
-    if (name.database.isDefined || !tempTables.contains(table)) {
-      externalCatalog.tableExists(db, table)
+    if (isTemporaryTable(name)) {
+      true
     } else {
-      true // it's a temporary table
+      externalCatalog.tableExists(db, table)
     }
   }
 
@@ -470,7 +495,7 @@ class SessionCatalog(
     // If the database is defined, this is definitely not a temp table.
     // If the database is not defined, there is a good chance this is a temp table.
     if (name.database.isEmpty) {
-      tempTables.get(name.table).foreach(_.refresh())
+      tempTables.get(formatTableName(name.table)).foreach(_.refresh())
     }
   }
 
@@ -487,7 +512,7 @@ class SessionCatalog(
    * For testing only.
    */
   private[catalog] def getTempTable(name: String): Option[LogicalPlan] = synchronized {
-    tempTables.get(name)
+    tempTables.get(formatTableName(name))
   }
 
   // ----------------------------------------------------------------------------
@@ -721,7 +746,7 @@ class SessionCatalog(
    *
    * This performs reflection to decide what type of [[Expression]] to return in the builder.
    */
-  private[sql] def makeFunctionBuilder(name: String, functionClassName: String): FunctionBuilder = {
+  def makeFunctionBuilder(name: String, functionClassName: String): FunctionBuilder = {
     // TODO: at least support UDAFs here
     throw new UnsupportedOperationException("Use sqlContext.udf.register(...) instead.")
   }
@@ -765,7 +790,7 @@ class SessionCatalog(
   /**
    * Look up the [[ExpressionInfo]] associated with the specified function, assuming it exists.
    */
-  private[spark] def lookupFunctionInfo(name: FunctionIdentifier): ExpressionInfo = synchronized {
+  def lookupFunctionInfo(name: FunctionIdentifier): ExpressionInfo = synchronized {
     // TODO: just make function registry take in FunctionIdentifier instead of duplicating this
     val database = name.database.orElse(Some(currentDb)).map(formatDatabaseName)
     val qualifiedName = name.copy(database = database)
@@ -877,15 +902,15 @@ class SessionCatalog(
    *
    * This is mainly used for tests.
    */
-  private[sql] def reset(): Unit = synchronized {
-    val default = "default"
-    listDatabases().filter(_ != default).foreach { db =>
+  def reset(): Unit = synchronized {
+    setCurrentDatabase(DEFAULT_DATABASE)
+    listDatabases().filter(_ != DEFAULT_DATABASE).foreach { db =>
       dropDatabase(db, ignoreIfNotExists = false, cascade = true)
     }
-    listTables(default).foreach { table =>
+    listTables(DEFAULT_DATABASE).foreach { table =>
       dropTable(table, ignoreIfNotExists = false)
     }
-    listFunctions(default).map(_._1).foreach { func =>
+    listFunctions(DEFAULT_DATABASE).map(_._1).foreach { func =>
       if (func.database.isDefined) {
         dropFunction(func, ignoreIfNotExists = false)
       } else {
@@ -902,7 +927,6 @@ class SessionCatalog(
       require(functionBuilder.isDefined, s"built-in function '$f' is missing function builder")
       functionRegistry.registerFunction(f, expressionInfo.get, functionBuilder.get)
     }
-    setCurrentDatabase(default)
   }
 
 }

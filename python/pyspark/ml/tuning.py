@@ -33,8 +33,6 @@ __all__ = ['ParamGridBuilder', 'CrossValidator', 'CrossValidatorModel', 'TrainVa
 
 class ParamGridBuilder(object):
     r"""
-    .. note:: Experimental
-
     Builder for a param grid used in grid search-based model selection.
 
     >>> from pyspark.ml.classification import LogisticRegression
@@ -145,8 +143,6 @@ class ValidatorParams(HasSeed):
 
 class CrossValidator(Estimator, ValidatorParams):
     """
-    .. note:: Experimental
-
     K-fold cross validation.
 
     >>> from pyspark.ml.classification import LogisticRegression
@@ -164,6 +160,8 @@ class CrossValidator(Estimator, ValidatorParams):
     >>> evaluator = BinaryClassificationEvaluator()
     >>> cv = CrossValidator(estimator=lr, estimatorParamMaps=grid, evaluator=evaluator)
     >>> cvModel = cv.fit(dataset)
+    >>> cvModel.avgMetrics[0]
+    0.5
     >>> evaluator.evaluate(cvModel.transform(dataset))
     0.8333...
 
@@ -232,7 +230,7 @@ class CrossValidator(Estimator, ValidatorParams):
                 model = est.fit(train, epm[j])
                 # TODO: duplicate evaluator to take extra params from input
                 metric = eva.evaluate(model.transform(validation, epm[j]))
-                metrics[j] += metric
+                metrics[j] += metric/nFolds
 
         if eva.isLargerBetter():
             bestIndex = np.argmax(metrics)
@@ -264,8 +262,6 @@ class CrossValidator(Estimator, ValidatorParams):
 
 class CrossValidatorModel(Model, ValidatorParams):
     """
-    .. note:: Experimental
-
     Model from k-fold cross validation.
 
     .. versionadded:: 1.4.0

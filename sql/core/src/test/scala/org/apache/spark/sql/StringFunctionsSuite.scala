@@ -92,6 +92,18 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("300", "100") :: Row("400", "100") :: Row("400-400", "100") :: Nil)
   }
 
+  test("non-matching optional group") {
+    val df = Seq(Tuple1("aaaac")).toDF("s")
+    checkAnswer(
+      df.select(regexp_extract($"s", "(foo)", 1)),
+      Row("")
+    )
+    checkAnswer(
+      df.select(regexp_extract($"s", "(a+)(b)?(c)", 2)),
+      Row("")
+    )
+  }
+
   test("string ascii function") {
     val df = Seq(("abc", "")).toDF("a", "b")
     checkAnswer(
@@ -381,5 +393,28 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       df.selectExpr("sentences()")
     }.getMessage
     assert(m.contains("Invalid number of arguments for function sentences"))
+  }
+
+  test("str_to_map function") {
+    val df1 = Seq(
+      ("a=1,b=2", "y"),
+      ("a=1,b=2,c=3", "y")
+    ).toDF("a", "b")
+
+    checkAnswer(
+      df1.selectExpr("str_to_map(a,',','=')"),
+      Seq(
+        Row(Map("a" -> "1", "b" -> "2")),
+        Row(Map("a" -> "1", "b" -> "2", "c" -> "3"))
+      )
+    )
+
+    val df2 = Seq(("a:1,b:2,c:3", "y")).toDF("a", "b")
+
+    checkAnswer(
+      df2.selectExpr("str_to_map(a)"),
+      Seq(Row(Map("a" -> "1", "b" -> "2", "c" -> "3")))
+    )
+
   }
 }

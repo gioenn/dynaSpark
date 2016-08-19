@@ -54,7 +54,6 @@ private[regression] trait LinearRegressionParams extends PredictorParams
     with HasFitIntercept with HasStandardization with HasWeightCol with HasSolver
 
 /**
- * :: Experimental ::
  * Linear regression.
  *
  * The learning objective is to minimize the squared error, with regularization.
@@ -68,7 +67,6 @@ private[regression] trait LinearRegressionParams extends PredictorParams
  *  - L2 + L1 (elastic net)
  */
 @Since("1.3.0")
-@Experimental
 class LinearRegression @Since("1.3.0") (@Since("1.3.0") override val uid: String)
   extends Regressor[Vector, LinearRegression, LinearRegressionModel]
   with LinearRegressionParams with DefaultParamsWritable with Logging {
@@ -263,7 +261,7 @@ class LinearRegression @Since("1.3.0") (@Since("1.3.0") override val uid: String
     }
 
     // if y is constant (rawYStd is zero), then y cannot be scaled. In this case
-    // setting yStd=1.0 ensures that y is not scaled anymore in l-bfgs algorithm.
+    // setting yStd=abs(yMean) ensures that y is not scaled anymore in l-bfgs algorithm.
     val yStd = if (rawYStd > 0) rawYStd else math.abs(yMean)
     val featuresMean = featuresSummarizer.mean.toArray
     val featuresStd = featuresSummarizer.variance.toArray.map(math.sqrt)
@@ -327,6 +325,11 @@ class LinearRegression @Since("1.3.0") (@Since("1.3.0") override val uid: String
         throw new SparkException(msg)
       }
 
+      if (!state.actuallyConverged) {
+        logWarning("LinearRegression training finished but the result " +
+          s"is not converged because: ${state.convergedReason.get.reason}")
+      }
+
       /*
          The coefficients are trained in the scaled space; we're converting them back to
          the original space.
@@ -382,11 +385,9 @@ object LinearRegression extends DefaultParamsReadable[LinearRegression] {
 }
 
 /**
- * :: Experimental ::
  * Model produced by [[LinearRegression]].
  */
 @Since("1.3.0")
-@Experimental
 class LinearRegressionModel private[ml] (
     @Since("1.4.0") override val uid: String,
     @Since("2.0.0") val coefficients: Vector,
@@ -793,27 +794,27 @@ class LinearRegressionSummary private[regression] (
  *
  * Now, the first derivative of the objective function in scaled space is
  * {{{
- * \frac{\partial L}{\partial\w_i} = diff/N (x_i - \bar{x_i}) / \hat{x_i}
+ * \frac{\partial L}{\partial w_i} = diff/N (x_i - \bar{x_i}) / \hat{x_i}
  * }}}
  * However, ($x_i - \bar{x_i}$) will densify the computation, so it's not
  * an ideal formula when the training dataset is sparse format.
  *
- * This can be addressed by adding the dense \bar{x_i} / \har{x_i} terms
+ * This can be addressed by adding the dense \bar{x_i} / \hat{x_i} terms
  * in the end by keeping the sum of diff. The first derivative of total
  * objective function from all the samples is
  * {{{
- * \frac{\partial L}{\partial\w_i} =
+ * \frac{\partial L}{\partial w_i} =
  *     1/N \sum_j diff_j (x_{ij} - \bar{x_i}) / \hat{x_i}
- *   = 1/N ((\sum_j diff_j x_{ij} / \hat{x_i}) - diffSum \bar{x_i}) / \hat{x_i})
+ *   = 1/N ((\sum_j diff_j x_{ij} / \hat{x_i}) - diffSum \bar{x_i} / \hat{x_i})
  *   = 1/N ((\sum_j diff_j x_{ij} / \hat{x_i}) + correction_i)
  * }}},
- * where correction_i = - diffSum \bar{x_i}) / \hat{x_i}
+ * where correction_i = - diffSum \bar{x_i} / \hat{x_i}
  *
  * A simple math can show that diffSum is actually zero, so we don't even
  * need to add the correction terms in the end. From the definition of diff,
  * {{{
  * diffSum = \sum_j (\sum_i w_i(x_{ij} - \bar{x_i}) / \hat{x_i} - (y_j - \bar{y}) / \hat{y})
- *         = N * (\sum_i w_i(\bar{x_i} - \bar{x_i}) / \hat{x_i} - (\bar{y_j} - \bar{y}) / \hat{y})
+ *         = N * (\sum_i w_i(\bar{x_i} - \bar{x_i}) / \hat{x_i} - (\bar{y} - \bar{y}) / \hat{y})
  *         = 0
  * }}}
  *
@@ -821,7 +822,7 @@ class LinearRegressionSummary private[regression] (
  * the training dataset, which can be easily computed in distributed fashion, and is
  * sparse format friendly.
  * {{{
- * \frac{\partial L}{\partial\w_i} = 1/N ((\sum_j diff_j x_{ij} / \hat{x_i})
+ * \frac{\partial L}{\partial w_i} = 1/N ((\sum_j diff_j x_{ij} / \hat{x_i})
  * }}},
  *
  * @param coefficients The coefficients corresponding to the features.

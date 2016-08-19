@@ -18,7 +18,6 @@
 package org.apache.spark.sql.execution
 
 import scala.collection.JavaConverters._
-import scala.util.Try
 
 import org.antlr.v4.runtime.{ParserRuleContext, Token}
 import org.antlr.v4.runtime.tree.TerminalNode
@@ -406,6 +405,20 @@ class SparkSqlAstBuilder(conf: SQLConf) extends AstBuilder {
   }
 
   /**
+   * Create a [[AlterTableRecoverPartitionsCommand]] command.
+   *
+   * For example:
+   * {{{
+   *   MSCK REPAIR TABLE tablename
+   * }}}
+   */
+  override def visitRepairTable(ctx: RepairTableContext): LogicalPlan = withOrigin(ctx) {
+    AlterTableRecoverPartitionsCommand(
+      visitTableIdentifier(ctx.tableIdentifier),
+      "MSCK REPAIR TABLE")
+  }
+
+  /**
    * Convert a table property list into a key-value map.
    * This should be called through [[visitPropertyKeyValues]] or [[visitPropertyKeys]].
    */
@@ -764,6 +777,19 @@ class SparkSqlAstBuilder(conf: SQLConf) extends AstBuilder {
   }
 
   /**
+   * Create an [[AlterTableRecoverPartitionsCommand]] command
+   *
+   * For example:
+   * {{{
+   *   ALTER TABLE table RECOVER PARTITIONS;
+   * }}}
+   */
+  override def visitRecoverPartitions(
+      ctx: RecoverPartitionsContext): LogicalPlan = withOrigin(ctx) {
+    AlterTableRecoverPartitionsCommand(visitTableIdentifier(ctx.tableIdentifier))
+  }
+
+  /**
    * Create an [[AlterTableSetLocationCommand]] command
    *
    * For example:
@@ -992,12 +1018,6 @@ class SparkSqlAstBuilder(conf: SQLConf) extends AstBuilder {
 
     selectQuery match {
       case Some(q) =>
-        // Just use whatever is projected in the select statement as our schema
-        if (schema.nonEmpty) {
-          operationNotAllowed(
-            "Schema may not be specified in a Create Table As Select (CTAS) statement",
-            ctx)
-        }
         // Hive does not allow to use a CTAS statement to create a partitioned table.
         if (tableDesc.partitionColumnNames.nonEmpty) {
           val errorMessage = "A Create Table As Select (CTAS) statement is not allowed to " +
@@ -1006,6 +1026,12 @@ class SparkSqlAstBuilder(conf: SQLConf) extends AstBuilder {
             "OPTIONS (...) PARTITIONED BY ...\" to create a partitioned table through a " +
             "CTAS statement."
           operationNotAllowed(errorMessage, ctx)
+        }
+        // Just use whatever is projected in the select statement as our schema
+        if (schema.nonEmpty) {
+          operationNotAllowed(
+            "Schema may not be specified in a Create Table As Select (CTAS) statement",
+            ctx)
         }
 
         val hasStorageProperties = (ctx.createFileFormat != null) || (ctx.rowFormat != null)
@@ -1152,7 +1178,7 @@ class SparkSqlAstBuilder(conf: SQLConf) extends AstBuilder {
         entry("mapkey.delim", ctx.keysTerminatedBy) ++
         Option(ctx.linesSeparatedBy).toSeq.map { token =>
           val value = string(token)
-          assert(
+          validate(
             value == "\n",
             s"LINES TERMINATED BY only supports newline '\\n' right now: $value",
             ctx)
@@ -1209,7 +1235,7 @@ class SparkSqlAstBuilder(conf: SQLConf) extends AstBuilder {
    *
    * For example:
    * {{{
-   *   CREATE [TEMPORARY] VIEW [IF NOT EXISTS] [db_name.]view_name
+   *   CREATE [OR REPLACE] [TEMPORARY] VIEW [IF NOT EXISTS] [db_name.]view_name
    *   [(column_name [COMMENT column_comment], ...) ]
    *   [COMMENT view_comment]
    *   [TBLPROPERTIES (property_name = property_value, ...)]
@@ -1315,7 +1341,10 @@ class SparkSqlAstBuilder(conf: SQLConf) extends AstBuilder {
 
     // Decode and input/output format.
     type Format = (Seq[(String, String)], Option[String], Seq[(String, String)], Option[String])
-    def format(fmt: RowFormatContext, configKey: String): Format = fmt match {
+    def format(
+        fmt: RowFormatContext,
+        configKey: String,
+        defaultConfigValue: String): Format = fmt match {
       case c: RowFormatDelimitedContext =>
         // TODO we should use the visitRowFormatDelimited function here. However HiveScriptIOSchema
         // expects a seq of pairs in which the old parsers' token names are used as keys.
@@ -1338,7 +1367,7 @@ class SparkSqlAstBuilder(conf: SQLConf) extends AstBuilder {
 
         // SPARK-10310: Special cases LazySimpleSerDe
         val recordHandler = if (name == "org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe") {
-          Try(conf.getConfString(configKey)).toOption
+          Option(conf.getConfString(configKey, defaultConfigValue))
         } else {
           None
         }
@@ -1349,15 +1378,18 @@ class SparkSqlAstBuilder(conf: SQLConf) extends AstBuilder {
         val name = conf.getConfString("hive.script.serde",
           "org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe")
         val props = Seq("field.delim" -> "\t")
-        val recordHandler = Try(conf.getConfString(configKey)).toOption
+        val recordHandler = Option(conf.getConfString(configKey, defaultConfigValue))
         (Nil, Option(name), props, recordHandler)
     }
 
     val (inFormat, inSerdeClass, inSerdeProps, reader) =
-      format(inRowFormat, "hive.script.recordreader")
+      format(
+        inRowFormat, "hive.script.recordreader", "org.apache.hadoop.hive.ql.exec.TextRecordReader")
 
     val (outFormat, outSerdeClass, outSerdeProps, writer) =
-      format(outRowFormat, "hive.script.recordwriter")
+      format(
+        outRowFormat, "hive.script.recordwriter",
+        "org.apache.hadoop.hive.ql.exec.TextRecordWriter")
 
     ScriptInputOutputSchema(
       inFormat, outFormat,

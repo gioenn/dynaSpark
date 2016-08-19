@@ -695,6 +695,19 @@ object FoldablePropagation extends Rule[LogicalPlan] {
         case j @ Join(_, _, LeftOuter | RightOuter | FullOuter, _) =>
           stop = true
           j
+
+        // These 3 operators take attributes as constructor parameters, and these attributes
+        // can't be replaced by alias.
+        case m: MapGroups =>
+          stop = true
+          m
+        case f: FlatMapGroupsInR =>
+          stop = true
+          f
+        case c: CoGroup =>
+          stop = true
+          c
+
         case p: LogicalPlan if !stop => p.transformExpressions {
           case a: AttributeReference if foldableMap.contains(a) =>
             foldableMap(a)
@@ -1120,15 +1133,26 @@ object PushDownPredicate extends Rule[LogicalPlan] with PredicateHelper {
         filter
       }
 
-    // two filters should be combine together by other rules
-    case filter @ Filter(_, _: Filter) => filter
-    // should not push predicates through sample, or will generate different results.
-    case filter @ Filter(_, _: Sample) => filter
-
-    case filter @ Filter(condition, u: UnaryNode) if u.expressions.forall(_.deterministic) =>
+    case filter @ Filter(condition, u: UnaryNode)
+        if canPushThrough(u) && u.expressions.forall(_.deterministic) =>
       pushDownPredicate(filter, u.child) { predicate =>
         u.withNewChildren(Seq(Filter(predicate, u.child)))
       }
+  }
+
+  private def canPushThrough(p: UnaryNode): Boolean = p match {
+    // Note that some operators (e.g. project, aggregate, union) are being handled separately
+    // (earlier in this rule).
+    case _: AppendColumns => true
+    case _: BroadcastHint => true
+    case _: Distinct => true
+    case _: Generate => true
+    case _: Pivot => true
+    case _: RedistributeData => true
+    case _: Repartition => true
+    case _: ScriptTransformation => true
+    case _: Sort => true
+    case _ => false
   }
 
   private def pushDownPredicate(
