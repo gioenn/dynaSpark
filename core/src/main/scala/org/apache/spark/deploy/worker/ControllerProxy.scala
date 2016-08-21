@@ -172,7 +172,7 @@ class ControllerProxy
         this.synchronized {
           executorRefMap.put(executorAddress.host, executorRef)
         }
-        context.reply(RegisteredExecutor)
+        context.reply(true)
 
       case RetrieveSparkProps =>
         val sparkProperties = driver.get.askWithRetry[Seq[(String, String)]](RetrieveSparkProps)
