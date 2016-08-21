@@ -618,20 +618,15 @@ private[deploy] class Worker(
         "--cpuset-cpus='" + cpuset + "'", appId + "." + execId)
       logDebug(commandUpdateDocker.toString)
       val result = commandUpdateDocker.!!
-      val nameId = appId + "." + execId
-      if (nameId == result.trim.filter(_ >= ' ')) {
-        execIdToProxy(execId.toString).proxyEndpoint.send(
-          ExecutorScaled(execId, coresWanted, coresWanted))
-        logInfo("Scaled executorId %s  of appId %s to  %d Core".format(execId, appId, coresWanted))
-        coresAllocated += (appId + "/" + execId -> available.take(coresWanted))
-        sendToMaster(ExecutorStateChanged(appId, execId.toInt, ExecutorState.RUNNING, None, None))
-        val stats = Seq("docker", "stats", "--no-stream", appId + "." + execId).!!
-        val cpuUsage = stats.split("\\s+")(15).dropRight(1)
-        logInfo("CPU USAGE: " + cpuUsage)
 
-      } else {
-        throw new Exception(result)
-      }
+      execIdToProxy(execId.toString).proxyEndpoint.send(
+        ExecutorScaled(execId, coresWanted, coresWanted))
+      logInfo("Scaled executorId %s  of appId %s to  %d Core".format(execId, appId, coresWanted))
+      coresAllocated += (appId + "/" + execId -> available.take(coresWanted))
+      sendToMaster(ExecutorStateChanged(appId, execId.toInt, ExecutorState.RUNNING, None, None))
+      val stats = Seq("docker", "stats", "--no-stream", appId + "." + execId).!!
+      val cpuUsage = stats.split("\\s+")(15).dropRight(1)
+      logInfo("CPU USAGE: " + cpuUsage)
 
     } catch {
       case e: Exception =>
