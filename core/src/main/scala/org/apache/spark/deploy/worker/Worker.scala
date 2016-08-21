@@ -613,16 +613,26 @@ private[deploy] class Worker(
       logDebug("Core Unwanted: " + unwanted.toString)
       logDebug("Core Available: " + available.toString)
       val cpuset = available.take(coresWanted).mkString(",")
+
       val commandUpdateDocker = Seq("docker", "update",
         "--cpuset-cpus='" + cpuset + "'", appId + "." + execId)
-      commandUpdateDocker.!
-      execIdToProxy(execId.toString).proxyEndpoint.send(
-        ExecutorScaled(execId, coresWanted, coresWanted))
       logDebug(commandUpdateDocker.toString)
-      logInfo("Scaled executorId %s  of appId %s to  %d Core".format(execId, appId, coresWanted))
+      val result = commandUpdateDocker.!
 
-      coresAllocated += (appId + "/" + execId -> available.take(coresWanted))
-      sendToMaster(ExecutorStateChanged(appId, execId.toInt, ExecutorState.RUNNING, None, None))
+      if (appId + "." + execId == result.toString) {
+        execIdToProxy(execId.toString).proxyEndpoint.send(
+          ExecutorScaled(execId, coresWanted, coresWanted))
+        logInfo("Scaled executorId %s  of appId %s to  %d Core".format(execId, appId, coresWanted))
+        coresAllocated += (appId + "/" + execId -> available.take(coresWanted))
+        sendToMaster(ExecutorStateChanged(appId, execId.toInt, ExecutorState.RUNNING, None, None))
+        val stats = Seq("docker", "stats", "--no-stream", appId + "." + execId).!
+        val cpuUsage = stats.toString.split("\\s+")(15).dropRight(1)
+        logInfo("CPU USAGE: " + cpuUsage)
+
+      } else {
+        throw new Exception(result.toString)
+      }
+
     } catch {
       case e: Exception =>
         logError(s"Failed to scale executor $appId/$execId ", e)
