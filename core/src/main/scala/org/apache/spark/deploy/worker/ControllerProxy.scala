@@ -172,6 +172,7 @@ class ControllerProxy
         this.synchronized {
           executorRefMap.put(executorAddress.host, executorRef)
         }
+        executorRef.send(RegisteredExecutor)
         context.reply(true)
 
       case RetrieveSparkProps =>
