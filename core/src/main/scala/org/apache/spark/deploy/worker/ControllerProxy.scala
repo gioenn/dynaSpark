@@ -149,18 +149,16 @@ class ControllerProxy
 
     override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
       case RegisterExecutor(executorId, executorRef, hostPort, cores, logUrls) =>
-        logInfo("Forward connection to driver: " + driverUrl)
+        logInfo("Connecting to driver: " + driverUrl)
         rpcEnv.asyncSetupEndpointRefByURI(driverUrl).flatMap { ref =>
           // This is a very fast action so we can use "ThreadUtils.sameThread"
           driver = Some(ref)
           logInfo(ref.address.toString)
-          ref.ask[RegisterExecutorResponse](
-            RegisterExecutor(executorId, self, hostPort, cores, logUrls))
+          ref.ask[Boolean](RegisterExecutor(executorId, self, hostPort, cores, logUrls))
         }(ThreadUtils.sameThread).onComplete {
           // This is a very fast action so we can use "ThreadUtils.sameThread"
-          case Success(msg) => Utils.tryLogNonFatalError {
-            Option(self).foreach(_.send(msg)) // msg must be RegisterExecutorResponse
-          }
+          case Success(msg) =>
+          // Always receive `true`. Just ignore it
           case Failure(e) =>
             logError(s"Cannot register with driver: $driverUrl", e)
             System.exit(1)
