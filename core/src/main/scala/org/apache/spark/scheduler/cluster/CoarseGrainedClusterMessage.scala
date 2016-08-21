@@ -32,8 +32,35 @@ private[spark] object CoarseGrainedClusterMessages {
 
   case object RetrieveLastAllocatedExecutorId extends CoarseGrainedClusterMessage
 
+  case class Bind(executorId: String, stageId: Int) extends CoarseGrainedClusterMessage
+
+  case class BindWithTasks(executorId: String, stageId: Int, tasks: Int)
+    extends CoarseGrainedClusterMessage
+
+  case class UnBind(executorId: String) extends CoarseGrainedClusterMessage
+
+  case class ScaleExecutor(appId: String, execId: String, cores: Int)
+    extends CoarseGrainedClusterMessage
+
+  case class ExecutorScaled(execId: String, cores: Int, newFreeCores: Int)
+    extends CoarseGrainedClusterMessage
+
+  // ControllerJob to ControllerExecutor (Worker)
+  case class InitControllerExecutor
+  (executorId: String, stageId: Long,
+   coreMin: Int, coreMax: Int, tasks: Int, deadline: Long, core: Int)
+  extends CoarseGrainedClusterMessage
+
+  // ControllerJob to Master
+  case class NeededCoreForExecutors
+  (stageId: Long, coreForExecutors: IndexedSeq[Int], driverUrl: String)
+  extends CoarseGrainedClusterMessage
+
+  // Proxy to driver
+  case class ExecutorFinishedTask(executorId: String) extends CoarseGrainedClusterMessage
+
   // Driver to executors
-  case class LaunchTask(data: SerializableBuffer) extends CoarseGrainedClusterMessage
+  case class LaunchTask(taskId: Long, data: SerializableBuffer) extends CoarseGrainedClusterMessage
 
   case class KillTask(taskId: Long, executor: String, interruptThread: Boolean)
     extends CoarseGrainedClusterMessage

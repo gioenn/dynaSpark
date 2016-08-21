@@ -29,7 +29,6 @@ import scala.collection.mutable.{HashMap, HashSet, LinkedHashMap}
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Random, Success}
 import scala.util.control.NonFatal
-
 import org.apache.spark.{SecurityManager, SparkConf}
 import org.apache.spark.deploy.{Command, ExecutorDescription, ExecutorState}
 import org.apache.spark.deploy.DeployMessages._
@@ -39,6 +38,7 @@ import org.apache.spark.deploy.worker.ui.WorkerWebUI
 import org.apache.spark.internal.Logging
 import org.apache.spark.metrics.MetricsSystem
 import org.apache.spark.rpc._
+import org.apache.spark.scheduler.cluster.CoarseGrainedClusterMessages._
 import org.apache.spark.util.{ThreadUtils, Utils}
 
 private[deploy] class Worker(
@@ -122,6 +122,10 @@ private[deploy] class Worker(
   val finishedDrivers = new LinkedHashMap[String, DriverRunner]
   val appDirectories = new HashMap[String, Seq[String]]
   val finishedApps = new HashSet[String]
+
+  val execIdToProxy = new HashMap[String, ControllerProxy]
+  val execIdToAppId = new HashMap[String, String]
+  val executorIdToController = new HashMap[String, ControllerExecutor]
 
   val retainedExecutors = conf.getInt("spark.worker.ui.retainedExecutors",
     WorkerWebUI.DEFAULT_RETAINED_EXECUTORS)
@@ -463,13 +467,24 @@ private[deploy] class Worker(
 
           var unwanted: List[Int] = List()
           coresAllocated.values.foreach(list => unwanted = unwanted ++ list)
-          val available = (0 to cores - 1).toList.filterNot(unwanted.toSet)
+          val available = (0 until cores).toList.filterNot(unwanted.toSet)
           val cpuset = available.take(cores_).mkString(",")
           coresAllocated += (appId + "/" + execId -> available.take(cores_))
+
+          val driverUrl = appDesc.command.arguments(1)
+          logInfo("CREATING PROXY FOR DRIVER: " + driverUrl)
+          val controllerProxy = new ControllerProxy(rpcEnv, driverUrl, execId)
+          controllerProxy.start()
+          execIdToProxy(execId.toString) = controllerProxy
+          logInfo("PROXY ADDRESS:" + controllerProxy.getAddress)
+          // scalastyle:off line.size.limit
+          val appDescProxed = appDesc.copy(command =
+          Worker.changeDriverToProxy(appDesc.command, execIdToProxy(execId.toString).getAddress))
+          logInfo(appDescProxed.command.toString)
           val manager = new ExecutorRunner(
             appId,
             execId,
-            appDesc.copy(command = Worker.maybeUpdateSSLSettings(appDesc.command, conf)),
+            appDescProxed.copy(command = Worker.maybeUpdateSSLSettings(appDescProxed.command, conf)),
             cores_,
             memory_,
             cpuset,
@@ -488,12 +503,13 @@ private[deploy] class Worker(
           coresUsed += cores_
           memoryUsed += memory_
           sendToMaster(ExecutorStateChanged(appId, execId, manager.state, None, None))
+          // scalastyle:on line.size.limit
         } catch {
           case e: Exception =>
             logError(s"Failed to launch executor $appId/$execId for ${appDesc.name}.", e)
             if (executors.contains(appId + "/" + execId)) {
               executors(appId + "/" + execId).kill()
-              val exitCode = Seq("docker", "stop" , appId + "." + execId).!
+              val exitCode = Seq("docker", "stop", appId + "." + execId).!
               executors -= appId + "/" + execId
               coresAllocated -= appId + "/" + execId
             }
@@ -502,37 +518,9 @@ private[deploy] class Worker(
         }
       }
 
-    case ScaleExecutor(masterUrl, appId, execId, appDesc, cores_) =>
-      if (masterUrl != activeMasterUrl) {
-        logWarning("Invalid Master (" + masterUrl + ") attempted to launch executor.")
-      } else {
-        try {
-          logInfo("Asked to scale executor %s/%d for %s".format(appId, execId, appDesc.name))
-          val fullId = appId + "/" + execId
-          var unwanted: List[Int] = List()
-          coresAllocated.filterKeys((fullId) => false).values.foreach(list => unwanted = unwanted ++ list)
-          val available = (0 to cores - 1).toList.filterNot(unwanted.toSet)
-          val cpuset = available.take(cores_ - executors(fullId).cores).mkString(",")
-          Seq("docker", "update" , "--cpuset-cpus='" + cpuset + "'", appId + "." + execId).!
-
-          coresAllocated += (appId + "/" + execId -> available.take(cores_))
-          executors(fullId).substituteVariables("CORES " + cores.toString)
-
-          sendToMaster(ExecutorStateChanged(appId, execId, ExecutorState.RUNNING, None, None))
-        } catch {
-          case e: Exception => {
-            logError(s"Failed to scale executor $appId/$execId for ${appDesc.name}.", e)
-            if (executors.contains(appId + "/" + execId)) {
-              executors(appId + "/" + execId).kill()
-              val exitCode = Seq("docker", "stop" , appId + "." + execId).!
-              executors -= appId + "/" + execId
-              coresAllocated -= appId + "/" + execId
-            }
-            sendToMaster(ExecutorStateChanged(appId, execId, ExecutorState.FAILED,
-              Some(e.toString), None))
-          }
-        }
-      }
+    case ScaleExecutor(appId, execId, cores_) =>
+      logInfo("Asked to scale executor %s/%s".format(appId, execId))
+      onScaleExecutor(appId, execId, cores_)
 
     case executorStateChanged @ ExecutorStateChanged(appId, execId, state, message, exitStatus) =>
       handleExecutorStateChanged(executorStateChanged)
@@ -546,7 +534,7 @@ private[deploy] class Worker(
           case Some(executor) =>
             logInfo("Asked to kill executor " + fullId)
             executor.kill()
-            val exitCode = Seq("docker", "stop" , appId + "." + execId).!
+            val exitCode = Seq("docker", "stop", appId + "." + execId).!
           case None =>
             logInfo("Asked to kill unknown executor " + fullId)
         }
@@ -588,6 +576,66 @@ private[deploy] class Worker(
     case ApplicationFinished(id) =>
       finishedApps += id
       maybeCleanupApplication(id)
+
+
+    case InitControllerExecutor
+      (executorId, stageId, coreMin, coreMax, tasks, deadline, core) =>
+      execIdToProxy(executorId).proxyEndpoint.send(Bind(executorId, stageId.toInt))
+      val controllerExecutor = new ControllerExecutor(
+        conf, executorId, deadline, coreMin, coreMax, tasks, core)
+      logInfo("Created ControllerExecutor: %s , %d , %d , %d , %d".format
+      (executorId, stageId, deadline, tasks, core))
+      executorIdToController(executorId) = controllerExecutor
+      controllerExecutor.worker = this
+      execIdToProxy(executorId).totalTask = tasks
+      execIdToProxy(executorId).controllerExecutor = controllerExecutor
+      controllerExecutor.start()
+
+    case BindWithTasks(executorId, stageId, tasks) =>
+      execIdToProxy(executorId).proxyEndpoint.send(Bind(executorId, stageId))
+      execIdToProxy(executorId).totalTask = tasks
+
+    case UnBind(executorId) =>
+      execIdToProxy(executorId).proxyEndpoint.send(UnBind(executorId))
+      execIdToProxy(executorId).totalTask = 0
+  }
+
+  def onScaleExecutor(_appId: String, execId: String, coresWanted: Int): Unit = {
+    var appId = _appId
+    if (appId.isEmpty) {
+      appId = executors.values.map(_.appId).toSet.head
+    }
+    try {
+      val fullId = appId + "/" + execId
+      var unwanted: List[Int] = List()
+      coresAllocated.filterKeys((fullId) => false).values.foreach(list => unwanted = unwanted ++ list)
+      val available = (0 until cores).toList.filterNot(unwanted.toSet)
+      logDebug("Core Unwanted: " + unwanted.toString)
+      logDebug("Core Available: " + available.toString)
+      val cpuset = available.take(coresWanted).mkString(",")
+      val commandUpdateDocker = Seq("docker", "update",
+        "--cpuset-cpus='" + cpuset + "'", appId + "." + execId)
+      commandUpdateDocker.!
+      execIdToProxy(execId.toString).proxyEndpoint.send(
+        ExecutorScaled(execId, coresWanted, coresWanted))
+      logDebug(commandUpdateDocker.toString)
+      logInfo("Scaled executorId %s  of appId %s to  %d Core".format(execId, appId, coresWanted))
+
+      coresAllocated += (appId + "/" + execId -> available.take(coresWanted))
+      sendToMaster(ExecutorStateChanged(appId, execId.toInt, ExecutorState.RUNNING, None, None))
+    } catch {
+      case e: Exception =>
+        logError(s"Failed to scale executor $appId/$execId ", e)
+        if (executors.contains(appId + "/" + execId)) {
+          executors(appId + "/" + execId).kill()
+          val exitCode = Seq("docker", "stop", appId + "." + execId).!
+          executors -= appId + "/" + execId
+          coresAllocated -= appId + "/" + execId
+        }
+        sendToMaster(ExecutorStateChanged(appId, execId.toInt, ExecutorState.FAILED,
+          Some(e.toString), None))
+    }
+
   }
 
   override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
@@ -783,5 +831,9 @@ private[deploy] object Worker extends Logging {
     } else {
       cmd
     }
+  }
+
+  def changeDriverToProxy(cmd: Command, proxyUrl: String): Command = {
+    cmd.copy(arguments = cmd.arguments.updated(1, proxyUrl))
   }
 }

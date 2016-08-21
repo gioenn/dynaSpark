@@ -63,6 +63,10 @@ private[spark] trait SparkListenerBus
         listener.onExecutorRemoved(executorRemoved)
       case blockUpdated: SparkListenerBlockUpdated =>
         listener.onBlockUpdated(blockUpdated)
+      case executorAssigned: SparkListenerExecutorAssigned =>
+        listener.onExecutorAssigned(executorAssigned)
+      case stageWeightSubmitted: SparkStageWeightSubmitted =>
+        listener.onStageWeightSubmitted(stageWeightSubmitted)
       case logStart: SparkListenerLogStart => // ignore event log metadata
       case _ => listener.onOtherEvent(event)
     }

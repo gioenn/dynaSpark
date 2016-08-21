@@ -131,6 +131,12 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
           }
         }
 
+      case ExecutorFinishedTask(executorId) =>
+        scheduler.unbind(executorId)
+
+      case UnBind(executorId) =>
+        scheduler.unbind(executorId)
+
       case ReviveOffers =>
         makeOffers()
 
@@ -141,6 +147,19 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
           case None =>
             // Ignoring the task kill since the executor is not registered.
             logWarning(s"Attempted to kill task $taskId for unknown executor $executorId.")
+        }
+
+      case Bind(executorId, stageId) =>
+        scheduler.bind(executorId, stageId)
+
+      case ExecutorScaled(execId, cores, newFreeCores) =>
+        executorDataMap.get(execId) match {
+          case Some(executorData) =>
+            executorDataMap(execId) = new ExecutorData(executorData.executorEndpoint,
+              executorData.executorAddress, executorData.executorHost,
+              newFreeCores, cores, executorData.logUrlMap)
+          case None =>
+            logWarning(s"Scaled not registered executorID $execId")
         }
     }
 
@@ -265,7 +284,8 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
           logInfo(s"Launching task ${task.taskId} on executor id: ${task.executorId} hostname: " +
             s"${executorData.executorHost}.")
 
-          executorData.executorEndpoint.send(LaunchTask(new SerializableBuffer(serializedTask)))
+          executorData.executorEndpoint.send(
+            LaunchTask(task.taskId, new SerializableBuffer(serializedTask)))
         }
       }
     }

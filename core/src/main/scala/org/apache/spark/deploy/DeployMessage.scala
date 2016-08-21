@@ -100,14 +100,6 @@ private[deploy] object DeployMessages {
       memory: Int)
     extends DeployMessage
 
-  case class ScaleExecutor(
-       masterUrl: String,
-       appId: String,
-       execId: Int,
-       appDesc: ApplicationDescription,
-       cores: Int)
-    extends DeployMessage
-
   case class LaunchDriver(driverId: String, driverDesc: DriverDescription) extends DeployMessage
 
   case class KillDriver(driverId: String) extends DeployMessage
@@ -139,10 +131,6 @@ private[deploy] object DeployMessages {
 
   // TODO(matei): replace hostPort with host
   case class ExecutorAdded(id: Int, workerId: String, hostPort: String, cores: Int, memory: Int) {
-    Utils.checkHostPort(hostPort, "Required hostport")
-  }
-
-  case class ExecutorScaled(id: Int, workerId: String, hostPort: String, cores: Int) {
     Utils.checkHostPort(hostPort, "Required hostport")
   }
 

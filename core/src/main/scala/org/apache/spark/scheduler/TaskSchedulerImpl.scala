@@ -81,6 +81,9 @@ private[spark] class TaskSchedulerImpl(
   private[scheduler] val taskIdToTaskSetManager = new HashMap[Long, TaskSetManager]
   val taskIdToExecutorId = new HashMap[Long, String]
 
+  val execIdToTaskSet = new HashMap[String, Long].withDefaultValue(-1)
+  val taskSetToExecId = new HashMap[Long, Set[String]].withDefaultValue(Set())
+
   @volatile private var hasReceivedTask = false
   @volatile private var hasLaunchedTask = false
   private val starvationTimer = new Timer(true)
@@ -252,7 +255,10 @@ private[spark] class TaskSchedulerImpl(
     for (i <- 0 until shuffledOffers.size) {
       val execId = shuffledOffers(i).executorId
       val host = shuffledOffers(i).host
-      if (availableCpus(i) >= CPUS_PER_TASK) {
+      val stageId = taskSet.stageId
+      logInfo("CPU FREE: %d, EID %s, SID, %d, ASSIGNED SID %d".format(availableCpus(i),
+        execId, stageId, execIdToTaskSet(execId)))
+      if (availableCpus(i) >= CPUS_PER_TASK && execIdToTaskSet(execId) == stageId) {
         try {
           for (task <- taskSet.resourceOffer(execId, host, maxLocality)) {
             tasks(i) += task
@@ -444,6 +450,17 @@ private[spark] class TaskSchedulerImpl(
         throw new SparkException(s"Exiting due to error from cluster scheduler: $message")
       }
     }
+  }
+
+  def bind(executorId: String, stageId: Int): Unit = {
+    logInfo("BINDING EXECUTOR ID: %s TO STAGEID %d".format(executorId, stageId))
+    execIdToTaskSet(executorId) = stageId
+    // sc.listenerBus.post(SparkListenerExecutorAssigned(executorId, stageId))
+  }
+
+  def unbind(executorId: String): Unit = {
+    logInfo("UNBINDING EXECUTOR ID: %s".format(executorId))
+    execIdToTaskSet(executorId) = -1
   }
 
   override def stop() {

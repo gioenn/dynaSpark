@@ -155,6 +155,8 @@ class DAGScheduler(
 
   private[scheduler] val activeJobs = new HashSet[ActiveJob]
 
+  val stageIdToWeight = new HashMap[Int, Int]
+
   /**
    * Contains the locations that each RDD's partitions are cached on.  This map's keys are RDD ids
    * and its values are arrays indexed by partition numbers. Each array value is the set of
@@ -371,6 +373,15 @@ class DAGScheduler(
       mapOutputTracker.registerShuffle(shuffleDep.shuffleId, rdd.partitions.length)
     }
     stage
+  }
+
+  private def setWeight(node: Stage): Unit = {
+    node.parents.foreach { parent =>
+      val w1 = stageIdToWeight.getOrElse(node.id, 0) + 1
+      val w2 = stageIdToWeight.getOrElse(parent.id, 0)
+      stageIdToWeight(parent.id) = math.max(w1, w2)
+      this.setWeight(parent)
+      }
   }
 
   /**
@@ -847,6 +858,10 @@ class DAGScheduler(
       // New stage creation may throw an exception if, for example, jobs are run on a
       // HadoopRDD whose underlying HDFS files have been deleted.
       finalStage = newResultStage(finalRDD, func, partitions, jobId, callSite)
+      stageIdToWeight.clear()
+      stageIdToWeight(finalStage.id) = 0
+      setWeight(finalStage)
+      logInfo(s"MapStageIdToWeight of JobID $jobId \n $stageIdToWeight")
     } catch {
       case e: Exception =>
         logWarning("Creating new stage failed due to exception - job: " + jobId, e)
@@ -1058,6 +1073,7 @@ class DAGScheduler(
       taskScheduler.submitTasks(new TaskSet(
         tasks.toArray, stage.id, stage.latestInfo.attemptId, jobId, properties))
       stage.latestInfo.submissionTime = Some(clock.getTimeMillis())
+      listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties, stageIdToWeight(stage.id)))
     } else {
       // Because we posted SparkListenerStageSubmitted earlier, we should mark
       // the stage as completed here in case there are no tasks to run

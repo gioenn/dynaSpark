@@ -46,6 +46,7 @@ import org.apache.mesos.MesosNativeLibrary
 
 import org.apache.spark.annotation.DeveloperApi
 import org.apache.spark.broadcast.Broadcast
+import org.apache.spark.deploy.control.ControlEventListener
 import org.apache.spark.deploy.{LocalSparkCluster, SparkHadoopUtil}
 import org.apache.spark.input.{FixedLengthBinaryInputFormat, PortableDataStream, StreamInputFormat,
   WholeTextFileInputFormat}
@@ -199,6 +200,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   private var _eventLogCodec: Option[String] = None
   private var _env: SparkEnv = _
   private var _jobProgressListener: JobProgressListener = _
+  private var _controlStageEventListener: ControlEventListener = _
   private var _statusTracker: SparkStatusTracker = _
   private var _progressBar: Option[ConsoleProgressBar] = None
   private var _ui: Option[SparkUI] = None
@@ -271,6 +273,8 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     map.asScala
   }
   private[spark] def jobProgressListener: JobProgressListener = _jobProgressListener
+
+  private[spark] def controlStageEventListener: ControlEventListener = _controlStageEventListener
 
   def statusTracker: SparkStatusTracker = _statusTracker
 
@@ -418,6 +422,9 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     // "SparkEnv", some messages will be posted to "listenerBus" and we should not miss them.
     _jobProgressListener = new JobProgressListener(_conf)
     listenerBus.addListener(jobProgressListener)
+
+    _controlStageEventListener = new ControlEventListener(_conf)
+    listenerBus.addListener(controlStageEventListener)
 
     // Create the Spark execution environment (cache, map output tracker, etc)
     _env = createSparkEnv(_conf, isLocal, listenerBus)
