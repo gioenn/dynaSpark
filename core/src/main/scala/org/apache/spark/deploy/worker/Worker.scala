@@ -617,20 +617,20 @@ private[deploy] class Worker(
       val commandUpdateDocker = Seq("docker", "update",
         "--cpuset-cpus='" + cpuset + "'", appId + "." + execId)
       logDebug(commandUpdateDocker.toString)
-      val result = commandUpdateDocker.!
+      val result = commandUpdateDocker.!!
 
-      if (appId + "." + execId == result.toString) {
+      if (appId + "." + execId == result) {
         execIdToProxy(execId.toString).proxyEndpoint.send(
           ExecutorScaled(execId, coresWanted, coresWanted))
         logInfo("Scaled executorId %s  of appId %s to  %d Core".format(execId, appId, coresWanted))
         coresAllocated += (appId + "/" + execId -> available.take(coresWanted))
         sendToMaster(ExecutorStateChanged(appId, execId.toInt, ExecutorState.RUNNING, None, None))
-        val stats = Seq("docker", "stats", "--no-stream", appId + "." + execId).!
-        val cpuUsage = stats.toString.split("\\s+")(15).dropRight(1)
+        val stats = Seq("docker", "stats", "--no-stream", appId + "." + execId).!!
+        val cpuUsage = stats.split("\\s+")(15).dropRight(1)
         logInfo("CPU USAGE: " + cpuUsage)
 
       } else {
-        throw new Exception(result.toString)
+        throw new Exception(result)
       }
 
     } catch {
