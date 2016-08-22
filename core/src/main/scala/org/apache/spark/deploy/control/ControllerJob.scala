@@ -54,7 +54,12 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
   }
 
   def computeDeadlineStage(stage: StageInfo, weight: Long): Long = {
-    (ALPHA * (deadlineJobMillisecond - stage.submissionTime.get) / (weight + 1)).toInt
+    val deadline = (ALPHA * (deadlineJobMillisecond - stage.submissionTime.get)
+      / (weight + 1)).toLong
+    if (deadline < 0) {
+      logError("DEADLINE NEGATIVE -> DEADLINE NOT SATISFIED")
+    }
+    deadline
   }
 
   def computeCoreStage(deadlineStage: Long, numRecord: Long): Int = {
@@ -65,7 +70,12 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
   }
 
   def computeDeadlineFirstStage(stage: StageInfo, weight: Long): Long = {
-    (ALPHA * (deadlineJobMillisecond - stage.submissionTime.get) / (weight + 1)).toInt
+    val deadline = (ALPHA * (deadlineJobMillisecond - stage.submissionTime.get)
+      / (weight + 1)).toLong
+    if (deadline < 0) {
+      logError("DEADLINE NEGATIVE -> DEADLINE NOT SATISFIED")
+    }
+    deadline
   }
 
   def computeCoreFirstStage(stage: StageInfo): Int = {
@@ -74,7 +84,11 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
 
   def computeCoreStageFromSize(deadlineStage: Long, totalSize: Long): Int = {
     logInfo("TotalSize RDD First Stage: " + totalSize.toString)
-    OVERSCALE * math.ceil(totalSize / (deadlineStage / 1000.0) / NOMINAL_RATE_DATA_S).toInt
+    if(deadlineStage > 0) {
+      OVERSCALE * math.ceil(totalSize / (deadlineStage / 1000.0) / NOMINAL_RATE_DATA_S).toInt
+    } else {
+      numMaxExecutor * coreForVM
+    }
   }
 
   def computeTaskForExecutors(coresToBeAllocated: Int, totalTasksStage: Int): IndexedSeq[Int] = {
@@ -90,7 +104,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
       } else coresToBeAllocated / numExecutor
     }
 
-    val remainingTasks = totalTasksStage - coresPerExecutor.foldLeft(0){
+    val remainingTasks = totalTasksStage - coresPerExecutor.foldLeft(0) {
       (agg, x) => totalTasksStage * x / coresToBeAllocated + agg
     }
 
@@ -121,7 +135,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
 
     if (numExecutor > numMaxExecutor) {
       logError("NUM EXECUTORS TOO HIGH: %d > NUM MAX EXECUTORS %d".format(
-        numExecutor , numMaxExecutor
+        numExecutor, numMaxExecutor
       ))
       numExecutor = numMaxExecutor
       val coreForExecutors = (1 to numExecutor).map {
