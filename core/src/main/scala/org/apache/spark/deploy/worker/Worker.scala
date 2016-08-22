@@ -624,9 +624,9 @@ private[deploy] class Worker(
       logInfo("Scaled executorId %s  of appId %s to  %d Core".format(execId, appId, coresWanted))
       coresAllocated += (appId + "/" + execId -> available.take(coresWanted))
       sendToMaster(ExecutorStateChanged(appId, execId.toInt, ExecutorState.RUNNING, None, None))
-      val stats = Seq("docker", "stats", "--no-stream", appId + "." + execId).!!
-      val cpuUsage = stats.split("\\s+")(15).dropRight(1)
-      logInfo("CPU USAGE: " + cpuUsage)
+      // val stats = Seq("docker", "stats", "--no-stream", appId + "." + execId).!!
+      // val cpuUsage = stats.split("\\s+")(15).dropRight(1)
+      // logInfo("CPU USAGE: " + cpuUsage)
 
     } catch {
       case e: Exception =>
