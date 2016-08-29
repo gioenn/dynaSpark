@@ -117,6 +117,8 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
   }
 
   override def onJobEnd(jobEnd: SparkListenerJobEnd): Unit = synchronized {
+    val controller = jobIdToController(jobEnd.jobId)
+    controller.stop()
     val jobData = activeJobs.remove(jobEnd.jobId).getOrElse {
       logWarning(s"Job completed for unknown job ${jobEnd.jobId}")
       new JobUIData(jobId = jobEnd.jobId)
@@ -207,7 +209,8 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       logInfo(jobIdToController.toString())
 
     } else {
-      val controller = new ControllerJob(conf, deadlineJobs(jobId.head))
+      val controller = jobIdToController.getOrElse(jobId.head,
+        new ControllerJob(conf, deadlineJobs(jobId.head)))
       jobIdToController(jobId.head) = controller
       val deadlineStage = controller.computeDeadlineStage(stage, stageWeight)
       stageIdToDeadline(stage.stageId) = deadlineStage
