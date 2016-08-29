@@ -194,7 +194,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     val stage = stageSubmitted.stageInfo
     val stageWeight = stageSubmitted.weight
     val jobId = stageIdToActiveJobIds(stage.stageId)
-
+    logInfo("JobID of stageId " + stage.stageId.toString + " : " + jobId.toString())
     if (firstStageId == -1 && stageIdToActiveJobIds(stage.stageId).head == 0) {
       logInfo("FIRST STAGE FIRST JOB GENERATES/LOADS DATA")
       firstStageId = stage.stageId
