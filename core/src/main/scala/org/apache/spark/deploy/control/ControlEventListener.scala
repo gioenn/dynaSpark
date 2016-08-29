@@ -488,10 +488,13 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     val jobId = stageIdToActiveJobIds(stageId)
     val workerUrl = "spark://Worker@" +
       executorIdToInfo(executorAssigned.executorId).executorHost + ":9999"
-    val controller = new ControllerJob(conf, deadlineJobs(jobId.head))
+    val controller = jobIdToController.getOrElse(jobId.head,
+      new ControllerJob(conf, deadlineJobs(jobId.head)))
+    jobIdToController(jobId.head) = controller
     if (jobId.head != 0) {
-      val coreToStart = math.ceil(controller.computeCoreForExecutors(stageIdToCore(stageId))
-      (executorAssigned.executorId.toInt)).toInt
+      val coreForExecutors = controller.computeCoreForExecutors(stageIdToCore(stageId))
+      logInfo(coreForExecutors.toString())
+      val coreToStart = math.ceil(coreForExecutors(executorAssigned.executorId.toInt)).toInt
       val taskForExecutorId = controller.computeTaskForExecutors(
         stageIdToCore(stageId),
         stageIdToInfo(stageId).numTasks)(executorAssigned.executorId.toInt)
