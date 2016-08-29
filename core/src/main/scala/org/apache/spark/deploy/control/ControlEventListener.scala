@@ -75,7 +75,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
   var execIdToStageId = new HashMap[String, Long].withDefaultValue(0)
   var stageIdToExecId = new HashMap[Long, Set[String]].withDefaultValue(Set())
   var executorIdToInfo = new HashMap[String, ExecutorInfo]
-
+  var executorNeededIndexAvaiable = List[Int]()
 
 
   override def onJobStart(jobStart: SparkListenerJobStart): Unit = synchronized {
@@ -256,6 +256,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     logInfo(stageIdToCore.toString)
 
     if (executorAvailable.size >= executorNeeded) {
+      executorNeededIndexAvaiable = 0 until executorNeeded toList
       // LAUNCH BIND
       for (exec <- executorAvailable.toList)
       {
@@ -468,6 +469,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     executorIdToInfo(executorAdded.executorId) = executorAdded.executorInfo
     logInfo("EXECUTOR AVAILABLE: " + executorAvailable.toString)
     if (executorAvailable.size >= executorNeeded) {
+      executorNeededIndexAvaiable = 0 until executorNeeded toList
       // LAUNCH BIND
       for (exec <- executorAvailable.toList)
       {
@@ -491,16 +493,18 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     val controller = jobIdToController.getOrElse(jobId.head,
       new ControllerJob(conf, deadlineJobs(jobId.head)))
     jobIdToController(jobId.head) = controller
+    val index = executorNeededIndexAvaiable.last
+    executorNeededIndexAvaiable = executorNeededIndexAvaiable.dropRight(1)
     if (jobId.head != 0) {
       val coreForExecutors = controller.computeCoreForExecutors(stageIdToCore(stageId))
       logInfo(coreForExecutors.toString())
-      val coreToStart = math.ceil(coreForExecutors(executorAssigned.executorId.toInt)).toInt
+      val coreToStart = math.ceil(coreForExecutors(index)).toInt
       val taskForExecutorId = controller.computeTaskForExecutors(
         stageIdToCore(stageId),
-        stageIdToInfo(stageId).numTasks)(executorAssigned.executorId.toInt)
+        stageIdToInfo(stageId).numTasks)(index)
       val maxCore =
         controller.computeCoreForExecutors(
-          stageIdToCore(stageId))(executorAssigned.executorId.toInt)
+          stageIdToCore(stageId))(index)
       controller.scaleExecutor(workerUrl, appid, executorAssigned.executorId, coreToStart)
       controller.initControllerExecutor(
         workerUrl,
@@ -513,7 +517,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
         taskForExecutorId)
     } else {
       val taskForExecutorId = controller.computeTaskForExecutors(stageIdToCore(stageId),
-        stageIdToInfo(stageId).numTasks)(executorAssigned.executorId.toInt)
+        stageIdToInfo(stageId).numTasks)(index)
       controller.bindwithtasks(workerUrl, executorAssigned.executorId, stageId, taskForExecutorId)
       controller.scaleExecutor(
         workerUrl, "", executorAssigned.executorId, controller.coreForVM)
