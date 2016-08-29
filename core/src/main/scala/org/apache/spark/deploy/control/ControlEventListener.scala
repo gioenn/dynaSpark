@@ -258,7 +258,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     if (executorAvailable.size >= executorNeeded) {
       executorNeededIndexAvaiable = (0 until executorNeeded).toList
       // LAUNCH BIND
-      for (exec <- executorAvailable.toList)
+      for (exec <- executorAvailable.toList.take(executorNeeded))
       {
         onExecutorAssigned(SparkListenerExecutorAssigned(exec, stage.stageId))
       }
@@ -469,7 +469,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     if (executorAvailable.size >= executorNeeded) {
       executorNeededIndexAvaiable = (0 until executorNeeded).toList
       // LAUNCH BIND
-      for (exec <- executorAvailable.toList)
+      for (exec <- executorAvailable.toList.take(executorNeeded))
       {
         onExecutorAssigned(SparkListenerExecutorAssigned(exec, activeStages.head._2.stageId))
       }
