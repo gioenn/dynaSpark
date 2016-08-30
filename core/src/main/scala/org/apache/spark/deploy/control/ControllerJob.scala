@@ -66,7 +66,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
   def computeNominalRecord(stage: StageInfo): Unit = {
     val recordsRead = stage.taskMetrics.inputMetrics.recordsRead +
       stage.taskMetrics.shuffleReadMetrics.recordsRead
-    val duration = stage.completionTime.get - stage.submissionTime.get
+    val duration = (stage.completionTime.get - stage.submissionTime.get) / 1000.0
     NOMINAL_RATE_RECORD_S = recordsRead / (duration * numExecutor * totalCore)
     logInfo("UPDATED NOMINAL RECORD/S: " + NOMINAL_RATE_RECORD_S)
   }
