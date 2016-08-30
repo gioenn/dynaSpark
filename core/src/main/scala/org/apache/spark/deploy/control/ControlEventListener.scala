@@ -69,6 +69,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
   val stageIdToCore = new HashMap[Int, Int]
 
   var firstStageId: Int = -1
+  var stageIdToComputeNominalRecord: Int = -1
 
   // Executor
   var executorAvailable = Set[String]()
@@ -166,6 +167,10 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       stageData.accumulables(id) = info
     }
 
+    if (stage.stageId == stageIdToComputeNominalRecord) {
+      controller.computeNominalRecord(stage)
+    }
+
     activeStages.remove(stage.stageId)
     if (stage.failureReason.isEmpty) {
       completedStages += stage
@@ -214,17 +219,19 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       jobIdToController(jobId.head) = controller
       val deadlineStage = controller.computeDeadlineStage(stage, stageWeight)
       stageIdToDeadline(stage.stageId) = deadlineStage
-      // FIND RECORD IN INPUT
-      val numRecord = stage.parentIds.foldLeft(0L) {
-        (agg, x) =>
-          agg + stageIdToData(x, 0).outputRecords + stageIdToData(x, 0).shuffleWriteRecords }
-      if (numRecord == 0) {
-        // val totalSize = stageIdToInfo(0).rddInfos.foldLeft(0L) {
-        //  (acc, rdd) => acc + rdd.memSize + rdd.diskSize + rdd.externalBlockStoreSize
-        // }
+      if (jobIdToData.get(jobId.head).head.stageIds.head == stage.stageId) {
         stageIdToCore(stage.stageId) = controller.computeCoreFirstStage(stage)
+        stageIdToComputeNominalRecord = stage.stageId
       } else {
-        stageIdToCore(stage.stageId) = controller.computeCoreStage(deadlineStage, numRecord)
+        // FIND RECORD IN INPUT
+        val numRecord = stage.parentIds.foldLeft(0L) {
+          (agg, x) =>
+            agg + stageIdToData(x, 0).outputRecords + stageIdToData(x, 0).shuffleWriteRecords }
+        if (numRecord == 0) {
+          logError("STAGEID: " + stage.stageId + " NUM RECORD == 0")
+        } else {
+          stageIdToCore(stage.stageId) = controller.computeCoreStage(deadlineStage, numRecord)
+        }
       }
       // ASK MASTER NEEDED EXECUTORS
       controller.askMasterNeededExecutors(

@@ -30,7 +30,7 @@ import scala.concurrent.duration.Deadline
 class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Logging {
 
   val ALPHA: Double = conf.get("spark.control.alpha").toDouble // 0.8
-  val NOMINAL_RATE_RECORD_S: Double = conf.get("spark.control.nominalrate").toDouble // 1000.0
+  var NOMINAL_RATE_RECORD_S: Double = conf.get("spark.control.nominalrate").toDouble // 1000.0
   val OVERSCALE: Int = conf.get("spark.control.overscale").toInt // 2
 
   val NOMINAL_RATE_DATA_S: Double = conf.get(
@@ -40,6 +40,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
   val coreForVM: Int = conf.get("spark.control.coreforvm").toInt  // 8
 
   var numExecutor = 0
+  var totalCore = 0
   var coreForExecutor = new HashMap[Int, Int]
 
   val securityMgr = new SecurityManager(conf)
@@ -60,6 +61,14 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
       logError("DEADLINE NEGATIVE -> DEADLINE NOT SATISFIED")
     }
     deadline
+  }
+
+  def computeNominalRecord(stage: StageInfo): Unit = {
+    val recordsRead = stage.taskMetrics.inputMetrics.recordsRead +
+      stage.taskMetrics.shuffleReadMetrics.recordsRead
+    val duration = stage.completionTime.get - stage.submissionTime.get
+    NOMINAL_RATE_RECORD_S = recordsRead / (duration * numExecutor * totalCore)
+    logInfo("UPDATED NOMINAL RECORD/S: " + NOMINAL_RATE_RECORD_S)
   }
 
   def computeCoreStage(deadlineStage: Long, numRecord: Long): Int = {
@@ -132,7 +141,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
 
   def computeCoreForExecutors(coresToBeAllocated: Int): IndexedSeq[Int] = {
     numExecutor = math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
-
+    totalCore = coresToBeAllocated
     if (numExecutor > numMaxExecutor) {
       logError("NUM EXECUTORS TOO HIGH: %d > NUM MAX EXECUTORS %d".format(
         numExecutor, numMaxExecutor
