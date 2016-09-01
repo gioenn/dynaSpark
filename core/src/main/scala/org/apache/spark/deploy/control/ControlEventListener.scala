@@ -44,6 +44,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
 
   val DEADLINE: Int = conf.get("spark.control.deadline").toInt // 1000000
   var executorNeeded: Int = conf.get("spark.control.maxexecutor").toInt
+  var coreForVM: Int = conf.get("spark.control.coreforvm").toInt
 
   // Master
   def master: String = conf.get("spark.master")
@@ -505,7 +506,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       val taskForExecutorId = controller.computeTaskForExecutors(
         stageIdToCore(stageId),
         stageIdToInfo(stageId).numTasks)(index)
-      val maxCore = coreForExecutors(index)
+      val maxCore = math.min(coreForExecutors(index) * controller.OVERSCALE, coreForVM)
       controller.scaleExecutor(workerUrl, appid, executorAssigned.executorId, coreToStart)
       controller.initControllerExecutor(
         workerUrl,
