@@ -1076,11 +1076,11 @@ class DAGScheduler(
       taskScheduler.submitTasks(new TaskSet(
         tasks.toArray, stage.id, stage.latestInfo.attemptId, jobId, properties))
       stage.latestInfo.submissionTime = Some(clock.getTimeMillis())
-      val stageJson = appJson.asJsObject(stage.id.toString)
+      val stageJson = appJson.asJsObject.fields(stage.id.toString)
       listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties,
-        stageJson.asJsObject("weight").convertTo[Long],
-        stageJson.asJsObject("firststage").convertTo[Boolean],
-        stageJson.asJsObject("genstage").convertTo[Boolean]))
+        stageJson.asJsObject.fields("weight").convertTo[Long],
+        stageJson.asJsObject.fields("firststage").convertTo[Boolean],
+        stageJson.asJsObject.fields("genstage").convertTo[Boolean]))
     } else {
       // Because we posted SparkListenerStageSubmitted earlier, we should mark
       // the stage as completed here in case there are no tasks to run
