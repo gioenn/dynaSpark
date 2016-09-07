@@ -45,6 +45,7 @@ import spray.json._
 import DefaultJsonProtocol._
 import scala.io
 
+
 /**
  * The high-level scheduling layer that implements stage-oriented scheduling. It computes a DAG of
  * stages for each job, keeps track of which RDDs and stage outputs are materialized, and finds a
@@ -157,7 +158,7 @@ class DAGScheduler(
   private[scheduler] val activeJobs = new HashSet[ActiveJob]
 
   val stageIdToWeight = new HashMap[Int, Int]
-  val appJson = io.Source.fromFile("/usr/local/spark/conf/" + sc.appName + ".json").mkString.parseJson
+  val appJson = io.Source.fromFile("/usr/local/spark/conf/" + sc.appName.split(" ")(1) + ".json").mkString.parseJson
 
   /**
    * Contains the locations that each RDD's partitions are cached on.  This map's keys are RDD ids
