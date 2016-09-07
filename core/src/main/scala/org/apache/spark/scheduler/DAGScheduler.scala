@@ -17,7 +17,7 @@
 
 package org.apache.spark.scheduler
 
-import java.io.NotSerializableException
+import java.io.{FileInputStream, NotSerializableException}
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
@@ -29,9 +29,7 @@ import scala.concurrent.duration._
 import scala.language.existentials
 import scala.language.postfixOps
 import scala.util.control.NonFatal
-
 import org.apache.commons.lang3.SerializationUtils
-
 import org.apache.spark._
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.executor.TaskMetrics
@@ -43,6 +41,8 @@ import org.apache.spark.rpc.RpcTimeout
 import org.apache.spark.storage._
 import org.apache.spark.storage.BlockManagerMessages.BlockManagerHeartbeat
 import org.apache.spark.util._
+import spray.json._
+import scala.io
 
 /**
  * The high-level scheduling layer that implements stage-oriented scheduling. It computes a DAG of
@@ -156,6 +156,7 @@ class DAGScheduler(
   private[scheduler] val activeJobs = new HashSet[ActiveJob]
 
   val stageIdToWeight = new HashMap[Int, Int]
+  val appJson = io.Source.fromFile("/usr/local/spark/conf/" + sc.appName + ".json").mkString.parseJson
 
   /**
    * Contains the locations that each RDD's partitions are cached on.  This map's keys are RDD ids
@@ -1073,7 +1074,11 @@ class DAGScheduler(
       taskScheduler.submitTasks(new TaskSet(
         tasks.toArray, stage.id, stage.latestInfo.attemptId, jobId, properties))
       stage.latestInfo.submissionTime = Some(clock.getTimeMillis())
-      listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties, stageIdToWeight(stage.id)))
+      val stageJson = appJson.asJsObject(stage.id.toString)
+      listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties,
+        stageJson.asJsObject("weight").convertTo[Long],
+        stageJson.asJsObject("firststage").convertTo[Boolean],
+        stageJson.asJsObject("genstage").convertTo[Boolean]))
     } else {
       // Because we posted SparkListenerStageSubmitted earlier, we should mark
       // the stage as completed here in case there are no tasks to run

@@ -44,7 +44,8 @@ case class SparkListenerStageSubmitted(stageInfo: StageInfo, properties: Propert
 
 @DeveloperApi
 case class SparkStageWeightSubmitted
-(stageInfo: StageInfo, properties: Properties = null, weight: Long)
+(stageInfo: StageInfo, properties: Properties = null, weight: Long,
+ firststage: Boolean, genstage: Boolean)
   extends SparkListenerEvent
 
 @DeveloperApi

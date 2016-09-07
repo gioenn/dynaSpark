@@ -42,18 +42,19 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
   @volatile var endTime = -1L
 
 
-  val DEADLINE: Int = conf.get("spark.control.deadline").toInt // 1000000
+  val DEADLINE: Int = conf.get("spark.control.deadline").toInt
+  // 1000000
   var executorNeeded: Int = conf.get("spark.control.maxexecutor").toInt
   var coreForVM: Int = conf.get("spark.control.coreforvm").toInt
 
   // Master
   def master: String = conf.get("spark.master")
+
   def appid: String = conf.get("spark.app.id")
 
   // Jobs:
   val activeJobs = new HashMap[Int, JobUIData]
   val jobIdToData = new HashMap[Int, JobUIData]
-  val deadlineJobs = new HashMap[Int, Long]
   val jobIdToController = new HashMap[Int, ControllerJob]
 
   // Stages:
@@ -79,9 +80,10 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
   var executorIdToInfo = new HashMap[String, ExecutorInfo]
   var executorNeededIndexAvaiable = List[Int]()
 
+  var deadlineApp: Long = 0
+
 
   override def onJobStart(jobStart: SparkListenerJobStart): Unit = synchronized {
-    deadlineJobs(jobStart.jobId) = System.currentTimeMillis() + DEADLINE
     val jobGroup = for (
       props <- Option(jobStart.properties);
       group <- Option(props.getProperty(SparkContext.SPARK_JOB_GROUP_ID))
@@ -201,10 +203,10 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     val stageWeight = stageSubmitted.weight
     val jobId = stageIdToActiveJobIds(stage.stageId)
     logInfo("JobID of stageId " + stage.stageId.toString + " : " + jobId.toString())
-    if (firstStageId == -1 && stageIdToActiveJobIds(stage.stageId).head == 0) {
+    if (stageSubmitted.genstage) {
       logInfo("FIRST STAGE FIRST JOB GENERATES/LOADS DATA")
       firstStageId = stage.stageId
-      val controller = new ControllerJob(conf, deadlineJobs(jobId.head))
+      val controller = new ControllerJob(conf, deadlineApp)
       stageIdToDeadline(stage.stageId) = controller.computeDeadlineFirstStage(stage, stageWeight)
       if (!completedStages.isEmpty) {
         stageIdToCore(stage.stageId) = controller.computeCoreFirstStage(completedStages.toList.head)
@@ -216,18 +218,20 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
 
     } else {
       val controller = jobIdToController.getOrElse(jobId.head,
-        new ControllerJob(conf, deadlineJobs(jobId.head)))
+        new ControllerJob(conf, deadlineApp))
       jobIdToController(jobId.head) = controller
       val deadlineStage = controller.computeDeadlineStage(stage, stageWeight)
       stageIdToDeadline(stage.stageId) = deadlineStage
-      if (jobIdToData.get(jobId.head).head.stageIds.head == stage.stageId) {
+      if (stageSubmitted.firststage) {
+        deadlineApp = System.currentTimeMillis() + DEADLINE
         stageIdToCore(stage.stageId) = controller.computeCoreFirstStage(stage)
         stageIdToComputeNominalRecord = stage.stageId
       } else {
         // FIND RECORD IN INPUT
         val numRecord = stage.parentIds.foldLeft(0L) {
           (agg, x) =>
-            agg + stageIdToData(x, 0).outputRecords + stageIdToData(x, 0).shuffleWriteRecords }
+            agg + stageIdToData(x, 0).outputRecords + stageIdToData(x, 0).shuffleWriteRecords
+        }
         if (numRecord == 0) {
           logError("STAGEID: " + stage.stageId + " NUM RECORD == 0")
         } else {
@@ -266,8 +270,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     if (executorAvailable.size >= executorNeeded) {
       executorNeededIndexAvaiable = (0 until executorNeeded).toList
       // LAUNCH BIND
-      for (exec <- executorAvailable.toList.take(executorNeeded))
-      {
+      for (exec <- executorAvailable.toList.take(executorNeeded)) {
         onExecutorAssigned(SparkListenerExecutorAssigned(exec, stage.stageId))
       }
     }
@@ -477,8 +480,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     if (executorAvailable.size >= executorNeeded) {
       executorNeededIndexAvaiable = (0 until executorNeeded).toList
       // LAUNCH BIND
-      for (exec <- executorAvailable.toList.take(executorNeeded))
-      {
+      for (exec <- executorAvailable.toList.take(executorNeeded)) {
         onExecutorAssigned(SparkListenerExecutorAssigned(exec, activeStages.head._2.stageId))
       }
     }
@@ -495,7 +497,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     val workerUrl = "spark://Worker@" +
       executorIdToInfo(executorAssigned.executorId).executorHost + ":9999"
     val controller = jobIdToController.getOrElse(jobId.head,
-      new ControllerJob(conf, deadlineJobs(jobId.head)))
+      new ControllerJob(conf, deadlineApp))
     jobIdToController(jobId.head) = controller
     val index = executorNeededIndexAvaiable.last
     executorNeededIndexAvaiable = executorNeededIndexAvaiable.dropRight(1)
