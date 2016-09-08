@@ -245,6 +245,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
         stageIdToComputeNominalRecord = stage.stageId
       } else {
         // FIND RECORD IN INPUT
+        logInfo("PARENTS IDS: " + stageSubmitted.parentsIds.toString)
         val numRecord = stageSubmitted.parentsIds.foldLeft(0L) {
           (agg, x) =>
             agg + stageIdToData(x, 0).outputRecords + stageIdToData(x, 0).shuffleWriteRecords
@@ -259,6 +260,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
               numRecord)
           } else {
             logError("STAGEID: " + stage.stageId + " NUM RECORD == 0")
+            stageIdToCore(stage.stageId) = controller.computeCoreFirstStage(stage)
           }
         } else {
           stageIdToCore(stage.stageId) = controller.computeCoreStage(deadlineStage, numRecord)
@@ -303,7 +305,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
         onExecutorAssigned(SparkListenerExecutorAssigned(exec, stage.stageId))
       }
     } else {
-      logError("NOT ENOUGH RESOURSE TO DO PARALLEL STAGES NEED " +
+      logError("NOT ENOUGH RESOURSE TO DO START STAGE NEED " +
         (executorNeeded - executorAvailable.size).toString + " EXEC")
       logInfo("Waiting for executor available...")
       activePendingStages(stage.stageId) = stage
