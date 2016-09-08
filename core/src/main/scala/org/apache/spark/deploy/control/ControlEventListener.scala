@@ -201,6 +201,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       executorAvailable += execId
       executorBinded -= execId
     }
+    activePendingStages.remove(stage.stageId)
     for (stage <- activePendingStages) {
       val stageExecNeeded = executorNeededPendingStages(stage._2.stageId)
       if (executorAvailable.size >= stageExecNeeded) {
