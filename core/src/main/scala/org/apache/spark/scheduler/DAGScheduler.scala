@@ -44,6 +44,7 @@ import org.apache.spark.util._
 import spray.json._
 import DefaultJsonProtocol._
 import scala.io
+import java.nio.file.{Paths, Files}
 
 
 /**
@@ -158,7 +159,12 @@ class DAGScheduler(
   private[scheduler] val activeJobs = new HashSet[ActiveJob]
 
   val stageIdToWeight = new HashMap[Int, Int]
-  val appJson = io.Source.fromFile("/usr/local/spark/conf/" + sc.appName.split(" ")(1) + ".json").mkString.parseJson
+
+  val jsonFile = "/usr/local/spark/conf/" + sc.appName.split(" ").last + ".json"
+
+  val appJson = if (Files.exists(Paths.get(jsonFile))) {
+    io.Source.fromFile(jsonFile).mkString.parseJson
+  } else null
 
   /**
    * Contains the locations that each RDD's partitions are cached on.  This map's keys are RDD ids
@@ -1076,11 +1082,20 @@ class DAGScheduler(
       taskScheduler.submitTasks(new TaskSet(
         tasks.toArray, stage.id, stage.latestInfo.attemptId, jobId, properties))
       stage.latestInfo.submissionTime = Some(clock.getTimeMillis())
-      val stageJson = appJson.asJsObject.fields(stage.id.toString)
-      listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties,
-        stageJson.asJsObject.fields("weight").convertTo[Long],
-        stageJson.asJsObject.fields("firststage").convertTo[Boolean],
-        stageJson.asJsObject.fields("genstage").convertTo[Boolean]))
+      if (appJson != null) {
+        val stageJson = appJson.asJsObject.fields(stage.id.toString)
+        listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties,
+          stageJson.asJsObject.fields("weight").convertTo[Long],
+          stageJson.asJsObject.fields("firststage").convertTo[Boolean],
+          stageJson.asJsObject.fields("genstage").convertTo[Boolean]))
+      }
+      else {
+        logError("NO JSON FOR APP: " + jsonFile)
+        listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties,
+          stageIdToWeight(stage.id),
+          false,
+          true))
+      }
     } else {
       // Because we posted SparkListenerStageSubmitted earlier, we should mark
       // the stage as completed here in case there are no tasks to run
