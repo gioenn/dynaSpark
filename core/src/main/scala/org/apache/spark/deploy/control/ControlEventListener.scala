@@ -76,8 +76,9 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
 
   // Executor
   var executorAvailable = Set[String]()
+  var executorBinded = Set[String]()
   var execIdToStageId = new HashMap[String, Long].withDefaultValue(0)
-  var stageIdToExecId = new HashMap[Long, Set[String]].withDefaultValue(Set())
+  var stageIdToExecId = new HashMap[Int, Set[String]].withDefaultValue(Set())
   var executorIdToInfo = new HashMap[String, ExecutorInfo]
   var executorNeededIndexAvaiable = List[Int]()
   var executorNeededPendingStages = new HashMap[Int, Int]
@@ -194,6 +195,18 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
         }
       } else {
         jobData.numFailedStages += 1
+      }
+    }
+    executorAvailable += stageIdToExecId(stage.stageId).head
+    executorBinded -= stageIdToExecId(stage.stageId).head
+    for (stage <- activePendingStages) {
+      val stageExecNeeded = executorNeededPendingStages(stage._2.stageId)
+      if (executorAvailable.size >= stageExecNeeded) {
+        executorNeededIndexAvaiable = (0 until stageExecNeeded).toList
+        // LAUNCH BIND
+        for (exec <- executorAvailable.toList.take(stageExecNeeded)) {
+          onExecutorAssigned(SparkListenerExecutorAssigned(exec, stage._2.stageId))
+        }
       }
     }
   }
@@ -545,5 +558,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       controller.scaleExecutor(
         workerUrl, "", executorAssigned.executorId, controller.coreForVM)
     }
+    executorAvailable -= executorAssigned.executorId
+    executorBinded += executorAssigned.executorId
   }
 }
