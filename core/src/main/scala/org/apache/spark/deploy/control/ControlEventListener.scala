@@ -206,9 +206,9 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     if (stageSubmitted.genstage) {
       logInfo("FIRST STAGE FIRST JOB GENERATES/LOADS DATA")
       firstStageId = stage.stageId
-      val controller = new ControllerJob(conf, deadlineApp)
+      val controller = new ControllerJob(conf, System.currentTimeMillis() + DEADLINE)
       stageIdToDeadline(stage.stageId) = controller.computeDeadlineFirstStage(stage, stageWeight)
-      if (!completedStages.isEmpty) {
+      if (completedStages.nonEmpty) {
         stageIdToCore(stage.stageId) = controller.computeCoreFirstStage(completedStages.toList.head)
       } else {
         stageIdToCore(stage.stageId) = controller.computeCoreFirstStage(stage)
@@ -234,6 +234,14 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
         }
         if (numRecord == 0) {
           logError("STAGEID: " + stage.stageId + " NUM RECORD == 0")
+          val numRecord = stageIdToInfo(stage.stageId - 1).parentIds.foldLeft(0L) {
+            (agg, x) =>
+              agg + stageIdToData(x, 0).outputRecords + stageIdToData(x, 0).shuffleWriteRecords
+          }
+          if (numRecord != 0) {
+            stageIdToCore(stage.stageId) = controller.computeCoreStage(deadlineStage,
+                                                                        numRecord)
+          }
         } else {
           stageIdToCore(stage.stageId) = controller.computeCoreStage(deadlineStage, numRecord)
         }
@@ -244,35 +252,39 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       executorNeeded = controller.computeCoreForExecutors(stageIdToCore(stage.stageId)).size
     }
 
-    activeStages(stage.stageId) = stage
-    pendingStages.remove(stage.stageId)
-
-    stageIdToInfo(stage.stageId) = stage
-    val stageData = stageIdToData.getOrElseUpdate((stage.stageId, stage.attemptId), new StageUIData)
-
-    stageData.description = Option(stageSubmitted.properties).flatMap {
-      p => Option(p.getProperty(SparkContext.SPARK_JOB_DESCRIPTION))
-    }
-
-    for (
-      activeJobsDependentOnStage <- stageIdToActiveJobIds.get(stage.stageId);
-      jobId <- activeJobsDependentOnStage;
-      jobData <- jobIdToData.get(jobId)
-    ) {
-      jobData.numActiveStages += 1
-
-      // If a stage retries again, it should be removed from completedStageIndices set
-      jobData.completedStageIndices.remove(stage.stageId)
-    }
     logInfo(stageIdToDeadline.toString)
     logInfo(stageIdToCore.toString)
 
     if (executorAvailable.size >= executorNeeded) {
+      activeStages(stage.stageId) = stage
+      pendingStages.remove(stage.stageId)
+
+      stageIdToInfo(stage.stageId) = stage
+      val stageData = stageIdToData.getOrElseUpdate((stage.stageId, stage.attemptId), new StageUIData)
+
+      stageData.description = Option(stageSubmitted.properties).flatMap {
+        p => Option(p.getProperty(SparkContext.SPARK_JOB_DESCRIPTION))
+      }
+
+      for (
+        activeJobsDependentOnStage <- stageIdToActiveJobIds.get(stage.stageId);
+        jobId <- activeJobsDependentOnStage;
+        jobData <- jobIdToData.get(jobId)
+      ) {
+        jobData.numActiveStages += 1
+
+        // If a stage retries again, it should be removed from completedStageIndices set
+        jobData.completedStageIndices.remove(stage.stageId)
+      }
+
       executorNeededIndexAvaiable = (0 until executorNeeded).toList
       // LAUNCH BIND
       for (exec <- executorAvailable.toList.take(executorNeeded)) {
         onExecutorAssigned(SparkListenerExecutorAssigned(exec, stage.stageId))
       }
+    } else if (activeStages.nonEmpty) {
+      logError("NOT ENOUGH RESOURSE TO DO PARALLEL STAGES NEED " +
+        (executorNeeded - executorAvailable.size).toString + "EXEC")
     }
   }
 
