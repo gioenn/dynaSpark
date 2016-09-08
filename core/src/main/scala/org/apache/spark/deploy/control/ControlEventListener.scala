@@ -304,9 +304,10 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       logError("NOT ENOUGH RESOURSE TO DO PARALLEL STAGES NEED " +
         (executorNeeded - executorAvailable.size).toString + "EXEC")
       logInfo("Waiting for executor available...")
+      activePendingStages(stage.stageId) = stage
+      executorNeededPendingStages(stage.stageId) = executorNeeded
     }
-    activePendingStages(stage.stageId) = stage
-    executorNeededPendingStages(stage.stageId) = executorNeeded
+
   }
 
   override def onTaskStart(taskStart: SparkListenerTaskStart): Unit = synchronized {
