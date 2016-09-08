@@ -160,7 +160,7 @@ class DAGScheduler(
 
   val stageIdToWeight = new HashMap[Int, Int]
 
-  val jsonFile = "/usr/local/spark/conf/" + sc.appName.split(" ").last + ".json"
+  val jsonFile = "/usr/local/spark/conf/" + sc.appName.replaceAll("[^a-zA-Z0-9.-]", "_") + ".json"
 
   val appJson = if (Files.exists(Paths.get(jsonFile))) {
     io.Source.fromFile(jsonFile).mkString.parseJson
