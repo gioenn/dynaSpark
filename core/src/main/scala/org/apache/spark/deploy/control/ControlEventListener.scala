@@ -197,8 +197,10 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
         jobData.numFailedStages += 1
       }
     }
-    executorAvailable += stageIdToExecId(stage.stageId).head
-    executorBinded -= stageIdToExecId(stage.stageId).head
+    for (execId <- stageIdToExecId(stage.stageId)) {
+      executorAvailable += execId
+      executorBinded -= execId
+    }
     for (stage <- activePendingStages) {
       val stageExecNeeded = executorNeededPendingStages(stage._2.stageId)
       if (executorAvailable.size >= stageExecNeeded) {
