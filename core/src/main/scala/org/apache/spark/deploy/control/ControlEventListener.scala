@@ -218,13 +218,13 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       logInfo(jobIdToController.toString())
 
     } else {
+      deadlineApp = System.currentTimeMillis() + DEADLINE
       val controller = jobIdToController.getOrElse(jobId.head,
         new ControllerJob(conf, deadlineApp))
       jobIdToController(jobId.head) = controller
       val deadlineStage = controller.computeDeadlineStage(stage, stageWeight)
       stageIdToDeadline(stage.stageId) = deadlineStage
       if (stageSubmitted.firststage) {
-        deadlineApp = System.currentTimeMillis() + DEADLINE
         stageIdToCore(stage.stageId) = controller.computeCoreFirstStage(stage)
         stageIdToComputeNominalRecord = stage.stageId
       } else {
