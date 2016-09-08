@@ -268,9 +268,11 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       executorNeeded = controller.computeCoreForExecutors(stageIdToCore(stage.stageId)).size
     }
 
-    logInfo(stageIdToDeadline.toString)
-    logInfo(stageIdToCore.toString)
-
+    logInfo("DEADLINE STAGES: " + stageIdToDeadline.toString)
+    logInfo("CORE STAGES: " + stageIdToCore.toString)
+    logInfo("EXEC AVAIL: " + executorAvailable.toString)
+    logInfo("ACTIVE STAGES: " + activeStages.toString)
+    logInfo("ACTIVE PENDING STAGES: " + activePendingStages.toString)
     if (executorAvailable.size >= executorNeeded) {
       activeStages(stage.stageId) = stage
       pendingStages.remove(stage.stageId)
