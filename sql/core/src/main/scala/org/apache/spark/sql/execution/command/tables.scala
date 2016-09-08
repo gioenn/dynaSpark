@@ -33,8 +33,10 @@ import org.apache.spark.sql.catalyst.catalog.{CatalogColumn, CatalogTable, Catal
 import org.apache.spark.sql.catalyst.catalog.CatalogTableType._
 import org.apache.spark.sql.catalyst.catalog.CatalogTypes.TablePartitionSpec
 import org.apache.spark.sql.catalyst.expressions.{Attribute, AttributeReference}
+import org.apache.spark.sql.catalyst.parser.CatalystSqlParser
 import org.apache.spark.sql.catalyst.plans.logical.{Command, LogicalPlan, UnaryNode}
 import org.apache.spark.sql.catalyst.util.quoteIdentifier
+import org.apache.spark.sql.execution.command.CreateDataSourceTableUtils._
 import org.apache.spark.sql.execution.datasources.PartitioningUtils
 import org.apache.spark.sql.types._
 import org.apache.spark.util.Utils
@@ -56,7 +58,12 @@ case class CreateHiveTableAsSelectLogicalPlan(
 }
 
 /**
- * A command to create a table with the same definition of the given existing table.
+ * A command to create a MANAGED table with the same definition of the given existing table.
+ * In the target table definition, the table comment is always empty but the column comments
+ * are identical to the ones defined in the source table.
+ *
+ * The CatalogTable attributes copied from the source table are storage(inputFormat, outputFormat,
+ * serde, compressed, properties), schema, provider, partitionColumnNames, bucketSpec.
  *
  * The syntax of using this command in SQL is:
  * {{{
@@ -75,18 +82,54 @@ case class CreateTableLikeCommand(
       throw new AnalysisException(
         s"Source table in CREATE TABLE LIKE does not exist: '$sourceTable'")
     }
-    if (catalog.isTemporaryTable(sourceTable)) {
-      throw new AnalysisException(
-        s"Source table in CREATE TABLE LIKE cannot be temporary: '$sourceTable'")
+    val sourceTableDesc = catalog.getTableMetadata(sourceTable)
+
+    if (DDLUtils.isDatasourceTable(sourceTableDesc) ||
+        sourceTableDesc.tableType == CatalogTableType.VIEW) {
+      val outputSchema =
+        StructType(sourceTableDesc.schema.map { c =>
+          val builder = new MetadataBuilder
+          c.comment.map(comment => builder.putString("comment", comment))
+          StructField(
+            c.name,
+            CatalystSqlParser.parseDataType(c.dataType),
+            c.nullable,
+            metadata = builder.build())
+        })
+      val (schema, provider) = if (DDLUtils.isDatasourceTable(sourceTableDesc)) {
+        (DDLUtils.getSchemaFromTableProperties(sourceTableDesc).getOrElse(outputSchema),
+          sourceTableDesc.properties(CreateDataSourceTableUtils.DATASOURCE_PROVIDER))
+      } else { // VIEW
+        (outputSchema, sparkSession.sessionState.conf.defaultDataSourceName)
+      }
+      createDataSourceTable(
+        sparkSession = sparkSession,
+        tableIdent = targetTable,
+        userSpecifiedSchema = Some(schema),
+        partitionColumns = Array.empty[String],
+        bucketSpec = None,
+        provider = provider,
+        options = Map("path" -> catalog.defaultTablePath(targetTable)),
+        isExternal = false)
+    } else {
+      val newStorage =
+        sourceTableDesc.storage.copy(
+          locationUri = None,
+          serdeProperties = sourceTableDesc.storage.serdeProperties)
+      val newTableDesc =
+        CatalogTable(
+          identifier = targetTable,
+          tableType = CatalogTableType.MANAGED,
+          storage = newStorage,
+          schema = sourceTableDesc.schema,
+          partitionColumnNames = sourceTableDesc.partitionColumnNames,
+          sortColumnNames = sourceTableDesc.sortColumnNames,
+          bucketColumnNames = sourceTableDesc.bucketColumnNames,
+          numBuckets = sourceTableDesc.numBuckets)
+
+      catalog.createTable(newTableDesc, ifNotExists)
     }
 
-    val tableToCreate = catalog.getTableMetadata(sourceTable).copy(
-      identifier = targetTable,
-      tableType = CatalogTableType.MANAGED,
-      createTime = System.currentTimeMillis,
-      lastAccessTime = -1).withNewStorage(locationUri = None)
-
-    catalog.createTable(tableToCreate, ifNotExists)
     Seq.empty[Row]
   }
 }
@@ -436,11 +479,12 @@ case class DescribeTableCommand(table: TableIdentifier, isExtended: Boolean, isF
 
   private def describePartitionInfo(table: CatalogTable, buffer: ArrayBuffer[Row]): Unit = {
     if (DDLUtils.isDatasourceTable(table)) {
-      val partCols = DDLUtils.getPartitionColumnsFromTableProperties(table)
-      if (partCols.nonEmpty) {
+      val userSpecifiedSchema = DDLUtils.getSchemaFromTableProperties(table)
+      val partColNames = DDLUtils.getPartitionColumnsFromTableProperties(table)
+      for (schema <- userSpecifiedSchema if partColNames.nonEmpty) {
         append(buffer, "# Partition Information", "", "")
-        append(buffer, s"# ${output.head.name}", "", "")
-        partCols.foreach(col => append(buffer, col, "", ""))
+        append(buffer, s"# ${output.head.name}", output(1).name, output(2).name)
+        describeSchema(StructType(partColNames.map(schema(_))), buffer)
       }
     } else {
       if (table.partitionColumns.nonEmpty) {
@@ -527,7 +571,7 @@ case class DescribeTableCommand(table: TableIdentifier, isExtended: Boolean, isF
   private def describeSchema(schema: StructType, buffer: ArrayBuffer[Row]): Unit = {
     schema.foreach { column =>
       val comment =
-        if (column.metadata.contains("comment")) column.metadata.getString("comment") else ""
+        if (column.metadata.contains("comment")) column.metadata.getString("comment") else null
       append(buffer, column.name, column.dataType.simpleString, comment)
     }
   }
@@ -678,12 +722,11 @@ case class ShowPartitionsCommand(
      * Validate and throws an [[AnalysisException]] exception under the following conditions:
      * 1. If the table is not partitioned.
      * 2. If it is a datasource table.
-     * 3. If it is a view or index table.
+     * 3. If it is a view.
      */
-    if (tab.tableType == VIEW ||
-      tab.tableType == INDEX) {
+    if (tab.tableType == VIEW) {
       throw new AnalysisException(
-        s"SHOW PARTITIONS is not allowed on a view or index table: ${tab.qualifiedName}")
+        s"SHOW PARTITIONS is not allowed on a view: ${tab.qualifiedName}")
     }
 
     if (!DDLUtils.isTablePartitioned(tab)) {
@@ -765,7 +808,6 @@ case class ShowCreateTableCommand(table: TableIdentifier) extends RunnableComman
       case EXTERNAL => " EXTERNAL TABLE"
       case VIEW => " VIEW"
       case MANAGED => " TABLE"
-      case INDEX => reportUnsupportedError(Seq("index table"))
     }
 
     builder ++= s"CREATE$tableTypeString ${table.quotedString}"
