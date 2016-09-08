@@ -60,6 +60,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
   // Stages:
   val pendingStages = new HashMap[Int, StageInfo]
   val activeStages = new HashMap[Int, StageInfo]
+  val activePendingStages = new HashMap[Int, StageInfo]
   val completedStages = ListBuffer[StageInfo]()
   val skippedStages = ListBuffer[StageInfo]()
   val failedStages = ListBuffer[StageInfo]()
@@ -79,7 +80,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
   var stageIdToExecId = new HashMap[Long, Set[String]].withDefaultValue(Set())
   var executorIdToInfo = new HashMap[String, ExecutorInfo]
   var executorNeededIndexAvaiable = List[Int]()
-
+  var executorNeededPendingStages = new HashMap[Int, Int]
   var deadlineApp: Long = 0
 
 
@@ -240,7 +241,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
           }
           if (numRecord != 0) {
             stageIdToCore(stage.stageId) = controller.computeCoreStage(deadlineStage,
-                                                                        numRecord)
+              numRecord)
           }
         } else {
           stageIdToCore(stage.stageId) = controller.computeCoreStage(deadlineStage, numRecord)
@@ -285,7 +286,10 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     } else if (activeStages.nonEmpty) {
       logError("NOT ENOUGH RESOURSE TO DO PARALLEL STAGES NEED " +
         (executorNeeded - executorAvailable.size).toString + "EXEC")
+      logInfo("Waiting for executor available...")
     }
+    activePendingStages(stage.stageId) = stage
+    executorNeededPendingStages(stage.stageId) = executorNeeded
   }
 
   override def onTaskStart(taskStart: SparkListenerTaskStart): Unit = synchronized {
@@ -489,11 +493,14 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     executorAvailable += executorAdded.executorId
     executorIdToInfo(executorAdded.executorId) = executorAdded.executorInfo
     logInfo("EXECUTOR AVAILABLE: " + executorAvailable.toString)
-    if (executorAvailable.size >= executorNeeded) {
-      executorNeededIndexAvaiable = (0 until executorNeeded).toList
-      // LAUNCH BIND
-      for (exec <- executorAvailable.toList.take(executorNeeded)) {
-        onExecutorAssigned(SparkListenerExecutorAssigned(exec, activeStages.head._2.stageId))
+    for (stage <- activePendingStages) {
+      val stageExecNeeded = executorNeededPendingStages(stage._2.stageId)
+      if (executorAvailable.size >= stageExecNeeded) {
+        executorNeededIndexAvaiable = (0 until stageExecNeeded).toList
+        // LAUNCH BIND
+        for (exec <- executorAvailable.toList.take(stageExecNeeded)) {
+          onExecutorAssigned(SparkListenerExecutorAssigned(exec, stage._2.stageId))
+        }
       }
     }
   }
