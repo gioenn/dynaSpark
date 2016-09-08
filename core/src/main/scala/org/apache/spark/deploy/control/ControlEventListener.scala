@@ -301,7 +301,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       for (exec <- executorAvailable.toList.take(executorNeeded)) {
         onExecutorAssigned(SparkListenerExecutorAssigned(exec, stage.stageId))
       }
-    } else if (activeStages.nonEmpty) {
+    } else {
       logError("NOT ENOUGH RESOURSE TO DO PARALLEL STAGES NEED " +
         (executorNeeded - executorAvailable.size).toString + "EXEC")
       logInfo("Waiting for executor available...")
