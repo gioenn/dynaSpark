@@ -55,8 +55,13 @@ class ControllerExecutor
   def start(): Unit = {
     def timerTask() = {
       if (SP < 1) SP += Ts / deadline.toDouble
-      val nextCore: Int = nextAllocation()
-
+      var nextCore: Int = coreMin
+      if (SP >= 1) {
+        SP = 1
+        nextCore = coreMax
+      } else {
+        nextCore = nextAllocation()
+      }
       logInfo("SP Updated: " + (SP - (SP % 0.01)).toString)
       logInfo("Real: " + (completedTasks / tasks).toString)
       logInfo("CoreToAllocate: " + nextCore.toString)
