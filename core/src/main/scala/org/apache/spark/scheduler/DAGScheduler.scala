@@ -1095,7 +1095,7 @@ class DAGScheduler(
         listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties,
           stageIdToWeight(stage.id),
           List(),
-          0,
+          0.0,
           true))
       }
     } else {
