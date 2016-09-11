@@ -72,7 +72,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
   val stageIdToCore = new HashMap[Int, Int]
 
   var firstStageId: Int = -1
-  var stageIdToComputeNominalRecord: Int = -1
+  var stageIdsToComputeNominalRecord = scala.collection.mutable.Set[Int]()
 
   // Executor
   var executorAvailable = Set[String]()
@@ -172,8 +172,9 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       stageData.accumulables(id) = info
     }
 
-    if (stage.stageId == stageIdToComputeNominalRecord) {
+    if (stageIdsToComputeNominalRecord.contains(stage.stageId)) {
       controller.computeNominalRecord(stage)
+      stageIdsToComputeNominalRecord.remove(stage.stageId)
     }
 
     activeStages.remove(stage.stageId)
@@ -265,7 +266,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
         }
       } else {
         stageIdToCore(stage.stageId) = controller.computeCoreFirstStage(stage)
-        stageIdToComputeNominalRecord = stage.stageId
+        stageIdsToComputeNominalRecord.add(stage.stageId)
       }
       // ASK MASTER NEEDED EXECUTORS
       controller.askMasterNeededExecutors(
@@ -543,7 +544,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     jobIdToController(jobId.head) = controller
     val index = executorNeededIndexAvaiable.last
     executorNeededIndexAvaiable = executorNeededIndexAvaiable.dropRight(1)
-    if (stageId != firstStageId && stageId != stageIdToComputeNominalRecord) {
+    if (stageId != firstStageId && !stageIdsToComputeNominalRecord.contains(stageId)) {
       val coreForExecutors = controller.computeCoreForExecutors(stageIdToCore(stageId))
       logInfo(coreForExecutors.toString())
       val coreToStart = coreForExecutors(index)
