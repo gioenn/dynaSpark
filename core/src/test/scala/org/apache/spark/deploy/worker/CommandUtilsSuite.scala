@@ -30,7 +30,7 @@ class CommandUtilsSuite extends SparkFunSuite with Matchers with PrivateMethodTe
     val sparkHome = sys.props.getOrElse("spark.test.home", fail("spark.test.home is not set!"))
     val cmd = new Command("mainClass", Seq(), Map(), Seq(), Seq("libraryPathToB"), Seq())
     val builder = CommandUtils.buildProcessBuilder(
-      cmd, new SecurityManager(new SparkConf), 512, sparkHome, t => t)
+      cmd, new SecurityManager(new SparkConf), 512, "0,1", sparkHome, t => t)
     val libraryPath = Utils.libraryPathEnvName
     val env = builder.environment
     env.keySet should contain(libraryPath)

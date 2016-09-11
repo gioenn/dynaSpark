@@ -33,7 +33,7 @@ class DriverRunnerTest extends SparkFunSuite {
     val command = new Command("mainClass", Seq(), Map(), Seq(), Seq(), Seq())
     val driverDescription = new DriverDescription("jarUrl", 512, 1, true, command)
     val conf = new SparkConf()
-    new DriverRunner(conf, "driverId", new File("workDir"), new File("sparkHome"),
+    new DriverRunner(conf, "driverId", new File("workDir"), 1, new File("sparkHome"),
       driverDescription, null, "spark://1.2.3.4/worker/", new SecurityManager(conf))
   }
 
