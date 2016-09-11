@@ -29,7 +29,6 @@ import scala.concurrent.duration.Deadline
 
 class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Logging {
 
-  val ALPHA: Double = conf.get("spark.control.alpha").toDouble // 0.8
   var NOMINAL_RATE_RECORD_S: Double = conf.get("spark.control.nominalrate").toDouble // 1000.0
   val OVERSCALE: Int = conf.get("spark.control.overscale").toInt // 2
 
@@ -55,8 +54,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
   }
 
   def computeDeadlineStage(stage: StageInfo, weight: Long): Long = {
-    val deadline = (ALPHA * (deadlineJobMillisecond - stage.submissionTime.get)
-      / (weight + 1)).toLong
+    val deadline = (deadlineJobMillisecond - stage.submissionTime.get) / (weight + 1)
     if (deadline < 0) {
       logError("DEADLINE NEGATIVE -> DEADLINE NOT SATISFIED")
     }
@@ -80,8 +78,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
   }
 
   def computeDeadlineFirstStage(stage: StageInfo, weight: Long): Long = {
-    val deadline = (ALPHA * (deadlineJobMillisecond - stage.submissionTime.get)
-      / (weight + 1)).toLong
+    val deadline = (deadlineJobMillisecond - stage.submissionTime.get) / (weight + 1)
     if (deadline < 0) {
       logError("DEADLINE NEGATIVE -> DEADLINE NOT SATISFIED")
     }

@@ -41,7 +41,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
   @volatile var startTime = -1L
   @volatile var endTime = -1L
 
-
+  val ALPHA: Double = conf.get("spark.control.alpha").toDouble // 0.8
   val DEADLINE: Int = conf.get("spark.control.deadline").toInt
   // 1000000
   var executorNeeded: Int = conf.get("spark.control.maxexecutor").toInt
@@ -224,7 +224,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     if (stageSubmitted.genstage) {
       logInfo("FIRST STAGE FIRST JOB GENERATES/LOADS DATA")
       firstStageId = stage.stageId
-      val controller = new ControllerJob(conf, System.currentTimeMillis() + DEADLINE)
+      val controller = new ControllerJob(conf, System.currentTimeMillis() + (ALPHA * DEADLINE).toLong)
       stageIdToDeadline(stage.stageId) = controller.computeDeadlineFirstStage(stage, stageWeight)
       if (completedStages.nonEmpty) {
         stageIdToCore(stage.stageId) = controller.computeCoreFirstStage(completedStages.toList.head)
@@ -235,7 +235,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       logInfo(jobIdToController.toString())
 
     } else {
-      if (deadlineApp == 0) deadlineApp = System.currentTimeMillis() + DEADLINE
+      if (deadlineApp == 0) deadlineApp = System.currentTimeMillis() + (ALPHA * DEADLINE).toLong
       val controller = jobIdToController.getOrElse(jobId.head,
         new ControllerJob(conf, deadlineApp))
       jobIdToController(jobId.head) = controller
