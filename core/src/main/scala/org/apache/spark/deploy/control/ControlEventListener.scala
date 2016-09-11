@@ -235,7 +235,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       logInfo(jobIdToController.toString())
 
     } else {
-      deadlineApp = System.currentTimeMillis() + DEADLINE
+      if (deadlineApp == 0) deadlineApp = System.currentTimeMillis() + DEADLINE
       val controller = jobIdToController.getOrElse(jobId.head,
         new ControllerJob(conf, deadlineApp))
       jobIdToController(jobId.head) = controller
