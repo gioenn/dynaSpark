@@ -55,7 +55,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
   }
 
   def computeDeadlineStage(stage: StageInfo, weight: Long): Long = {
-    val deadline = (ALPHA * (deadlineJobMillisecond - stage.submissionTime.get)
+    val deadline = (((ALPHA * deadlineJobMillisecond) - stage.submissionTime.get)
       / (weight + 1)).toLong
     if (deadline < 0) {
       logError("DEADLINE NEGATIVE -> DEADLINE NOT SATISFIED")
@@ -80,7 +80,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
   }
 
   def computeDeadlineFirstStage(stage: StageInfo, weight: Long): Long = {
-    val deadline = (ALPHA * (deadlineJobMillisecond - stage.submissionTime.get)
+    val deadline = (((ALPHA * deadlineJobMillisecond) - stage.submissionTime.get)
       / (weight + 1)).toLong
     if (deadline < 0) {
       logError("DEADLINE NEGATIVE -> DEADLINE NOT SATISFIED")
