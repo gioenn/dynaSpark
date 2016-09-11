@@ -241,6 +241,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       jobIdToController(jobId.head) = controller
       val deadlineStage = controller.computeDeadlineStage(stage, stageWeight)
       stageIdToDeadline(stage.stageId) = deadlineStage
+      logInfo("NOMINAL RATE PASSED = " + stageSubmitted.nominalrate.toString)
       if (stageSubmitted.nominalrate > 0.0) {
         // FIND RECORD IN INPUT
         logInfo("PARENTS IDS: " + stageSubmitted.parentsIds.toString)
