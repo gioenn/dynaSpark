@@ -54,10 +54,10 @@ class ControllerExecutor
 
   def start(): Unit = {
     def timerTask() = {
-      if (SP < 1) SP += Ts / deadline.toDouble
+      if (SP < 1.0) SP += Ts / deadline.toDouble
       var nextCore: Int = coreMin
-      if (SP >= 1) {
-        SP = 1
+      if (SP >= 1.0) {
+        SP = 1.0
         nextCore = coreMax
       } else {
         nextCore = nextAllocation()
