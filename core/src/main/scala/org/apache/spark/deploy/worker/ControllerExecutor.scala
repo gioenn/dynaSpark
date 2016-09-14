@@ -29,15 +29,12 @@ class ControllerExecutor
 (conf: SparkConf, executorId: String, deadline: Long,
  coreMin: Int, coreMax: Int, _tasks: Int, core: Int) extends Logging {
 
-  val K: Int = conf.get("spark.control.k").toInt
-  // 50
+  val K: Double = conf.get("spark.control.k").toDouble
   val Ts: Long = conf.get("spark.control.tsample").toLong
-  // Sampling Time Ms 2000
-  val Ti: Long = conf.get("spark.control.ti").toLong
-  // 10000
+  val Ti: Double = conf.get("spark.control.ti").toDouble
   val CQ: Double = conf.get("spark.control.corequantum").toDouble
-  // Cores Quantum 0.5
-  val tasks: Int = _tasks
+
+  val tasks: Double = _tasks.toDouble
   var worker: Worker = _
 
   var csiOld: Double = core.toDouble
@@ -54,7 +51,7 @@ class ControllerExecutor
 
   def start(): Unit = {
     def timerTask() = {
-      if (SP < 1.0) SP += Ts / deadline.toDouble
+      if (SP < 1.0) SP += Ts.toDouble / deadline.toDouble
       var nextCore: Int = coreMin
       if (SP >= 1.0) {
         SP = 1.0
@@ -85,8 +82,8 @@ class ControllerExecutor
       cs = coreMin
     }
     else {
-      val csi = csiOld + K * (Ts / Ti) * (SP - (completedTasks / tasks))
-      cs = math.min(coreMax, math.max(coreMin, math.ceil(csp + csi)))
+      val csi = csiOld + K * (Ts.toDouble / Ti) * (SP - (completedTasks / tasks))
+      cs = math.min(coreMax.toDouble, math.max(coreMin.toDouble, csp + csi))
     }
     cs = math.ceil(cs / CQ) * CQ
     csiOld = cs - csp
