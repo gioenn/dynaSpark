@@ -17,6 +17,7 @@
 
 package org.apache.spark.deploy.control
 
+import org.apache.spark.deploy.DeployMessages.KillExecutors
 import org.apache.spark.deploy.master.Master
 import org.apache.spark.{SecurityManager, SparkConf}
 import org.apache.spark.rpc.{RpcAddress, RpcEnv, ThreadSafeRpcEndpoint}
@@ -61,9 +62,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
     deadline
   }
 
-  def computeNominalRecord(stage: StageInfo): Unit = {
-    val recordsRead = stage.taskMetrics.inputMetrics.recordsRead +
-      stage.taskMetrics.shuffleReadMetrics.recordsRead
+  def computeNominalRecord(stage: StageInfo, recordsRead: Double): Unit = {
     val duration = (stage.completionTime.get - stage.submissionTime.get) / 1000.0
     NOMINAL_RATE_RECORD_S = recordsRead / (duration * totalCore)
     logInfo("NOMINAL RECORD/S STAGE ID " + stage.stageId + " : " + NOMINAL_RATE_RECORD_S)
@@ -144,11 +143,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
       logError("NUM EXECUTORS TOO HIGH: %d > NUM MAX EXECUTORS %d".format(
         numExecutor, numMaxExecutor
       ))
-      numExecutor = numMaxExecutor
-      val coreForExecutors = (1 to numExecutor).map {
-        i => coreForVM
-      }
-      coreForExecutors
+      -1
     } else {
       val coresPerExecutor = (1 to numExecutor).map {
         i => if (coresToBeAllocated % numExecutor >= i) {
@@ -198,6 +193,12 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
     logInfo("SEND NEEDED CORE TO MASTER %s, %s, %s, %s".format
     (masterUrl, stageId, computeCoreForExecutors(coreNeeded), appname))
 
+  }
+
+  def killExecutors(masterUrl: String, appid: String, executorIds: Seq[String]): Unit = {
+    val masterRef = rpcEnv.setupEndpointRef(
+      RpcAddress.fromSparkURL(masterUrl), Master.ENDPOINT_NAME)
+    masterRef.send(KillExecutors(appid, executorIds))
   }
 
   class ControllerJob(

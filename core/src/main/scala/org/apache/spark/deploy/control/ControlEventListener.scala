@@ -173,7 +173,11 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     }
 
     if (stageIdsToComputeNominalRecord.contains(stage.stageId)) {
-      controller.computeNominalRecord(stage)
+      val recordsRead = stage.parentIds.foldLeft(0L) {
+        (agg, x) =>
+          agg + stageIdToData(x, 0).outputRecords + stageIdToData(x, 0).shuffleWriteRecords
+      }
+      controller.computeNominalRecord(stage, recordsRead)
       stageIdsToComputeNominalRecord.remove(stage.stageId)
     }
 
@@ -273,6 +277,10 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       controller.askMasterNeededExecutors(
         master, firstStageId, stageIdToCore(stage.stageId), appid)
       executorNeeded = controller.computeCoreForExecutors(stageIdToCore(stage.stageId)).size
+      if (executorNeeded == -1) {
+        controller.killExecutors(master, appid, executorAvailable.toSeq)
+      }
+
     }
 
     logInfo("DEADLINE STAGES: " + stageIdToDeadline.toString)
