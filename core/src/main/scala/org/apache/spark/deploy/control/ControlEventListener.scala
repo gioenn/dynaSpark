@@ -277,7 +277,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       controller.askMasterNeededExecutors(
         master, firstStageId, stageIdToCore(stage.stageId), appid)
       executorNeeded = controller.computeCoreForExecutors(stageIdToCore(stage.stageId)).size
-      if (executorNeeded == -1) {
+      if (controller.computeCoreForExecutors(stageIdToCore(stage.stageId)).contains(-1)) {
         controller.killExecutors(master, appid, executorAvailable.toSeq)
       }
 

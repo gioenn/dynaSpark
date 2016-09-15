@@ -143,7 +143,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
       logError("NUM EXECUTORS TOO HIGH: %d > NUM MAX EXECUTORS %d".format(
         numExecutor, numMaxExecutor
       ))
-      -1
+      IndexedSeq(-1)
     } else {
       val coresPerExecutor = (1 to numExecutor).map {
         i => if (coresToBeAllocated % numExecutor >= i) {
