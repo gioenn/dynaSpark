@@ -173,9 +173,26 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     }
 
     if (stageIdsToComputeNominalRecord.contains(stage.stageId)) {
-      val recordsRead = stage.parentIds.foldLeft(0L) {
+      stage.parentIds.foreach { id =>
+        logInfo("STAGE ID: " + id + " INPUT RECORDS: " + stageIdToData(id, 0).inputRecords +
+          " SHUFFLE READ RECORDS: " + stageIdToData(id, 0).shuffleReadRecords +
+          " OUTPUT RECORDS: " + stageIdToData(id, 0).outputRecords +
+          " SHUFFLE WRITE RECORDS: " + stageIdToData(id, 0).shuffleWriteRecords)
+      }
+      logInfo("STAGE ID: " + stage.stageId + " INPUT RECORDS: " +
+        stageIdToData(stage.stageId, 0).inputRecords +
+        " SHUFFLE READ RECORDS: " + stageIdToData(stage.stageId, 0).shuffleReadRecords +
+        " OUTPUT RECORDS: " + stageIdToData(stage.stageId, 0).outputRecords +
+        " SHUFFLE WRITE RECORDS: " + stageIdToData(stage.stageId, 0).shuffleWriteRecords)
+      var recordsRead = stage.parentIds.foldLeft(0L) {
         (agg, x) =>
           agg + stageIdToData(x, 0).outputRecords + stageIdToData(x, 0).shuffleWriteRecords
+      }
+      if (recordsRead == 0) {
+        recordsRead = stage.parentIds.foldLeft(0L) {
+          (agg, x) =>
+            agg + stageIdToData(x, 0).inputRecords + stageIdToData(x, 0).shuffleReadRecords
+        }
       }
       controller.computeNominalRecord(stage, recordsRead)
       stageIdsToComputeNominalRecord.remove(stage.stageId)
