@@ -59,7 +59,7 @@ class ControllerExecutor
       } else {
         nextCore = nextAllocation()
       }
-      logInfo("SP Updated: " + (SP - (SP % 0.01)).toString)
+      logInfo("SP Updated: " + SP.toString)
       logInfo("Real: " + (completedTasks / tasks).toString)
       logInfo("CoreToAllocate: " + nextCore.toString)
 
