@@ -69,7 +69,7 @@ class ControllerExecutor
       }
 
     }
-    timer.schedule(function2TimerTask(timerTask), Ts, Ts)
+    timer.scheduleAtFixedRate(function2TimerTask(timerTask), Ts, Ts)
   }
 
   def stop(): Unit = {
