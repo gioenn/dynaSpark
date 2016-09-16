@@ -62,9 +62,9 @@ object CommandUtils extends Logging {
     // SPARK-698: do not call the run.cmd script, as process.destroy()
     // fails to kill a process tree on Windows
     val cmd = new WorkerCommandBuilder(sparkHome, memory, command).buildCommand()
-    val app_id = command.arguments(command.arguments.indexOf("--app-id")+1)
-    val executor_id = command.arguments(command.arguments.indexOf("--executor-id")+1)
-    val docker_cmd = Seq("docker", "run", "-P", "--net=host")
+    val app_id = command.arguments(command.arguments.indexOf("--app-id") + 1)
+    val executor_id = command.arguments(command.arguments.indexOf("--executor-id") + 1)
+    val docker_cmd = Seq("docker", "run", "-P", "--net=host", "-v", "/tmp:/tmp")
     val docker_resource = Seq("-m", s"${memory}m", s"--cpuset-cpus=${cpuset}")
     val docker_name = Seq("--name=" + app_id + "." + executor_id)
     val docker_image_name = Seq("elfolink/spark:2.0")
