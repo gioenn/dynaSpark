@@ -194,6 +194,14 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
             agg + stageIdToData(x, 0).inputRecords + stageIdToData(x, 0).shuffleReadRecords
         }
       }
+      else if (recordsRead == 0) {
+        recordsRead = stageIdToData(stage.stageId, 0).inputRecords +
+          stageIdToData(stage.stageId, 0).shuffleReadRecords
+        if (recordsRead == 0) {
+          recordsRead = stageIdToData(stage.stageId, 0).outputRecords +
+            stageIdToData(stage.stageId, 0).shuffleWriteRecords
+        }
+      }
       controller.computeNominalRecord(stage, recordsRead)
       stageIdsToComputeNominalRecord.remove(stage.stageId)
     }
@@ -263,6 +271,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       val deadlineStage = controller.computeDeadlineStage(stage, stageWeight)
       stageIdToDeadline(stage.stageId) = deadlineStage
       logInfo("NOMINAL RATE PASSED = " + stageSubmitted.nominalrate.toString)
+      controller.NOMINAL_RATE_RECORD_S = stageSubmitted.nominalrate
       if (stageSubmitted.nominalrate > 0.0) {
         // FIND RECORD IN INPUT
         logInfo("PARENTS IDS: " + stageSubmitted.parentsIds.toString)
@@ -276,7 +285,6 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
               agg + stageIdToData(x, 0).inputRecords + stageIdToData(x, 0).shuffleReadRecords
           }
           if (numRecord != 0) {
-            controller.NOMINAL_RATE_RECORD_S = stageSubmitted.nominalrate
             stageIdToCore(stage.stageId) = controller.computeCoreStage(deadlineStage,
               numRecord)
           } else {
@@ -284,7 +292,6 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
             stageIdToCore(stage.stageId) = controller.computeCoreFirstStage(stage)
           }
         } else {
-          controller.NOMINAL_RATE_RECORD_S = stageSubmitted.nominalrate
           stageIdToCore(stage.stageId) = controller.computeCoreStage(deadlineStage, numRecord)
         }
       } else {
