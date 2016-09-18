@@ -276,6 +276,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
               agg + stageIdToData(x, 0).inputRecords + stageIdToData(x, 0).shuffleReadRecords
           }
           if (numRecord != 0) {
+            controller.NOMINAL_RATE_RECORD_S = stageSubmitted.nominalrate
             stageIdToCore(stage.stageId) = controller.computeCoreStage(deadlineStage,
               numRecord)
           } else {
