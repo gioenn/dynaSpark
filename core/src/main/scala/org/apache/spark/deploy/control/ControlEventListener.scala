@@ -194,13 +194,11 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
             agg + stageIdToData(x, 0).inputRecords + stageIdToData(x, 0).shuffleReadRecords
         }
       }
-      else if (recordsRead == 0) {
-        recordsRead = stageIdToData(stage.stageId, 0).inputRecords +
-          stageIdToData(stage.stageId, 0).shuffleReadRecords
-        if (recordsRead == 0) {
-          recordsRead = stageIdToData(stage.stageId, 0).outputRecords +
-            stageIdToData(stage.stageId, 0).shuffleWriteRecords
-        }
+      if (recordsRead == 0) {
+        recordsRead = stageData.inputRecords + stageData.shuffleReadRecords
+      }
+      if (recordsRead == 0) {
+        recordsRead = stageData.outputRecords + stageData.shuffleWriteRecords
       }
       controller.computeNominalRecord(stage, recordsRead)
       stageIdsToComputeNominalRecord.remove(stage.stageId)
