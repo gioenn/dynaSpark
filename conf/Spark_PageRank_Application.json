@@ -7,13 +7,13 @@
     },
     "1": {
         "genstage": false,
-        "nominalrate": 0.0,
+        "nominalrate": 5.283290010355248,
         "parentsIds": [],
         "weight": 4
     },
     "2": {
         "genstage": false,
-        "nominalrate": 0.0,
+        "nominalrate": 3.0412515358320254,
         "parentsIds": [],
         "weight": 4
     },
@@ -37,7 +37,7 @@
     },
     "5": {
         "genstage": false,
-        "nominalrate": 280.08755425092411,
+        "nominalrate": 2938.5145221387684,
         "parentsIds": [
             3,
             4
@@ -56,7 +56,7 @@
     },
     "7": {
         "genstage": false,
-        "nominalrate": 195.47539616346955,
+        "nominalrate": 6658.32157029856,
         "parentsIds": [
             6,
             3,
@@ -84,7 +84,7 @@
     },
     "13": {
         "genstage": false,
-        "nominalrate": 0.0,
+        "nominalrate": 4.4959985612804604,
         "parentsIds": [
             12,
             9,
