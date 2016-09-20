@@ -1,0 +1,95 @@
+{
+    "0": {
+        "genstage": true,
+        "nominalrate": 0.0,
+        "parentsIds": [],
+        "weight": 0
+    },
+    "1": {
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [],
+        "weight": 4
+    },
+    "2": {
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [],
+        "weight": 4
+    },
+    "3": {
+        "genstage": false,
+        "nominalrate": 951903.1555724484,
+        "parentsIds": [
+            1,
+            2
+        ],
+        "weight": 3
+    },
+    "4": {
+        "genstage": false,
+        "nominalrate": 577308.8092326812,
+        "parentsIds": [
+            1,
+            2
+        ],
+        "weight": 3
+    },
+    "5": {
+        "genstage": false,
+        "nominalrate": 280.08755425092411,
+        "parentsIds": [
+            3,
+            4
+        ],
+        "weight": 2
+    },
+    "6": {
+        "genstage": false,
+        "nominalrate": 1768409.3203905136,
+        "parentsIds": [
+            1,
+            5,
+            2
+        ],
+        "weight": 1
+    },
+    "7": {
+        "genstage": false,
+        "nominalrate": 195.47539616346955,
+        "parentsIds": [
+            6,
+            3,
+            4
+        ],
+        "weight": 0
+    },
+    "8": {
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [],
+        "weight": 1
+    },
+    "9": {
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [],
+        "weight": 1
+    },
+    "12": {
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [],
+        "weight": 1
+    },
+    "13": {
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            12,
+            9,
+            8
+        ],
+        "weight": 0
+    }
+}

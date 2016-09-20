@@ -1,0 +1,14 @@
+{
+   "0":{
+      "weight":1,
+      "parentsIds":[],
+      "nominalrate":0.0,
+      "genstage":true
+   },
+   "1":{
+      "weight":0,
+      "parentsIds":[],
+      "nominalrate":3872366.7905824035,
+      "genstage":false
+   }
+}
