@@ -1087,7 +1087,7 @@ class DAGScheduler(
         listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties,
           stageJson.asJsObject.fields("weight").convertTo[Long],
           stageJson.asJsObject.fields("parentsIds").convertTo[List[Int]],
-          stageJson.asJsObject.fields("nominalrate").convertTo[Long],
+          stageJson.asJsObject.fields("nominalrate").convertTo[Double],
           stageJson.asJsObject.fields("genstage").convertTo[Boolean]))
       }
       else {
