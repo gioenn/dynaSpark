@@ -19,7 +19,7 @@
     },
     "3": {
         "genstage": false,
-        "nominalrate": 951903.1555724484,
+        "nominalrate": 475951.5777862242,
         "parentsIds": [
             1,
             2
@@ -46,7 +46,7 @@
     },
     "6": {
         "genstage": false,
-        "nominalrate": 1768409.3203905136,
+        "nominalrate": 884204.6601952568,
         "parentsIds": [
             1,
             5,
