@@ -98,10 +98,14 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
   }
 
   def computeTaskForExecutors(coresToBeAllocated: Int, totalTasksStage: Int): IndexedSeq[Int] = {
-    numExecutor = math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
+    numExecutor = math.min(math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt * 2,
+      numMaxExecutor)
 
     if (numExecutor > numMaxExecutor) {
-      numExecutor = numMaxExecutor
+      logError("NUM EXECUTORS TOO HIGH: %d > NUM MAX EXECUTORS %d".format(
+        numExecutor, numMaxExecutor
+      ))
+      IndexedSeq(-1)
     }
 
     val coresPerExecutor = (1 to numExecutor).map {
@@ -137,7 +141,8 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
   }
 
   def computeCoreForExecutors(coresToBeAllocated: Int): IndexedSeq[Int] = {
-    numExecutor = math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
+    numExecutor = math.min(math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt * 2,
+      numMaxExecutor)
     totalCore = coresToBeAllocated
     if (numExecutor > numMaxExecutor) {
       logError("NUM EXECUTORS TOO HIGH: %d > NUM MAX EXECUTORS %d".format(
