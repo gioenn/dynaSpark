@@ -1,9 +1,9 @@
 {
     "0": {
-        "genstage": true,
+        "genstage": false,
         "nominalrate": 0.0,
         "parentsIds": [],
-        "weight": 0
+        "weight": 5
     },
     "1": {
         "genstage": false,
