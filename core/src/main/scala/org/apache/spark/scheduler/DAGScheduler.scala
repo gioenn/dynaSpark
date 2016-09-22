@@ -1084,11 +1084,13 @@ class DAGScheduler(
       stage.latestInfo.submissionTime = Some(clock.getTimeMillis())
       if (appJson != null) {
         val stageJson = appJson.asJsObject.fields(stage.id.toString)
+        val stageJsonIds = appJson.asJsObject.fields.keys.toList
         listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties,
           stageJson.asJsObject.fields("weight").convertTo[Long],
           stageJson.asJsObject.fields("parentsIds").convertTo[List[Int]],
           stageJson.asJsObject.fields("nominalrate").convertTo[Double],
-          stageJson.asJsObject.fields("genstage").convertTo[Boolean]))
+          stageJson.asJsObject.fields("genstage").convertTo[Boolean],
+          stageJsonIds))
       }
       else {
         logError("NO JSON FOR APP: " + jsonFile)
@@ -1096,7 +1098,8 @@ class DAGScheduler(
           stageIdToWeight(stage.id),
           List(),
           0.0,
-          true))
+          true,
+          List()))
       }
     } else {
       // Because we posted SparkListenerStageSubmitted earlier, we should mark

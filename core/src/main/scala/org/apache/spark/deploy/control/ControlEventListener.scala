@@ -244,31 +244,11 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     }
   }
 
-  def checkParallelStages(stage: SparkStageWeightSubmitted): Long = {
-    val stageId = stage.stageInfo.stageId
-    // Check if already found parallel with other stages
-    if (!parallelStages.exists(_._2.contains(stageId))) {
-      // New stage: check if other pending stages can be submitted
-      pendingStages.foreach(x => if (x._1 >= stageId) {
-        if (!x._2.parentIds.exists(x => !completedStages.contains(stageIdToInfo(x)))) {
-          parallelStages(stageId).append(x._2.stageId)
-        }
-      })
-      stage.weight
-    } else {
-      val parallelStageIds = parallelStages.find(_._2.contains(stageId)).get._2
-      // Find all the completed/running/activepending parallel stages for change weight
-      stage.weight -
-        parallelStageIds.count(x => completedStages.contains(stageIdToInfo(x))) -
-        parallelStageIds.count(x => activeStages.contains(x)) -
-        parallelStageIds.count(x => activePendingStages.contains(x))
-    }
-  }
-
   override def onStageWeightSubmitted
   (stageSubmitted: SparkStageWeightSubmitted): Unit = synchronized {
     val stage = stageSubmitted.stageInfo
-    val stageWeight = checkParallelStages(stageSubmitted)
+    val stageWeight = stageSubmitted.stageIds.size - completedStages.size - activePendingStages.size
+    logInfo("STAGE ID " + stage.stageId +" WEIGHT: " + stageWeight)
     val jobId = stageIdToActiveJobIds(stage.stageId)
     logInfo("JobID of stageId " + stage.stageId.toString + " : " + jobId.toString())
     if (stageSubmitted.genstage) {
