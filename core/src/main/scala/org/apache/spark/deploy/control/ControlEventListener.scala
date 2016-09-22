@@ -257,10 +257,11 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       stage.weight
     } else {
       val parallelStageIds = parallelStages.find(_._2.contains(stageId)).get._2
-      // Find all the completed/running parallel stages for change weight
+      // Find all the completed/running/activepending parallel stages for change weight
       stage.weight -
-        parallelStageIds.count(x =>
-          completedStages.contains(stageIdToInfo(x))) - parallelStageIds.count(x => activeStages.contains(x))
+        parallelStageIds.count(x => completedStages.contains(stageIdToInfo(x))) -
+        parallelStageIds.count(x => activeStages.contains(x)) -
+        parallelStageIds.count(x => activePendingStages.contains(x))
     }
   }
 
