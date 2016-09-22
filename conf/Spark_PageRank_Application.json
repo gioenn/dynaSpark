@@ -3,19 +3,19 @@
         "genstage": false,
         "nominalrate": 0.0,
         "parentsIds": [],
-        "weight": 5
+        "weight": 8
     },
     "1": {
         "genstage": false,
         "nominalrate": 5.283290010355248,
         "parentsIds": [],
-        "weight": 4
+        "weight": 7
     },
     "2": {
         "genstage": false,
         "nominalrate": 3.0412515358320254,
         "parentsIds": [],
-        "weight": 4
+        "weight": 7
     },
     "3": {
         "genstage": false,
@@ -24,7 +24,7 @@
             1,
             2
         ],
-        "weight": 3
+        "weight": 5
     },
     "4": {
         "genstage": false,
@@ -33,7 +33,7 @@
             1,
             2
         ],
-        "weight": 3
+        "weight": 5
     },
     "5": {
         "genstage": false,
@@ -42,7 +42,7 @@
             3,
             4
         ],
-        "weight": 2
+        "weight": 3
     },
     "6": {
         "genstage": false,
@@ -52,7 +52,7 @@
             5,
             2
         ],
-        "weight": 1
+        "weight": 2
     },
     "7": {
         "genstage": false,
@@ -62,7 +62,7 @@
             3,
             4
         ],
-        "weight": 0
+        "weight": 1
     },
     "8": {
         "genstage": false,
@@ -90,6 +90,6 @@
             9,
             8
         ],
-        "weight": 0
+        "weight": 1
     }
 }
