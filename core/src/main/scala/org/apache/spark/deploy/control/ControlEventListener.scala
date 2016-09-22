@@ -197,7 +197,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       if (recordsRead == 0) {
         recordsRead = stageData.inputRecords + stageData.shuffleReadRecords
       }
-      if (recordsRead == 0) {
+      if (stageData.numCompleteTasks == recordsRead || recordsRead == 0) {
         recordsRead = stageData.outputRecords + stageData.shuffleWriteRecords
       }
       controller.computeNominalRecord(stage, recordsRead)
@@ -245,13 +245,14 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
   override def onStageWeightSubmitted
   (stageSubmitted: SparkStageWeightSubmitted): Unit = synchronized {
     val stage = stageSubmitted.stageInfo
-    val stageWeight = stageSubmitted.weight
+    val stageWeight = math.max(pendingStages.size, stageSubmitted.weight)
     val jobId = stageIdToActiveJobIds(stage.stageId)
     logInfo("JobID of stageId " + stage.stageId.toString + " : " + jobId.toString())
     if (stageSubmitted.genstage) {
       logInfo("FIRST STAGE FIRST JOB GENERATES/LOADS DATA")
       firstStageId = stage.stageId
-      val controller = new ControllerJob(conf, System.currentTimeMillis() + (ALPHA * DEADLINE).toLong)
+      val controller = new ControllerJob(conf,
+        System.currentTimeMillis() + (ALPHA * DEADLINE).toLong)
       stageIdToDeadline(stage.stageId) = controller.computeDeadlineFirstStage(stage, stageWeight)
       if (completedStages.nonEmpty) {
         stageIdToCore(stage.stageId) = controller.computeCoreFirstStage(completedStages.toList.head)
@@ -316,7 +317,8 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       pendingStages.remove(stage.stageId)
 
       stageIdToInfo(stage.stageId) = stage
-      val stageData = stageIdToData.getOrElseUpdate((stage.stageId, stage.attemptId), new StageUIData)
+      val stageData = stageIdToData.getOrElseUpdate((stage.stageId, stage.attemptId),
+        new StageUIData)
 
       stageData.description = Option(stageSubmitted.properties).flatMap {
         p => Option(p.getProperty(SparkContext.SPARK_JOB_DESCRIPTION))
