@@ -248,8 +248,11 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
   (stageSubmitted: SparkStageWeightSubmitted): Unit = synchronized {
     val stage = stageSubmitted.stageInfo
     val genstage = if (firstStageId != -1) 1 else 0
-    val stageWeight = stageSubmitted.stageIds.size - completedStages.size -
-      activePendingStages.size - activeStages.size - 1 + genstage
+    var stageWeight = 0
+    if (stageSubmitted.stageIds.nonEmpty) {
+      stageWeight = stageSubmitted.stageIds.size - completedStages.size -
+        activePendingStages.size - activeStages.size - 1 + genstage
+    }
     logInfo("STAGE ID " + stage.stageId +" WEIGHT: " + stageWeight)
     val jobId = stageIdToActiveJobIds(stage.stageId)
     logInfo("JobID of stageId " + stage.stageId.toString + " : " + jobId.toString())
