@@ -202,6 +202,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       if (stageData.numCompleteTasks == recordsRead || recordsRead == 0) {
         recordsRead = stageData.outputRecords + stageData.shuffleWriteRecords
       }
+      logInfo("RECORDS FOR COMPUTE NOMINAL RATE: " + recordsRead)
       controller.computeNominalRecord(stage, recordsRead)
       stageIdsToComputeNominalRecord.remove(stage.stageId)
     }
