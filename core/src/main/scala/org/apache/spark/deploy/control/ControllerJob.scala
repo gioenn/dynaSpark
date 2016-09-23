@@ -64,9 +64,9 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
     deadline
   }
 
-  def computeNominalRecord(stage: StageInfo, recordsRead: Double): Unit = {
-    val duration = (stage.completionTime.get - stage.submissionTime.get) / 1000.0
-    NOMINAL_RATE_RECORD_S = recordsRead / (duration * totalCore)
+  def computeNominalRecord(stage: StageInfo, duration: Long, recordsRead: Double): Unit = {
+    // val duration = (stage.completionTime.get - stage.submissionTime.get) / 1000.0
+    NOMINAL_RATE_RECORD_S = recordsRead / ((duration / 1000.0) * totalCore)
     logInfo("DURATION STAGE ID " + stage.stageId + " : " + duration)
     logInfo("NOMINAL RECORD/S STAGE ID " + stage.stageId + " : " + NOMINAL_RATE_RECORD_S)
     conf.set("spark.control.nominalrate", NOMINAL_RATE_RECORD_S.toString)
