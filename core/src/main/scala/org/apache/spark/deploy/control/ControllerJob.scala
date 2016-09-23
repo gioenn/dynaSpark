@@ -25,7 +25,7 @@ import org.apache.spark.scheduler.StageInfo
 import org.apache.spark.scheduler.cluster.CoarseGrainedClusterMessages._
 import org.apache.spark.{SecurityManager, SparkConf}
 
-import scala.collection.mutable.HashMap
+import scala.collection.mutable.{HashMap, ListBuffer}
 
 
 class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Logging {
@@ -147,7 +147,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
     taskPerExecutor
   }
 
-  def computeCoreForExecutors(coresToBeAllocated: Int): IndexedSeq[Int] = {
+  def computeCoreForExecutors(coresToBeAllocated: Int): List[Int] = {
     numExecutor = math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
     totalCore = coresToBeAllocated
     if (numExecutor > numMaxExecutor) {
@@ -162,12 +162,16 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
       if ((coresToBeAllocated / numExecutor) <= 1) {
         numExecutor = math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
       }
-      val coresPerExecutor = (1 to numExecutor).map {
-        i => if (coresToBeAllocated % numExecutor >= i) {
-          1 + (coresToBeAllocated / numExecutor / OVERSCALE)
-        } else coresToBeAllocated / numExecutor / OVERSCALE
+      var coresToStart = math.ceil(coresToBeAllocated.toDouble / OVERSCALE).toInt
+      var n = numExecutor
+      var coresPerExecutor = new ListBuffer[Int]()
+      while (coresToStart > 0 && n > 0) {
+        val a = math.floor(coresToStart / n).toInt
+        coresToStart -= a
+        n -= 1
+        coresPerExecutor += a
       }
-      coresPerExecutor
+      coresPerExecutor.toList
     }
   }
 
