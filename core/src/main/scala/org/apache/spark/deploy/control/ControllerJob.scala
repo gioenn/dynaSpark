@@ -111,7 +111,9 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
     numExecutor = math.min(math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
       * LOCALITY_FACTOR,
       numMaxExecutor)
-
+    if ((coresToBeAllocated / numExecutor) <= 1) {
+      numExecutor = math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
+    }
     val coresPerExecutor = (1 to numExecutor).map {
       i => if (coresToBeAllocated % numExecutor >= i) {
         1 + (coresToBeAllocated / numExecutor)
