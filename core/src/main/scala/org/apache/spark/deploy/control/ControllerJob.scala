@@ -149,6 +149,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
 
   def computeCoreForExecutors(coresToBeAllocated: Int): IndexedSeq[Int] = {
     numExecutor = math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
+    totalCore = coresToBeAllocated
     if (numExecutor > numMaxExecutor) {
       logError("NUM EXECUTORS TOO HIGH: %d > NUM MAX EXECUTORS %d".format(
         numExecutor, numMaxExecutor
