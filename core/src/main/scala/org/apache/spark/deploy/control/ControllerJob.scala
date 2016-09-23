@@ -17,27 +17,28 @@
 
 package org.apache.spark.deploy.control
 
-import org.apache.spark.deploy.DeployMessages.KillExecutors
+import org.apache.spark.deploy.DeployMessages.{KillDriver, KillExecutors}
 import org.apache.spark.deploy.master.Master
-import org.apache.spark.{SecurityManager, SparkConf}
+import org.apache.spark.internal.Logging
 import org.apache.spark.rpc.{RpcAddress, RpcEnv, ThreadSafeRpcEndpoint}
 import org.apache.spark.scheduler.StageInfo
 import org.apache.spark.scheduler.cluster.CoarseGrainedClusterMessages._
-import org.apache.spark.internal.Logging
+import org.apache.spark.{SecurityManager, SparkConf}
 
 import scala.collection.mutable.HashMap
-import scala.concurrent.duration.Deadline
+
 
 class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Logging {
 
-  var NOMINAL_RATE_RECORD_S: Double = conf.get("spark.control.nominalrate").toDouble // 1000.0
-  val OVERSCALE: Int = conf.get("spark.control.overscale").toInt // 2
+  var NOMINAL_RATE_RECORD_S: Double = conf.getDouble("spark.control.nominalrate", 1000.0)
+  val OVERSCALE: Int = conf.getInt("spark.control.overscale", 2)
+  val LOCALITY_FACTOR: Int = 2
 
-  val NOMINAL_RATE_DATA_S: Double = conf.get(
-    "spark.control.nominalratedata").toDouble  // 48000000.0
+  val NOMINAL_RATE_DATA_S: Double = conf.getDouble(
+    "spark.control.nominalratedata", 48000000.0)
 
-  val numMaxExecutor: Int = conf.get("spark.control.maxexecutor").toInt // 4
-  val coreForVM: Int = conf.get("spark.control.coreforvm").toInt  // 8
+  val numMaxExecutor: Int = conf.getInt("spark.control.maxexecutor", 4)
+  val coreForVM: Int = conf.getInt("spark.control.coreforvm", 8)
 
   var numExecutor = 0
   var totalCore = 0
@@ -91,7 +92,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
 
   def computeCoreStageFromSize(deadlineStage: Long, totalSize: Long): Int = {
     logInfo("TotalSize RDD First Stage: " + totalSize.toString)
-    if(deadlineStage > 0) {
+    if (deadlineStage > 0) {
       OVERSCALE * math.ceil(totalSize / (deadlineStage / 1000.0) / NOMINAL_RATE_DATA_S).toInt
     } else {
       numMaxExecutor * coreForVM
@@ -99,8 +100,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
   }
 
   def computeTaskForExecutors(coresToBeAllocated: Int, totalTasksStage: Int): IndexedSeq[Int] = {
-    numExecutor = math.min(math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt * 2,
-      numMaxExecutor)
+    numExecutor = math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
 
     if (numExecutor > numMaxExecutor) {
       logError("NUM EXECUTORS TOO HIGH: %d > NUM MAX EXECUTORS %d".format(
@@ -108,6 +108,9 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
       ))
       IndexedSeq(-1)
     }
+    numExecutor = math.min(math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
+      * LOCALITY_FACTOR,
+      numMaxExecutor)
 
     val coresPerExecutor = (1 to numExecutor).map {
       i => if (coresToBeAllocated % numExecutor >= i) {
@@ -142,15 +145,16 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
   }
 
   def computeCoreForExecutors(coresToBeAllocated: Int): IndexedSeq[Int] = {
-    numExecutor = math.min(math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt * 2,
-      numMaxExecutor)
-    totalCore = coresToBeAllocated
+    numExecutor = math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
     if (numExecutor > numMaxExecutor) {
       logError("NUM EXECUTORS TOO HIGH: %d > NUM MAX EXECUTORS %d".format(
         numExecutor, numMaxExecutor
       ))
       IndexedSeq(-1)
     } else {
+      numExecutor = math.min(math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
+        * LOCALITY_FACTOR,
+        numMaxExecutor)
       val coresPerExecutor = (1 to numExecutor).map {
         i => if (coresToBeAllocated % numExecutor >= i) {
           1 + (coresToBeAllocated / numExecutor / OVERSCALE)
@@ -201,9 +205,10 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
 
   }
 
-  def killExecutors(masterUrl: String, appid: String, executorIds: Seq[String]): Unit = {
+  def kill(masterUrl: String, appid: String, executorIds: Seq[String]): Unit = {
     val masterRef = rpcEnv.setupEndpointRef(
       RpcAddress.fromSparkURL(masterUrl), Master.ENDPOINT_NAME)
+    masterRef.send(KillDriver(appid))
     masterRef.send(KillExecutors(appid, executorIds))
   }
 
