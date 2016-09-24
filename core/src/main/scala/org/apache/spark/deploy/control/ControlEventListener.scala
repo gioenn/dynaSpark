@@ -70,6 +70,8 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
 
   val stageIdToDeadline = new HashMap[Int, Long]
   val stageIdToCore = new HashMap[Int, Int]
+  val stageIdToWeight = new HashMap[Int, Long]
+  val stageIdToNumRecords = new HashMap[Int, Long]
 
   var firstStageId: Int = -1
   var stageIdsToComputeNominalRecord = scala.collection.mutable.Set[Int]()
@@ -203,7 +205,8 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
         recordsRead = stageData.outputRecords + stageData.shuffleWriteRecords
       }
       logInfo("RECORDS FOR COMPUTE NOMINAL RATE: " + recordsRead)
-      controller.computeNominalRecord(stage, stageIdToData(stage.stageId, 0).executorRunTime, recordsRead)
+      controller.computeNominalRecord(stage, stageIdToData(stage.stageId, 0).executorRunTime,
+        recordsRead)
       stageIdsToComputeNominalRecord.remove(stage.stageId)
     }
 
@@ -234,7 +237,14 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     }
     activePendingStages.remove(stage.stageId)
     for (stage <- activePendingStages) {
-      val stageExecNeeded = executorNeededPendingStages(stage._2.stageId)
+      val stageId = stage._2.stageId
+      val controller = jobIdToController(stageIdToActiveJobIds(stageId).head)
+      val newDeadline = controller.computeDeadlineStage(stage._2,
+        stageIdToWeight(stageId), System.currentTimeMillis())
+      stageIdToDeadline(stageId) = newDeadline
+      val stageCoreNeeded = controller.computeCoreStage(newDeadline, stageIdToNumRecords(stageId))
+      stageIdToCore(stageId) = stageCoreNeeded
+      val stageExecNeeded = controller.computeCoreForExecutors(stageCoreNeeded).size
       if (executorAvailable.size >= stageExecNeeded) {
         executorNeededIndexAvaiable = (0 until stageExecNeeded).toList
         // LAUNCH BIND
@@ -255,6 +265,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
         activePendingStages.size - activeStages.size - 1 + genstage
     }
     if (stageWeight < 0) stageWeight = 0
+    stageIdToWeight(stage.stageId) = stageWeight
     logInfo("STAGE ID " + stage.stageId +" WEIGHT: " + stageWeight)
     val jobId = stageIdToActiveJobIds(stage.stageId)
     logInfo("JobID of stageId " + stage.stageId.toString + " : " + jobId.toString())
@@ -277,7 +288,11 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       val controller = jobIdToController.getOrElse(jobId.head,
         new ControllerJob(conf, deadlineApp))
       jobIdToController(jobId.head) = controller
-      val deadlineStage = controller.computeDeadlineStage(stage, stageWeight)
+      var start = stage.submissionTime.get
+//      if (activeStages.nonEmpty) {
+//        start = start + activeStages.map(x => stageIdToDeadline(x._1)).min
+//      }
+      val deadlineStage = controller.computeDeadlineStage(stage, stageWeight, start)
       stageIdToDeadline(stage.stageId) = deadlineStage
       logInfo("NOMINAL RATE PASSED = " + stageSubmitted.nominalrate.toString)
       controller.NOMINAL_RATE_RECORD_S = stageSubmitted.nominalrate
@@ -288,11 +303,13 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
           (agg, x) =>
             agg + stageIdToData(x, 0).outputRecords + stageIdToData(x, 0).shuffleWriteRecords
         }
+        stageIdToNumRecords(stage.stageId) = numRecord
         if (numRecord == 0) {
           val numRecord = stageSubmitted.parentsIds.foldLeft(0L) {
             (agg, x) =>
               agg + stageIdToData(x, 0).inputRecords + stageIdToData(x, 0).shuffleReadRecords
           }
+          stageIdToNumRecords(stage.stageId) = numRecord
           if (numRecord != 0) {
             stageIdToCore(stage.stageId) = controller.computeCoreStage(deadlineStage,
               numRecord)
@@ -562,7 +579,14 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     executorIdToInfo(executorAdded.executorId) = executorAdded.executorInfo
     logInfo("EXECUTOR AVAILABLE: " + executorAvailable.toString)
     for (stage <- activePendingStages) {
-      val stageExecNeeded = executorNeededPendingStages(stage._2.stageId)
+      val stageId = stage._2.stageId
+      val controller = jobIdToController(stageIdToActiveJobIds(stageId).head)
+      val newDeadline = controller.computeDeadlineStage(stage._2,
+        stageIdToWeight(stageId), System.currentTimeMillis())
+      stageIdToDeadline(stageId) = newDeadline
+      val stageCoreNeeded = controller.computeCoreStage(newDeadline, stageIdToNumRecords(stageId))
+      stageIdToCore(stageId) = stageCoreNeeded
+      val stageExecNeeded = controller.computeCoreForExecutors(stageCoreNeeded).size
       if (executorAvailable.size >= stageExecNeeded) {
         executorNeededIndexAvaiable = (0 until stageExecNeeded).toList
         // LAUNCH BIND
