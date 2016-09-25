@@ -584,9 +584,13 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       val newDeadline = controller.computeDeadlineStage(stage._2,
         stageIdToWeight(stageId), System.currentTimeMillis())
       stageIdToDeadline(stageId) = newDeadline
-      val stageCoreNeeded = controller.computeCoreStage(newDeadline, stageIdToNumRecords(stageId))
-      stageIdToCore(stageId) = stageCoreNeeded
-      val stageExecNeeded = controller.computeCoreForExecutors(stageCoreNeeded).size
+      val numRecord = stageIdToNumRecords.getOrElse(stageId, 0)
+      if (numRecord != 0) {
+        stageIdToCore(stageId) = controller.computeCoreStage(newDeadline, numRecord.asInstanceOf[Number].longValue)
+      } else {
+        stageIdToCore(stageId) = controller.computeCoreFirstStage(stage._2)
+      }
+      val stageExecNeeded = controller.computeCoreForExecutors(stageIdToCore(stageId)).size
       if (executorAvailable.size >= stageExecNeeded) {
         executorNeededIndexAvaiable = (0 until stageExecNeeded).toList
         // LAUNCH BIND
