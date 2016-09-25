@@ -1,95 +1,342 @@
 {
-    "0": {
-        "genstage": false,
-        "nominalrate": 88485.35391871526,
-        "parentsIds": [],
-        "weight": 8
-    },
-    "1": {
-        "genstage": false,
-        "nominalrate": 5.283290010355248,
-        "parentsIds": [],
-        "weight": 7
-    },
-    "2": {
-        "genstage": false,
-        "nominalrate": 3.0412515358320254,
-        "parentsIds": [],
-        "weight": 7
-    },
-    "3": {
-        "genstage": false,
-        "nominalrate": 475951.5777862242,
-        "parentsIds": [
-            1,
-            2
-        ],
-        "weight": 5
-    },
-    "4": {
-        "genstage": false,
-        "nominalrate": 577308.8092326812,
-        "parentsIds": [
-            1,
-            2
-        ],
-        "weight": 5
-    },
-    "5": {
-        "genstage": false,
-        "nominalrate": 3741.9127909804934,
-        "parentsIds": [
-            3,
-            4
-        ],
-        "weight": 3
-    },
-    "6": {
-        "genstage": false,
-        "nominalrate": 884204.6601952568,
-        "parentsIds": [
-            1,
-            5,
-            2
-        ],
-        "weight": 2
-    },
-    "7": {
-        "genstage": false,
-        "nominalrate": 6658.32157029856,
-        "parentsIds": [
-            6,
-            3,
-            4
-        ],
-        "weight": 1
-    },
-    "8": {
-        "genstage": false,
-        "nominalrate": 0.0,
-        "parentsIds": [],
-        "weight": 1
-    },
-    "9": {
-        "genstage": false,
-        "nominalrate": 0.0,
-        "parentsIds": [],
-        "weight": 1
-    },
-    "12": {
-        "genstage": false,
-        "nominalrate": 0.0,
-        "parentsIds": [],
-        "weight": 1
-    },
-    "13": {
-        "genstage": false,
-        "nominalrate": 4.4959985612804604,
-        "parentsIds": [
-            12,
-            9,
-            8
-        ],
-        "weight": 1
-    }
+  "0": {
+    "RDDIds": [
+      3,
+      2,
+      0,
+      1
+    ],
+    "cachedRDDs": [
+      3
+    ],
+    "genstage": false,
+    "nominalrate": 385510.5489852533,
+    "parentsIds": [],
+    "skipped": false,
+    "weight": 5
+  },
+  "1": {
+    "RDDIds": [
+      12,
+      2,
+      0,
+      3,
+      1
+    ],
+    "cachedRDDs": [
+      3
+    ],
+    "genstage": false,
+    "nominalrate": 232094.31797439308,
+    "parentsIds": [
+      0
+    ],
+    "skipped": false,
+    "weight": 4
+  },
+  "2": {
+    "RDDIds": [
+      6,
+      2,
+      0,
+      3,
+      1
+    ],
+    "cachedRDDs": [
+      3
+    ],
+    "genstage": false,
+    "nominalrate": 514556.4131397091,
+    "parentsIds": [
+      0
+    ],
+    "skipped": false,
+    "weight": 4
+  },
+  "3": {
+    "RDDIds": [
+      20,
+      14,
+      8,
+      9,
+      7,
+      16,
+      13
+    ],
+    "cachedRDDs": [
+      9,
+      16
+    ],
+    "genstage": false,
+    "nominalrate": 147896.93074987934,
+    "parentsIds": [
+      1,
+      2
+    ],
+    "skipped": false,
+    "weight": 3
+  },
+  "4": {
+    "RDDIds": [
+      30,
+      14,
+      8,
+      9,
+      7,
+      16,
+      13,
+      26
+    ],
+    "cachedRDDs": [
+      9,
+      16,
+      26
+    ],
+    "genstage": false,
+    "nominalrate": 662644.7175125049,
+    "parentsIds": [
+      1,
+      2
+    ],
+    "skipped": false,
+    "weight": 3
+  },
+  "5": {
+    "RDDIds": [
+      34,
+      32,
+      2,
+      0,
+      18,
+      28,
+      24,
+      22,
+      31,
+      3,
+      21,
+      1
+    ],
+    "cachedRDDs": [
+      18,
+      28,
+      3
+    ],
+    "genstage": false,
+    "nominalrate": 2951.4196328433977,
+    "parentsIds": [
+      3,
+      4
+    ],
+    "skipped": false,
+    "weight": 2
+  },
+  "6": {
+    "RDDIds": [
+      42,
+      40,
+      14,
+      8,
+      9,
+      7,
+      36,
+      35,
+      16,
+      38,
+      13,
+      26
+    ],
+    "cachedRDDs": [
+      9,
+      16,
+      38,
+      26
+    ],
+    "genstage": false,
+    "nominalrate": 307319.6071272452,
+    "parentsIds": [
+      1,
+      5,
+      2
+    ],
+    "skipped": false,
+    "weight": 1
+  },
+  "7": {
+    "RDDIds": [
+      45,
+      32,
+      2,
+      0,
+      18,
+      43,
+      28,
+      24,
+      22,
+      31,
+      3,
+      21,
+      44,
+      1
+    ],
+    "cachedRDDs": [
+      45,
+      18,
+      28,
+      3,
+      44
+    ],
+    "genstage": false,
+    "nominalrate": 5158.361704322707,
+    "parentsIds": [
+      6,
+      3,
+      4
+    ],
+    "skipped": false,
+    "weight": 0
+  },
+  "8": {
+    "RDDIds": [
+      12,
+      2,
+      0,
+      3,
+      1
+    ],
+    "cachedRDDs": [
+      3
+    ],
+    "genstage": false,
+    "nominalrate": 0.0,
+    "parentsIds": [
+      0
+    ],
+    "skipped": true,
+    "weight": 0
+  },
+  "9": {
+    "RDDIds": [
+      6,
+      2,
+      0,
+      3,
+      1
+    ],
+    "cachedRDDs": [
+      3
+    ],
+    "genstage": false,
+    "nominalrate": 0.0,
+    "parentsIds": [
+      0
+    ],
+    "skipped": true,
+    "weight": 0
+  },
+  "10": {
+    "RDDIds": [
+      20,
+      14,
+      8,
+      9,
+      7,
+      16,
+      13
+    ],
+    "cachedRDDs": [
+      9,
+      16
+    ],
+    "genstage": false,
+    "nominalrate": 0.0,
+    "parentsIds": [
+      2,
+      1
+    ],
+    "skipped": true,
+    "weight": 0
+  },
+  "11": {
+    "RDDIds": [
+      30,
+      14,
+      8,
+      9,
+      7,
+      16,
+      13,
+      26
+    ],
+    "cachedRDDs": [
+      9,
+      16
+    ],
+    "genstage": false,
+    "nominalrate": 0.0,
+    "parentsIds": [
+      2,
+      1
+    ],
+    "skipped": true,
+    "weight": 0
+  },
+  "12": {
+    "RDDIds": [
+      34,
+      32,
+      2,
+      0,
+      18,
+      28,
+      24,
+      22,
+      31,
+      3,
+      21,
+      1
+    ],
+    "cachedRDDs": [
+      18,
+      3
+    ],
+    "genstage": false,
+    "nominalrate": 0.0,
+    "parentsIds": [
+      3,
+      4
+    ],
+    "skipped": true,
+    "weight": 0
+  },
+  "13": {
+    "RDDIds": [
+      46,
+      14,
+      8,
+      9,
+      7,
+      36,
+      39,
+      35,
+      16,
+      38,
+      13,
+      26
+    ],
+    "cachedRDDs": [
+      9,
+      39,
+      16,
+      38
+    ],
+    "genstage": false,
+    "nominalrate": 2590957.673371045,
+    "parentsIds": [
+      5,
+      2,
+      1
+    ],
+    "skipped": false,
+    "weight": 0
+  }
 }
