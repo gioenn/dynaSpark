@@ -37,6 +37,8 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
   val NOMINAL_RATE_DATA_S: Double = conf.getDouble(
     "spark.control.nominalratedata", 48000000.0)
 
+  val DEADLINE_TIMEOUT = 300000
+
   val numMaxExecutor: Int = conf.getInt("spark.control.maxexecutor", 4)
   val coreForVM: Int = conf.getInt("spark.control.coreforvm", 8)
 
@@ -55,11 +57,16 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
     rpcEnv.stop(controllerEndpoint)
   }
 
-  def computeDeadlineStage(stage: StageInfo, weight: Long, startTime: Long): Long = {
+  def computeDeadlineStage(stage: StageInfo, weight: Long, startTime: Long, alpha: Double, deadline: Long): Long = {
     var deadline = (deadlineJobMillisecond - startTime) / (weight + 1)
     if (deadline < 0) {
+      logError("ALPHA DEADLINE NEGATIVE -> ALPHA DEADLINE NOT SATISFIED")
+      deadline = (((deadlineJobMillisecond + (1 - alpha) * deadline) - startTime)
+        / (weight + 1)).toLong
+    }
+    if (deadline < 0) {
       logError("DEADLINE NEGATIVE -> DEADLINE NOT SATISFIED")
-      deadline = 1
+      deadline = DEADLINE_TIMEOUT
     }
     deadline
   }
