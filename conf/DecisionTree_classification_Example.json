@@ -25,7 +25,7 @@
     ],
     "cachedRDDs": [],
     "genstage": false,
-    "nominalrate": 0.0,
+    "nominalrate": 212418.85599700914,
     "parentsIds": [],
     "skipped": false,
     "weight": 0
@@ -42,7 +42,7 @@
     ],
     "cachedRDDs": [],
     "genstage": false,
-    "nominalrate": 0.0,
+    "nominalrate": 326246.17884163034,
     "parentsIds": [],
     "skipped": false,
     "weight": 1
@@ -54,7 +54,7 @@
     ],
     "cachedRDDs": [],
     "genstage": false,
-    "nominalrate": 0.0,
+    "nominalrate": 58170.4822211398,
     "parentsIds": [
       2
     ],
@@ -76,7 +76,7 @@
       11
     ],
     "genstage": false,
-    "nominalrate": 0.0,
+    "nominalrate": 210275.31346792356,
     "parentsIds": [],
     "skipped": false,
     "weight": 2
@@ -88,7 +88,7 @@
     ],
     "cachedRDDs": [],
     "genstage": false,
-    "nominalrate": 0.0,
+    "nominalrate": 324.19289477238957,
     "parentsIds": [
       4
     ],
@@ -110,7 +110,7 @@
       11
     ],
     "genstage": false,
-    "nominalrate": 0.0,
+    "nominalrate": 4746760.336070632,
     "parentsIds": [
       4
     ],
@@ -124,7 +124,7 @@
     ],
     "cachedRDDs": [],
     "genstage": false,
-    "nominalrate": 0.0,
+    "nominalrate": 922.5446857582164,
     "parentsIds": [
       6
     ],
@@ -146,7 +146,7 @@
       11
     ],
     "genstage": false,
-    "nominalrate": 0.0,
+    "nominalrate": 6598482.3490597168,
     "parentsIds": [
       4
     ],
@@ -160,7 +160,7 @@
     ],
     "cachedRDDs": [],
     "genstage": false,
-    "nominalrate": 0.0,
+    "nominalrate": 1698.8143691382056,
     "parentsIds": [
       8
     ],
@@ -182,7 +182,7 @@
       11
     ],
     "genstage": false,
-    "nominalrate": 0.0,
+    "nominalrate": 5925223.6771938148,
     "parentsIds": [
       4
     ],
@@ -196,7 +196,7 @@
     ],
     "cachedRDDs": [],
     "genstage": false,
-    "nominalrate": 0.0,
+    "nominalrate": 2723.4042553191488,
     "parentsIds": [
       10
     ],
@@ -218,7 +218,7 @@
       11
     ],
     "genstage": false,
-    "nominalrate": 0.0,
+    "nominalrate": 5653230.821414438,
     "parentsIds": [
       4
     ],
@@ -232,7 +232,7 @@
     ],
     "cachedRDDs": [],
     "genstage": false,
-    "nominalrate": 0.0,
+    "nominalrate": 4138.376980278047,
     "parentsIds": [
       12
     ],
@@ -249,7 +249,7 @@
     ],
     "cachedRDDs": [],
     "genstage": false,
-    "nominalrate": 0.0,
+    "nominalrate": 346375.52649080026,
     "parentsIds": [],
     "skipped": false,
     "weight": 0
@@ -262,7 +262,7 @@
     ],
     "cachedRDDs": [],
     "genstage": false,
-    "nominalrate": 0.0,
+    "nominalrate": 358245.7422493534,
     "parentsIds": [],
     "skipped": false,
     "weight": 0
