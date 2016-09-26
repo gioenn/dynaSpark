@@ -57,7 +57,8 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
     rpcEnv.stop(controllerEndpoint)
   }
 
-  def computeDeadlineStage(stage: StageInfo, weight: Long, startTime: Long, alpha: Double, deadline: Long): Long = {
+  def computeDeadlineStage(stage: StageInfo, weight: Long, startTime: Long,
+                           alpha: Double, deadline: Long): Long = {
     var deadline = (deadlineJobMillisecond - startTime) / (weight + 1)
     if (deadline < 0) {
       logError("ALPHA DEADLINE NEGATIVE -> ALPHA DEADLINE NOT SATISFIED")
@@ -122,11 +123,21 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
     if ((coresToBeAllocated / numExecutor) <= 1) {
       numExecutor = math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
     }
-    val coresPerExecutor = (1 to numExecutor).map {
-      i => if (coresToBeAllocated % numExecutor >= i) {
-        1 + (coresToBeAllocated / numExecutor)
-      } else coresToBeAllocated / numExecutor
+    var coresToStart = coresToBeAllocated.toInt
+    var n = numExecutor
+    var coresForExecutor = new ListBuffer[Int]()
+    while (coresToStart > 0 && n > 0) {
+      val a = math.floor(coresToStart / n).toInt
+      coresToStart -= a
+      n -= 1
+      coresForExecutor += a
     }
+    val coresPerExecutor = coresForExecutor.toList
+//    val coresPerExecutor = (1 to numExecutor).map {
+//      i => if (coresToBeAllocated % numExecutor >= i) {
+//        1 + (coresToBeAllocated / numExecutor)
+//      } else coresToBeAllocated / numExecutor
+//    }
 
     val remainingTasks = totalTasksStage - coresPerExecutor.foldLeft(0) {
       (agg, x) => totalTasksStage * x / coresToBeAllocated + agg
