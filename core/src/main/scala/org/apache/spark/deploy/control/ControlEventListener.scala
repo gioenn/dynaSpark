@@ -72,6 +72,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
   val stageIdToCore = new HashMap[Int, Int]
   val stageIdToWeight = new HashMap[Int, Long]
   val stageIdToNumRecords = new HashMap[Int, Long]
+  val stageIdToParentsIds = new HashMap[Int, List[Int]]
 
   var firstStageId: Int = -1
   var stageIdsToComputeNominalRecord = scala.collection.mutable.Set[Int]()
@@ -177,7 +178,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     }
 
     if (stageIdsToComputeNominalRecord.contains(stage.stageId)) {
-      stage.parentIds.foreach { id =>
+      stageIdToParentsIds(stage.stageId).foreach { id =>
         logInfo("STAGE ID: " + id + " INPUT RECORDS: " + stageIdToData(id, 0).inputRecords +
           " SHUFFLE READ RECORDS: " + stageIdToData(id, 0).shuffleReadRecords +
           " OUTPUT RECORDS: " + stageIdToData(id, 0).outputRecords +
@@ -188,12 +189,12 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
         " SHUFFLE READ RECORDS: " + stageIdToData(stage.stageId, 0).shuffleReadRecords +
         " OUTPUT RECORDS: " + stageIdToData(stage.stageId, 0).outputRecords +
         " SHUFFLE WRITE RECORDS: " + stageIdToData(stage.stageId, 0).shuffleWriteRecords)
-      var recordsRead = stage.parentIds.foldLeft(0L) {
+      var recordsRead = stageIdToParentsIds(stage.stageId).foldLeft(0L) {
         (agg, x) =>
           agg + stageIdToData(x, 0).outputRecords + stageIdToData(x, 0).shuffleWriteRecords
       }
       if (recordsRead == 0) {
-        recordsRead = stage.parentIds.foldLeft(0L) {
+        recordsRead = stageIdToParentsIds(stage.stageId).foldLeft(0L) {
           (agg, x) =>
             agg + stageIdToData(x, 0).inputRecords + stageIdToData(x, 0).shuffleReadRecords
         }
@@ -259,6 +260,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
   (stageSubmitted: SparkStageWeightSubmitted): Unit = synchronized {
     val stage = stageSubmitted.stageInfo
     val genstage = if (firstStageId != -1) 1 else 0
+    stageIdToParentsIds(stage.stageId) = stageSubmitted.parentsIds
     var stageWeight = 0
     if (stageSubmitted.stageIds.nonEmpty) {
       stageWeight = stageSubmitted.stageIds.size - completedStages.size -
@@ -586,7 +588,8 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       stageIdToDeadline(stageId) = newDeadline
       val numRecord = stageIdToNumRecords.getOrElse(stageId, 0)
       if (numRecord != 0) {
-        stageIdToCore(stageId) = controller.computeCoreStage(newDeadline, numRecord.asInstanceOf[Number].longValue)
+        stageIdToCore(stageId) = controller.computeCoreStage(newDeadline,
+          numRecord.asInstanceOf[Number].longValue)
       } else {
         stageIdToCore(stageId) = controller.computeCoreFirstStage(stage._2)
       }
