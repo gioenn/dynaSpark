@@ -49,7 +49,10 @@ class ControllerProxy
 
   def start() {
     proxyEndpoint = rpcEnv.setupEndpoint(ENDPOINT_NAME, createProxyEndpoint(driverUrl))
-    // rpcEnv.awaitTermination()
+  }
+
+  def stop() {
+    rpcEnv.stop(proxyEndpoint)
   }
 
   protected def createProxyEndpoint(driverUrl: String): ProxyEndpoint = {

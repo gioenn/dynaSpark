@@ -535,6 +535,8 @@ private[deploy] class Worker(
             logInfo("Asked to kill executor " + fullId)
             executor.kill()
             val exitCode = Seq("docker", "stop", appId + "." + execId).!
+            execIdToProxy(execId.toString).stop()
+            execIdToProxy.remove(execId.toString)
           case None =>
             logInfo("Asked to kill unknown executor " + fullId)
         }
