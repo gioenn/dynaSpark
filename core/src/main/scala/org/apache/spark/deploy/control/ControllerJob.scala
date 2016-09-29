@@ -149,7 +149,6 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
           temp
         }
       }
-      println(taskForOneCore, taskPerExecutor)
       val taskForExecutor = scala.collection.mutable.IndexedSeq(taskPerExecutor: _*)
       var j = taskForExecutor.size - 1
       while (remainingTasks > 0 && j >= 0) {
