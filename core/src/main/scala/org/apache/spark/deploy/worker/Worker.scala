@@ -617,7 +617,7 @@ private[deploy] class Worker(
       val cpuset = available.take(coresWanted).mkString(",")
 
       val commandUpdateDocker = Seq("docker", "update",
-        "--cpuset-cpus='" + cpuset + ",6,7'", appId + "." + execId)
+        "--cpuset-cpus='" + cpuset + "'", appId + "." + execId)
       logDebug(commandUpdateDocker.toString)
       val result = commandUpdateDocker.!!
 
