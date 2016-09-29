@@ -144,7 +144,9 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
           remainingTasks -= taskForOneCore * coresPerExecutor(i)
           taskForOneCore * coresPerExecutor(i)
         } else {
-          remainingTasks
+          val temp = remainingTasks
+          remainingTasks = 0
+          temp
         }
       }
       println(taskForOneCore, taskPerExecutor)
