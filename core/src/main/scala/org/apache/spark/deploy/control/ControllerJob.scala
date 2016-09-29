@@ -110,53 +110,54 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
 
   def computeTaskForExecutors(coresToBeAllocated: Int, totalTasksStage: Int): List[Int] = {
     numExecutor = math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
-
     if (numExecutor > numMaxExecutor) {
       logError("NUM EXECUTORS TOO HIGH: %d > NUM MAX EXECUTORS %d".format(
         numExecutor, numMaxExecutor
       ))
       List(-1)
-    }
-    numExecutor = math.min(math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
-      * LOCALITY_FACTOR,
-      numMaxExecutor)
-    if ((coresToBeAllocated / numExecutor) <= 1) {
-      numExecutor = math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
-    }
-    var coresToStart = math.ceil(coresToBeAllocated.toDouble / OVERSCALE).toInt
-    var n = numExecutor
-    var coresForExecutor = new ListBuffer[Int]()
-    while (coresToStart > 0 && n > 0) {
-      val a = math.floor(coresToStart / n).toInt
-      coresToStart -= a
-      n -= 1
-      coresForExecutor += a
-    }
-    val coresPerExecutor = coresForExecutor.toList
-    //    val coresPerExecutor = (1 to numExecutor).map {
-    //      i => if (coresToBeAllocated % numExecutor >= i) {
-    //        1 + (coresToBeAllocated / numExecutor)
-    //      } else coresToBeAllocated / numExecutor
-    //    }
-    val taskForOneCore = math.floor(totalTasksStage / (coresToBeAllocated / OVERSCALE)).toInt
-    var remainingTasks = totalTasksStage.toInt
-    val taskPerExecutor = (0 until numExecutor).map { i =>
-      if (remainingTasks > taskForOneCore * coresPerExecutor(i)) {
-        remainingTasks -= taskForOneCore * coresPerExecutor(i)
-        taskForOneCore * coresPerExecutor(i)
-      } else {
-        remainingTasks = 0
-        remainingTasks
+    } else {
+      numExecutor = math.min(math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
+        * LOCALITY_FACTOR,
+        numMaxExecutor)
+      if ((coresToBeAllocated / numExecutor) <= 1) {
+        numExecutor = math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
       }
+      var coresToStart = math.ceil(coresToBeAllocated.toDouble / OVERSCALE).toInt
+      var n = numExecutor
+      var coresForExecutor = new ListBuffer[Int]()
+      while (coresToStart > 0 && n > 0) {
+        val a = math.floor(coresToStart / n).toInt
+        coresToStart -= a
+        n -= 1
+        coresForExecutor += a
+      }
+      val coresPerExecutor = coresForExecutor.toList
+      //    val coresPerExecutor = (1 to numExecutor).map {
+      //      i => if (coresToBeAllocated % numExecutor >= i) {
+      //        1 + (coresToBeAllocated / numExecutor)
+      //      } else coresToBeAllocated / numExecutor
+      //    }
+      val taskForOneCore = math.floor(totalTasksStage / (coresToBeAllocated / OVERSCALE)).toInt
+      var remainingTasks = totalTasksStage.toInt
+      val taskPerExecutor = (0 until numExecutor).map { i =>
+        if (remainingTasks > taskForOneCore * coresPerExecutor(i)) {
+          remainingTasks -= taskForOneCore * coresPerExecutor(i)
+          taskForOneCore * coresPerExecutor(i)
+        } else {
+          remainingTasks = 0
+          remainingTasks
+        }
+      }
+      val taskForExecutor = scala.collection.mutable.IndexedSeq(taskPerExecutor: _*)
+      var j = taskForExecutor.size - 1
+      while (remainingTasks > 0 && j >= 0) {
+        taskForExecutor(j) += 1
+        remainingTasks -= 1
+        j -= 1
+        if (j < 0) j = taskForExecutor.size - 1
+      }
+      taskForExecutor.toList
     }
-    val taskForExecutor = scala.collection.mutable.IndexedSeq(taskPerExecutor: _*)
-    var j = taskForExecutor.size - 1
-    while (remainingTasks > 0) {
-      taskForExecutor(j) += 1
-      remainingTasks -= 1
-      j -= 1
-    }
-    taskForExecutor.toList
   }
 
   def computeCoreForExecutors(coresToBeAllocated: Int): List[Int] = {
