@@ -17,7 +17,7 @@
 
 package org.apache.spark.deploy.control
 
-import org.apache.spark.deploy.DeployMessages.{KillDriverResponse, KillExecutors, RequestKillDriver}
+import org.apache.spark.deploy.DeployMessages.{KillExecutors, UnregisterApplication}
 import org.apache.spark.deploy.master.Master
 import org.apache.spark.internal.Logging
 import org.apache.spark.rpc.{RpcAddress, RpcEnv, ThreadSafeRpcEndpoint}
@@ -232,7 +232,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
   def kill(masterUrl: String, appid: String, executorIds: Seq[String]): Unit = {
     val masterRef = rpcEnv.setupEndpointRef(
       RpcAddress.fromSparkURL(masterUrl), Master.ENDPOINT_NAME)
-    masterRef.ask[KillDriverResponse](RequestKillDriver(appid))
+    masterRef.send(UnregisterApplication(appid))
     masterRef.ask[Boolean](KillExecutors(appid, executorIds))
   }
 
