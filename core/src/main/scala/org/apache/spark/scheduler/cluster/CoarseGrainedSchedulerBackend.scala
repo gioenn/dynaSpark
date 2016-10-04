@@ -154,6 +154,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
 
       case Bind(executorId, stageId) =>
         scheduler.bind(executorId, stageId)
+        makeOffers(executorId)
 
       case ExecutorScaled(execId, cores, newFreeCores) =>
         executorDataMap.get(execId) match {
