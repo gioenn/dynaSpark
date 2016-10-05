@@ -157,14 +157,16 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
         makeOffers(executorId)
 
       case ExecutorScaled(execId, cores, newFreeCores) =>
-        executorDataMap.get(execId) match {
-          case Some(executorData) =>
-            executorDataMap(execId) = new ExecutorData(executorData.executorEndpoint,
-              executorData.executorAddress, executorData.executorHost,
-              newFreeCores, cores, executorData.logUrlMap)
-            makeOffers(execId)
-          case None =>
-            logWarning(s"Scaled not registered executorID $execId")
+        CoarseGrainedSchedulerBackend.this.synchronized {
+          executorDataMap.get(execId) match {
+            case Some(executorData) =>
+              executorDataMap(execId) = new ExecutorData(executorData.executorEndpoint,
+                executorData.executorAddress, executorData.executorHost,
+                newFreeCores, cores, executorData.logUrlMap)
+              makeOffers(execId)
+            case None =>
+              logWarning(s"Scaled not registered executorID $execId")
+          }
         }
     }
 
