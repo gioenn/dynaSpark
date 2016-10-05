@@ -602,7 +602,7 @@ private[deploy] class Worker(
       execIdToProxy(executorId).totalTask = 0
   }
 
-  def onScaleExecutor(_appId: String, execId: String, coresWanted: Int): Unit = {
+  def onScaleExecutor(_appId: String, execId: String, coresWanted: Int): Unit = synchronized {
     var appId = _appId
     if (appId.isEmpty) {
       appId = executors.values.map(_.appId).toSet.head
