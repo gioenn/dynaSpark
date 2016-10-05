@@ -132,6 +132,7 @@ class ControllerProxy
         if (controllerExecutor != null) controllerExecutor.stop()
 
       case Bind(executorId, stageId) =>
+        logInfo("Received Binding EID " + executorId + " SID " + stageId.toString)
         driver.get.send(Bind(executorId, stageId))
         executorStageId = stageId
         taskCompleted = 0
