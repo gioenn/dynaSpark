@@ -1,33 +1,14 @@
 {
   "0": {
-    "RDDIds": [
-      3,
-      2,
-      0,
-      1
-    ],
-    "cachedRDDs": [
-      3
-    ],
     "genstage": false,
-    "nominalrate": 337357.8368234742,
+    "nominalrate": 228822.92720251917,
     "parentsIds": [],
     "skipped": false,
     "weight": 5
   },
   "1": {
-    "RDDIds": [
-      12,
-      2,
-      0,
-      3,
-      1
-    ],
-    "cachedRDDs": [
-      3
-    ],
     "genstage": false,
-    "nominalrate": 3324694.1481816177,
+    "nominalrate": 2684872.036493498,
     "parentsIds": [
       0
     ],
@@ -35,18 +16,8 @@
     "weight": 4
   },
   "2": {
-    "RDDIds": [
-      6,
-      2,
-      0,
-      3,
-      1
-    ],
-    "cachedRDDs": [
-      3
-    ],
     "genstage": false,
-    "nominalrate": 1166666.6715830693,
+    "nominalrate": 1142490.4187348632,
     "parentsIds": [
       0
     ],
@@ -54,21 +25,8 @@
     "weight": 4
   },
   "3": {
-    "RDDIds": [
-      20,
-      14,
-      8,
-      9,
-      7,
-      16,
-      13
-    ],
-    "cachedRDDs": [
-      9,
-      16
-    ],
     "genstage": false,
-    "nominalrate": 1447839.271526166,
+    "nominalrate": 1122529.1178838124,
     "parentsIds": [
       1,
       2
@@ -77,23 +35,8 @@
     "weight": 3
   },
   "4": {
-    "RDDIds": [
-      30,
-      14,
-      8,
-      9,
-      7,
-      16,
-      13,
-      26
-    ],
-    "cachedRDDs": [
-      9,
-      16,
-      26
-    ],
     "genstage": false,
-    "nominalrate": 5285792.112379903,
+    "nominalrate": 4332509.252870176,
     "parentsIds": [
       1,
       2
@@ -102,27 +45,8 @@
     "weight": 3
   },
   "5": {
-    "RDDIds": [
-      34,
-      32,
-      2,
-      0,
-      18,
-      28,
-      24,
-      22,
-      31,
-      3,
-      21,
-      1
-    ],
-    "cachedRDDs": [
-      18,
-      28,
-      3
-    ],
     "genstage": false,
-    "nominalrate": 744.1506041758755,
+    "nominalrate": 1672.7317130696385,
     "parentsIds": [
       3,
       4
@@ -131,28 +55,8 @@
     "weight": 2
   },
   "6": {
-    "RDDIds": [
-      42,
-      40,
-      14,
-      8,
-      9,
-      7,
-      36,
-      35,
-      16,
-      38,
-      13,
-      26
-    ],
-    "cachedRDDs": [
-      9,
-      16,
-      38,
-      26
-    ],
     "genstage": false,
-    "nominalrate": 4680442.621578639,
+    "nominalrate": 2596794.5102349054,
     "parentsIds": [
       1,
       5,
@@ -162,31 +66,8 @@
     "weight": 1
   },
   "7": {
-    "RDDIds": [
-      45,
-      32,
-      2,
-      0,
-      18,
-      43,
-      28,
-      24,
-      22,
-      31,
-      3,
-      21,
-      44,
-      1
-    ],
-    "cachedRDDs": [
-      45,
-      18,
-      28,
-      3,
-      44
-    ],
     "genstage": false,
-    "nominalrate": 1679.87044839102,
+    "nominalrate": 2324.41378284,
     "parentsIds": [
       6,
       3,
@@ -196,16 +77,6 @@
     "weight": 0
   },
   "8": {
-    "RDDIds": [
-      12,
-      2,
-      0,
-      3,
-      1
-    ],
-    "cachedRDDs": [
-      3
-    ],
     "genstage": false,
     "nominalrate": 0.0,
     "parentsIds": [
@@ -215,16 +86,6 @@
     "weight": 0
   },
   "9": {
-    "RDDIds": [
-      6,
-      2,
-      0,
-      3,
-      1
-    ],
-    "cachedRDDs": [
-      3
-    ],
     "genstage": false,
     "nominalrate": 0.0,
     "parentsIds": [
@@ -234,19 +95,6 @@
     "weight": 0
   },
   "10": {
-    "RDDIds": [
-      20,
-      14,
-      8,
-      9,
-      7,
-      16,
-      13
-    ],
-    "cachedRDDs": [
-      9,
-      16
-    ],
     "genstage": false,
     "nominalrate": 0.0,
     "parentsIds": [
@@ -257,20 +105,6 @@
     "weight": 0
   },
   "11": {
-    "RDDIds": [
-      30,
-      14,
-      8,
-      9,
-      7,
-      16,
-      13,
-      26
-    ],
-    "cachedRDDs": [
-      9,
-      16
-    ],
     "genstage": false,
     "nominalrate": 0.0,
     "parentsIds": [
@@ -281,24 +115,6 @@
     "weight": 0
   },
   "12": {
-    "RDDIds": [
-      34,
-      32,
-      2,
-      0,
-      18,
-      28,
-      24,
-      22,
-      31,
-      3,
-      21,
-      1
-    ],
-    "cachedRDDs": [
-      18,
-      3
-    ],
     "genstage": false,
     "nominalrate": 0.0,
     "parentsIds": [
@@ -309,28 +125,8 @@
     "weight": 0
   },
   "13": {
-    "RDDIds": [
-      46,
-      14,
-      8,
-      9,
-      7,
-      36,
-      39,
-      35,
-      16,
-      38,
-      13,
-      26
-    ],
-    "cachedRDDs": [
-      9,
-      39,
-      16,
-      38
-    ],
     "genstage": false,
-    "nominalrate": 22236600.518289644,
+    "nominalrate": 39978865.1265,
     "parentsIds": [
       5,
       2,
