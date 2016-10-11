@@ -107,7 +107,8 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
     }
   }
 
-  def computeTaskForExecutors(coresToBeAllocated: Int, totalTasksStage: Int): List[Int] = {
+  def computeTaskForExecutors(coresToBeAllocated: Int, totalTasksStage: Int,
+                              last: Boolean): List[Int] = {
     numExecutor = math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
     if (numExecutor > numMaxExecutor) {
       logError("NUM EXECUTORS TOO HIGH: %d > NUM MAX EXECUTORS %d".format(
@@ -115,16 +116,22 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
       ))
       List(-1)
     } else {
-      var coresToAllocate = math.max(coresToBeAllocated, numMaxExecutor * minCoreExec)
-      val coresToAllocateRes = coresToAllocate % numMaxExecutor
-      if (coresToAllocateRes != 0) {
-        coresToAllocate = coresToAllocate + (numMaxExecutor - coresToAllocateRes)
+      var coresToStart = 0
+      var taskForOneCore = 0
+      if (last) {
+        numExecutor = math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
+        coresToStart = math.ceil(coresToBeAllocated.toDouble / OVERSCALE).toInt
+        taskForOneCore = math.floor(totalTasksStage / (coresToBeAllocated / OVERSCALE)).toInt
+      } else {
+        var coresToAllocate = math.max(coresToBeAllocated, numMaxExecutor * minCoreExec)
+        val coresToAllocateRes = coresToAllocate % numMaxExecutor
+        if (coresToAllocateRes != 0) {
+          coresToAllocate = coresToAllocate + (numMaxExecutor - coresToAllocateRes)
+        }
+        numExecutor = numMaxExecutor
+        coresToStart = math.ceil(coresToAllocate.toDouble / OVERSCALE).toInt
+        taskForOneCore = math.floor(totalTasksStage / (coresToAllocate / OVERSCALE)).toInt
       }
-      numExecutor = numMaxExecutor
-      if ((coresToAllocate / numExecutor) <= 1) {
-        numExecutor = math.ceil(coresToAllocate.toDouble / coreForVM.toDouble).toInt
-      }
-      var coresToStart = math.ceil(coresToAllocate.toDouble / OVERSCALE).toInt
       var n = numExecutor
       var coresForExecutor = new ListBuffer[Int]()
       while (coresToStart > 0 && n > 0) {
@@ -134,7 +141,6 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
         coresForExecutor += a
       }
       val coresPerExecutor = coresForExecutor.toList
-      val taskForOneCore = math.floor(totalTasksStage / (coresToAllocate / OVERSCALE)).toInt
       var remainingTasks = totalTasksStage.toInt
       val taskPerExecutor = (0 until numExecutor).map { i =>
         if (remainingTasks > taskForOneCore * coresPerExecutor(i)) {
@@ -158,7 +164,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
     }
   }
 
-  def computeCoreForExecutors(coresToBeAllocated: Int): List[Int] = {
+  def computeCoreForExecutors(coresToBeAllocated: Int, last: Boolean): List[Int] = {
     numExecutor = math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
     if (numExecutor > numMaxExecutor) {
       logError("NUM EXECUTORS TOO HIGH: %d > NUM MAX EXECUTORS %d".format(
@@ -166,16 +172,19 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
       ))
       List(-1)
     } else {
-      var coresToAllocate = math.max(coresToBeAllocated, numMaxExecutor * minCoreExec)
-      val coresToAllocateRes = coresToAllocate % numMaxExecutor
-      if (coresToAllocateRes != 0) {
-        coresToAllocate = coresToAllocate + (numMaxExecutor - coresToAllocateRes)
+      var coresToStart = 0
+      if (last) {
+        numExecutor = math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
+        coresToStart = math.ceil(coresToBeAllocated.toDouble / OVERSCALE).toInt
+      } else {
+        var coresToAllocate = math.max(coresToBeAllocated, numMaxExecutor * minCoreExec)
+        val coresToAllocateRes = coresToAllocate % numMaxExecutor
+        if (coresToAllocateRes != 0) {
+          coresToAllocate = coresToAllocate + (numMaxExecutor - coresToAllocateRes)
+        }
+        numExecutor = numMaxExecutor
+        coresToStart = math.ceil(coresToAllocate.toDouble / OVERSCALE).toInt
       }
-      numExecutor = numMaxExecutor
-      if ((coresToAllocate / numExecutor) <= 1) {
-        numExecutor = math.ceil(coresToAllocate.toDouble / coreForVM.toDouble).toInt
-      }
-      var coresToStart = math.ceil(coresToAllocate.toDouble / OVERSCALE).toInt
       var n = numExecutor
       var coresPerExecutor = new ListBuffer[Int]()
       while (coresToStart > 0 && n > 0) {
@@ -220,12 +229,12 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
   }
 
   def askMasterNeededExecutors
-  (masterUrl: String, stageId: Long, coreNeeded: Int, appname: String): Unit = {
+  (masterUrl: String, stageId: Long, coreForExecutors: List[Int], appname: String): Unit = {
     val masterRef = rpcEnv.setupEndpointRef(
       RpcAddress.fromSparkURL(masterUrl), Master.ENDPOINT_NAME)
-    masterRef.send(NeededCoreForExecutors(stageId, computeCoreForExecutors(coreNeeded), appname))
+    masterRef.send(NeededCoreForExecutors(stageId, coreForExecutors, appname))
     logInfo("SEND NEEDED CORE TO MASTER %s, %s, %s, %s".format
-    (masterUrl, stageId, computeCoreForExecutors(coreNeeded), appname))
+    (masterUrl, stageId, coreForExecutors, appname))
 
   }
 
