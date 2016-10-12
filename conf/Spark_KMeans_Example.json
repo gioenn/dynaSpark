@@ -1,0 +1,475 @@
+{
+    "0": {
+        "RDDIds": [
+            5,
+            1,
+            2,
+            4,
+            0,
+            3
+        ],
+        "cachedRDDs": [
+            2,
+            3
+        ],
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [],
+        "skipped": false,
+        "weight": 7
+    },
+    "1": {
+        "RDDIds": [
+            7,
+            1,
+            2,
+            4,
+            0,
+            3,
+            5
+        ],
+        "cachedRDDs": [
+            2,
+            3
+        ],
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            0
+        ],
+        "skipped": false,
+        "weight": 6
+    },
+    "2": {
+        "RDDIds": [
+            9,
+            1,
+            2,
+            4,
+            0,
+            3,
+            5,
+            6,
+            8
+        ],
+        "cachedRDDs": [
+            9,
+            2,
+            3
+        ],
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            0,
+            1
+        ],
+        "skipped": false,
+        "weight": 5
+    },
+    "3": {
+        "RDDIds": [
+            11,
+            1,
+            9,
+            2,
+            10,
+            4,
+            0,
+            3,
+            5,
+            6,
+            8
+        ],
+        "cachedRDDs": [
+            9,
+            2,
+            3
+        ],
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            0,
+            1,
+            2
+        ],
+        "skipped": false,
+        "weight": 0
+    },
+    "4": {
+        "RDDIds": [
+            13,
+            1,
+            9,
+            2,
+            4,
+            0,
+            12,
+            3,
+            5,
+            6,
+            8
+        ],
+        "cachedRDDs": [
+            13,
+            9,
+            2,
+            3
+        ],
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            0,
+            1,
+            2
+        ],
+        "skipped": false,
+        "weight": 4
+    },
+    "5": {
+        "RDDIds": [
+            15,
+            1,
+            9,
+            2,
+            4,
+            0,
+            12,
+            3,
+            13,
+            5,
+            6,
+            14,
+            8
+        ],
+        "cachedRDDs": [
+            2,
+            3,
+            13
+        ],
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            0,
+            1,
+            4
+        ],
+        "skipped": false,
+        "weight": 0
+    },
+    "6": {
+        "RDDIds": [
+            17,
+            1,
+            9,
+            2,
+            4,
+            0,
+            12,
+            3,
+            13,
+            5,
+            16,
+            6,
+            8
+        ],
+        "cachedRDDs": [
+            17,
+            2,
+            3,
+            13
+        ],
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            0,
+            1,
+            4
+        ],
+        "skipped": false,
+        "weight": 3
+    },
+    "7": {
+        "RDDIds": [
+            19,
+            1,
+            13,
+            17,
+            5,
+            6,
+            18,
+            8,
+            9,
+            2,
+            4,
+            0,
+            12,
+            3,
+            16
+        ],
+        "cachedRDDs": [
+            17,
+            2,
+            3
+        ],
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            0,
+            1,
+            6
+        ],
+        "skipped": false,
+        "weight": 0
+    },
+    "8": {
+        "RDDIds": [
+            21,
+            1,
+            13,
+            17,
+            5,
+            6,
+            8,
+            9,
+            2,
+            4,
+            0,
+            12,
+            3,
+            20,
+            16
+        ],
+        "cachedRDDs": [
+            21,
+            17,
+            2,
+            3
+        ],
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            0,
+            1,
+            6
+        ],
+        "skipped": false,
+        "weight": 2
+    },
+    "9": {
+        "RDDIds": [
+            23,
+            1,
+            13,
+            17,
+            5,
+            6,
+            8,
+            9,
+            2,
+            22,
+            4,
+            21,
+            0,
+            12,
+            3,
+            20,
+            16
+        ],
+        "cachedRDDs": [
+            2,
+            21,
+            3
+        ],
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            0,
+            0,
+            8
+        ],
+        "skipped": false,
+        "weight": 0
+    },
+    "10": {
+        "RDDIds": [
+            25,
+            1,
+            13,
+            17,
+            5,
+            6,
+            8,
+            9,
+            2,
+            4,
+            21,
+            24,
+            0,
+            12,
+            3,
+            20,
+            16
+        ],
+        "cachedRDDs": [
+            25,
+            2,
+            21,
+            3
+        ],
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            0,
+            0,
+            8
+        ],
+        "skipped": false,
+        "weight": 1
+    },
+    "11": {
+        "RDDIds": [
+            27,
+            1,
+            13,
+            17,
+            5,
+            6,
+            8,
+            9,
+            2,
+            4,
+            21,
+            0,
+            24,
+            12,
+            3,
+            26,
+            25,
+            20,
+            16
+        ],
+        "cachedRDDs": [
+            2,
+            3,
+            25
+        ],
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            0,
+            1,
+            10
+        ],
+        "skipped": false,
+        "weight": 0
+    },
+    "12": {
+        "RDDIds": [
+            28,
+            1,
+            2,
+            4,
+            0,
+            3,
+            5
+        ],
+        "cachedRDDs": [
+            2,
+            3
+        ],
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            0,
+            1
+        ],
+        "skipped": false,
+        "weight": 1
+    },
+    "13": {
+        "RDDIds": [
+            29
+        ],
+        "cachedRDDs": [],
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            12
+        ],
+        "skipped": false,
+        "weight": 0
+    },
+    "14": {
+        "RDDIds": [
+            30,
+            1,
+            2,
+            4,
+            0,
+            3,
+            5
+        ],
+        "cachedRDDs": [
+            2,
+            3
+        ],
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            0,
+            1
+        ],
+        "skipped": false,
+        "weight": 1
+    },
+    "15": {
+        "RDDIds": [
+            31
+        ],
+        "cachedRDDs": [],
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            14
+        ],
+        "skipped": false,
+        "weight": 0
+    },
+    "16": {
+        "RDDIds": [
+            33,
+            1,
+            32,
+            2,
+            0
+        ],
+        "cachedRDDs": [
+            2
+        ],
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            0
+        ],
+        "skipped": false,
+        "weight": 0
+    },
+    "17": {
+        "RDDIds": [
+            34,
+            1,
+            2,
+            0
+        ],
+        "cachedRDDs": [
+            2
+        ],
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            0
+        ],
+        "skipped": false,
+        "weight": 0
+    }
+}
