@@ -126,6 +126,7 @@ private[deploy] class Worker(
   val execIdToProxy = new HashMap[String, ControllerProxy]
   val execIdToAppId = new HashMap[String, String]
   val executorIdToController = new HashMap[String, ControllerExecutor]
+  val execIdToStageId = new HashMap[String, Int]
 
   val retainedExecutors = conf.getInt("spark.worker.ui.retainedExecutors",
     WorkerWebUI.DEFAULT_RETAINED_EXECUTORS)
@@ -583,6 +584,7 @@ private[deploy] class Worker(
     case InitControllerExecutor
       (executorId, stageId, coreMin, coreMax, tasks, deadline, core) =>
       execIdToProxy(executorId).proxyEndpoint.send(Bind(executorId, stageId.toInt))
+      execIdToStageId(executorId) = stageId.toInt
       val controllerExecutor = new ControllerExecutor(
         conf, executorId, deadline, coreMin, coreMax, tasks, core)
       logInfo("Created ControllerExecutor: %s , %d , %d , %d , %d".format
@@ -597,9 +599,12 @@ private[deploy] class Worker(
       execIdToProxy(executorId).proxyEndpoint.send(Bind(executorId, stageId))
       execIdToProxy(executorId).totalTask = tasks
 
-    case UnBind(executorId) =>
-      execIdToProxy(executorId).proxyEndpoint.send(UnBind(executorId))
-      execIdToProxy(executorId).totalTask = 0
+    case UnBind(executorId, stageId) =>
+      if (execIdToStageId(executorId) == stageId) {
+        execIdToProxy(executorId).proxyEndpoint.send(UnBind(executorId, stageId))
+        execIdToProxy(executorId).totalTask = 0
+      }
+
   }
 
   def onScaleExecutor(_appId: String, execId: String, coresWanted: Int): Unit = synchronized {

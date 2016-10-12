@@ -121,7 +121,7 @@ class ControllerProxy
           taskLaunched += 1
           if (taskFailed > 0) taskFailed -= 1
           if (taskLaunched == totalTask) {
-            driver.get.send(UnBind(execId.toString))
+            driver.get.send(UnBind(execId.toString, executorStageId))
           }
 
         }
@@ -138,8 +138,8 @@ class ControllerProxy
         taskCompleted = 0
         taskLaunched = 0
 
-      case UnBind(executorId) =>
-        driver.get.send(UnBind(executorId))
+      case UnBind(executorId, stageId) =>
+        driver.get.send(UnBind(executorId, stageId))
         if (controllerExecutor != null) controllerExecutor.stop()
         executorStageId = -1
 
