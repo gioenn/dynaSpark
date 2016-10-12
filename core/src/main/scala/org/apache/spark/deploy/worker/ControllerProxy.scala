@@ -91,7 +91,7 @@ class ControllerProxy
           logDebug("EID: %s, Completed: %d, Launched: %d, Total: %d".format(executorId,
             taskCompleted, taskLaunched, totalTask))
           if (taskCompleted == totalTask) {
-            driver.get.send(ExecutorFinishedTask(executorId))
+            driver.get.send(ExecutorFinishedTask(executorId, executorStageId))
             taskCompleted = 0
             taskLaunched = 0
             totalTask = 0

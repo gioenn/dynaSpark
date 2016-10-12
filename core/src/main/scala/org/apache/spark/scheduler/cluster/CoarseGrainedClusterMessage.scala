@@ -57,7 +57,8 @@ private[spark] object CoarseGrainedClusterMessages {
   extends CoarseGrainedClusterMessage
 
   // Proxy to driver
-  case class ExecutorFinishedTask(executorId: String) extends CoarseGrainedClusterMessage
+  case class ExecutorFinishedTask(executorId: String,
+                                  stageId: Int) extends CoarseGrainedClusterMessage
 
   // Driver to executors
   case class LaunchTask(taskId: Long, data: SerializableBuffer) extends CoarseGrainedClusterMessage
