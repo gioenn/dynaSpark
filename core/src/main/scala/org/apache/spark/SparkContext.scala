@@ -19,7 +19,7 @@ package org.apache.spark
 
 import java.io._
 import java.lang.reflect.Constructor
-import java.net.URI
+import java.net.{MalformedURLException, URI}
 import java.util.{Arrays, Locale, Properties, ServiceLoader, UUID}
 import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger, AtomicReference}
@@ -36,10 +36,8 @@ import com.google.common.collect.MapMaker
 import org.apache.commons.lang3.SerializationUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.hadoop.io.{ArrayWritable, BooleanWritable, BytesWritable, DoubleWritable,
-  FloatWritable, IntWritable, LongWritable, NullWritable, Text, Writable}
-import org.apache.hadoop.mapred.{FileInputFormat, InputFormat, JobConf, SequenceFileInputFormat,
-  TextInputFormat}
+import org.apache.hadoop.io.{ArrayWritable, BooleanWritable, BytesWritable, DoubleWritable, FloatWritable, IntWritable, LongWritable, NullWritable, Text, Writable}
+import org.apache.hadoop.mapred.{FileInputFormat, InputFormat, JobConf, SequenceFileInputFormat, TextInputFormat}
 import org.apache.hadoop.mapreduce.{InputFormat => NewInputFormat, Job => NewHadoopJob}
 import org.apache.hadoop.mapreduce.lib.input.{FileInputFormat => NewFileInputFormat}
 import org.apache.mesos.MesosNativeLibrary
@@ -48,8 +46,7 @@ import org.apache.spark.annotation.DeveloperApi
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.deploy.control.ControlEventListener
 import org.apache.spark.deploy.{LocalSparkCluster, SparkHadoopUtil}
-import org.apache.spark.input.{FixedLengthBinaryInputFormat, PortableDataStream, StreamInputFormat,
-  WholeTextFileInputFormat}
+import org.apache.spark.input.{FixedLengthBinaryInputFormat, PortableDataStream, StreamInputFormat, WholeTextFileInputFormat}
 import org.apache.spark.internal.Logging
 import org.apache.spark.io.CompressionCodec
 import org.apache.spark.partial.{ApproximateEvaluator, PartialResult}
@@ -251,7 +248,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   def isStopped: Boolean = stopped.get()
 
   // An asynchronous listener bus for Spark events
-  private[spark] val listenerBus = new LiveListenerBus
+  private[spark] val listenerBus = new LiveListenerBus(this)
 
   // This function allows components created by SparkEnv to be mocked in unit tests:
   private[spark] def createSparkEnv(
@@ -1426,7 +1423,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * supported for Hadoop-supported filesystems.
    */
   def addFile(path: String, recursive: Boolean): Unit = {
-    val uri = new URI(path)
+    val uri = new Path(path).toUri
     val schemeCorrectedPath = uri.getScheme match {
       case null | "local" => new File(path).getCanonicalFile.toURI.toString
       case _ => path
@@ -1448,6 +1445,9 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
         throw new SparkException(s"Added file $hadoopPath is a directory and recursive is not " +
           "turned on.")
       }
+    } else {
+      // SPARK-17650: Make sure this is a valid URL before adding it to the list of dependencies
+      Utils.validateURL(uri)
     }
 
     val key = if (!isLocal && scheme == "file") {
@@ -1460,8 +1460,8 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       logInfo(s"Added file $path at $key with timestamp $timestamp")
       // Fetch the file locally so that closures which are run on the driver can still use the
       // SparkFiles API to access files.
-      Utils.fetchFile(path, new File(SparkFiles.getRootDirectory()), conf, env.securityManager,
-        hadoopConfiguration, timestamp, useCache = false)
+      Utils.fetchFile(uri.toString, new File(SparkFiles.getRootDirectory()), conf,
+        env.securityManager, hadoopConfiguration, timestamp, useCache = false)
       postEnvironmentUpdate()
     }
   }
@@ -1707,6 +1707,8 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
         key = env.rpcEnv.fileServer.addJar(new File(path))
       } else {
         val uri = new URI(path)
+        // SPARK-17650: Make sure this is a valid URL before adding it to the list of dependencies
+        Utils.validateURL(uri)
         key = uri.getScheme match {
           // A JAR file which exists only on the driver node
           case null | "file" =>
@@ -2161,7 +2163,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
         }
     }
 
-    listenerBus.start(this)
+    listenerBus.start()
     _listenerBusStarted = true
   }
 
