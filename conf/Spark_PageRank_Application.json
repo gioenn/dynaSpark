@@ -2,8 +2,8 @@
   "0": {
     "genstage": false,
     "nominalrate": 228822.92720251917,
-    "duration": 52349,
-    "totalduration": 185484,
+    "duration": 3148801,
+    "totalduration": 7955866,
     "parentsIds": [],
     "skipped": false,
     "weight": 5
@@ -11,7 +11,7 @@
   "1": {
     "genstage": false,
     "nominalrate": 2684872.036493498,
-    "duration": 6639,
+    "duration": 311114,
     "parentsIds": [
       0
     ],
@@ -21,7 +21,7 @@
   "2": {
     "genstage": false,
     "nominalrate": 1142490.4187348632,
-    "duration": 23549,
+    "duration": 784785,
     "parentsIds": [
       0
     ],
@@ -31,7 +31,7 @@
   "3": {
     "genstage": false,
     "nominalrate": 1122529.1178838124,
-    "duration": 23354,
+    "duration": 1119009,
     "parentsIds": [
       1,
       2
@@ -42,7 +42,7 @@
   "4": {
     "genstage": false,
     "nominalrate": 4332509.252870176,
-    "duration": 27732,
+    "duration": 284351,
     "parentsIds": [
       1,
       2
@@ -53,7 +53,7 @@
   "5": {
     "genstage": false,
     "nominalrate": 1672.7317130696385,
-    "duration": 22960,
+    "duration": 1043539,
     "parentsIds": [
       3,
       4
@@ -64,7 +64,7 @@
   "6": {
     "genstage": false,
     "nominalrate": 2596794.5102349054,
-    "duration": 11674,
+    "duration": 555506,
     "parentsIds": [
       1,
       5,
@@ -76,7 +76,7 @@
   "7": {
     "genstage": false,
     "nominalrate": 2324.41378284,
-    "duration": 11807,
+    "duration": 647891,
     "parentsIds": [
       6,
       3,
@@ -141,7 +141,7 @@
   "13": {
     "genstage": false,
     "nominalrate": 39978865.1265,
-    "duration": 5420,
+    "duration": 60870,
     "parentsIds": [
       5,
       2,
