@@ -142,15 +142,13 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
       }
       val coresPerExecutor = coresForExecutor.toList
       var remainingTasks = totalTasksStage.toInt
-      val taskPerExecutor = (0 until numExecutor).map { i =>
-        if (remainingTasks > taskForOneCore * coresPerExecutor(i)) {
-          remainingTasks -= taskForOneCore * coresPerExecutor(i)
-          taskForOneCore * coresPerExecutor(i)
-        } else {
-          val temp = remainingTasks
-          remainingTasks = 0
-          temp
-        }
+      var z = numExecutor
+      var taskPerExecutor = new ListBuffer[Int]()
+      while (remainingTasks > 0 && z > 0) {
+        val a = math.floor(remainingTasks / z).toInt
+        remainingTasks -= a
+        z -= 1
+        taskPerExecutor += a
       }
       val taskForExecutor = scala.collection.mutable.IndexedSeq(taskPerExecutor: _*)
       var j = taskForExecutor.size - 1
