@@ -1086,9 +1086,11 @@ class DAGScheduler(
         val stageJson = appJson.asJsObject.fields(stage.id.toString)
         val totalduration = appJson.asJsObject.fields("0").asJsObject.fields("totalduration").convertTo[Long]
         val duration = stageJson.asJsObject.fields("duration").convertTo[Long]
+        val weight = stageJson.asJsObject.fields("weight").convertTo[Long]
         val stageJsonIds = appJson.asJsObject.fields.keys.toList.filter(id =>
           appJson.asJsObject.fields(id).asJsObject.fields("nominalrate").convertTo[Double] != 0.0)
         listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties,
+          weight,
           duration,
           totalduration,
           stageJson.asJsObject.fields("parentsIds").convertTo[List[Int]],

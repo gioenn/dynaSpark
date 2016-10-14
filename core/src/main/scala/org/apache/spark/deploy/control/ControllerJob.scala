@@ -56,7 +56,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
     rpcEnv.stop(controllerEndpoint)
   }
 
-  def computeDeadlineStage(stage: StageInfo, weight: Long, startTime: Long,
+  def computeDeadlineStage(stage: StageInfo, weight: Double, startTime: Long,
                            alpha: Double, deadline: Long): Long = {
     var deadline = (deadlineJobMillisecond - startTime) / (weight + 1)
     if (deadline < 0) {
@@ -86,7 +86,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
     OVERSCALE * math.ceil((numRecord / (deadlineStage / 1000.0)) / NOMINAL_RATE_RECORD_S).toInt
   }
 
-  def computeDeadlineFirstStage(stage: StageInfo, weight: Long): Long = {
+  def computeDeadlineFirstStage(stage: StageInfo, weight: Double): Long = {
     val deadline = (deadlineJobMillisecond - stage.submissionTime.get) / (weight + 1)
     if (deadline < 0) {
       logError("DEADLINE NEGATIVE -> DEADLINE NOT SATISFIED")
