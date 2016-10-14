@@ -281,7 +281,8 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     if (totaldurationremaining == -1L) totaldurationremaining = stageSubmitted.totalduration
     var stageWeight = 0.0
     if (stageSubmitted.stageIds.nonEmpty) {
-      stageWeight = stageSubmitted.stageIds.size - completedStages.size - activePendingStages.size - activeStages.size + genstage
+      stageWeight = stageSubmitted.stageIds.size - completedStages.size -
+        activePendingStages.size - activeStages.size - 1 + genstage
     }
     stageIdToWeight(stage.stageId) = stageWeight
     stageWeight = average(List(stageWeight,
