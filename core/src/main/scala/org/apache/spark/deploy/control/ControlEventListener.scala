@@ -71,7 +71,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
 
   val stageIdToDeadline = new HashMap[Int, Long]
   val stageIdToCore = new HashMap[Int, Int]
-  val stageIdToWeight = new HashMap[Int, Long]
+  val stageIdToWeight = new HashMap[Int, Double]
   val stageIdToDuration = new HashMap[Int, Long]
   val stageIdToNumRecords = new HashMap[Int, Long]
   val stageIdToParentsIds = new HashMap[Int, List[Int]]
@@ -279,8 +279,12 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     val genstage = if (firstStageId != -1) 1 else 0
     stageIdToParentsIds(stage.stageId) = stageSubmitted.parentsIds
     if (totaldurationremaining == -1L) totaldurationremaining = stageSubmitted.totalduration
-    stageIdToWeight(stage.stageId) = stageSubmitted.weight + 1
-    var stageWeight = average(List(stageSubmitted.weight + 1,
+    var stageWeight = 0.0
+    if (stageSubmitted.stageIds.nonEmpty) {
+      stageWeight = stageSubmitted.stageIds.size - completedStages.size - activePendingStages.size - activeStages.size + genstage
+    }
+    stageIdToWeight(stage.stageId) = stageWeight
+    stageWeight = average(List(stageWeight,
       (totaldurationremaining / stageSubmitted.duration) - 1))
     if (stageWeight < 0) stageWeight = 0.0
     if (stageWeight < 1) lastStageId = stage.stageId
