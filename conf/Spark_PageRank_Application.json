@@ -2,7 +2,7 @@
   "0": {
     "genstage": false,
     "nominalrate": 228822.92720251917,
-    "duration": 108295,
+    "duration": 52349,
     "parentsIds": [],
     "skipped": false,
     "weight": 5
@@ -10,7 +10,7 @@
   "1": {
     "genstage": false,
     "nominalrate": 2684872.036493498,
-    "duration": 4219,
+    "duration": 6639,
     "parentsIds": [
       0
     ],
@@ -20,7 +20,7 @@
   "2": {
     "genstage": false,
     "nominalrate": 1142490.4187348632,
-    "duration": 6356,
+    "duration": 23549,
     "parentsIds": [
       0
     ],
@@ -30,7 +30,7 @@
   "3": {
     "genstage": false,
     "nominalrate": 1122529.1178838124,
-    "duration": 4497,
+    "duration": 23354,
     "parentsIds": [
       1,
       2
@@ -41,7 +41,7 @@
   "4": {
     "genstage": false,
     "nominalrate": 4332509.252870176,
-    "duration": 7315,
+    "duration": 27732,
     "parentsIds": [
       1,
       2
@@ -52,7 +52,7 @@
   "5": {
     "genstage": false,
     "nominalrate": 1672.7317130696385,
-    "duration": 2556,
+    "duration": 22960,
     "parentsIds": [
       3,
       4
@@ -63,7 +63,7 @@
   "6": {
     "genstage": false,
     "nominalrate": 2596794.5102349054,
-    "duration": 1456,
+    "duration": 11674,
     "parentsIds": [
       1,
       5,
@@ -75,7 +75,7 @@
   "7": {
     "genstage": false,
     "nominalrate": 2324.41378284,
-    "duration": 1528,
+    "duration": 11807,
     "parentsIds": [
       6,
       3,
@@ -140,7 +140,7 @@
   "13": {
     "genstage": false,
     "nominalrate": 39978865.1265,
-    "duration": 6355,
+    "duration": 5420,
     "parentsIds": [
       5,
       2,
