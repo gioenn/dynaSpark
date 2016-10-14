@@ -1084,10 +1084,7 @@ class DAGScheduler(
       stage.latestInfo.submissionTime = Some(clock.getTimeMillis())
       if (appJson != null) {
         val stageJson = appJson.asJsObject.fields(stage.id.toString)
-        val totalduration = appJson.asJsObject.fields.foldLeft(0L) {
-          (agg, x) =>
-            agg + x.asInstanceOf[JsObject].fields("duration").convertTo[Long]
-        }
+        val totalduration = appJson.asJsObject.fields("0").asJsObject.fields("totalduration").convertTo[Long]
         val duration = stageJson.asJsObject.fields("duration").convertTo[Long]
         val stageJsonIds = appJson.asJsObject.fields.keys.toList.filter(id =>
           appJson.asJsObject.fields(id).asJsObject.fields("nominalrate").convertTo[Double] != 0.0)
