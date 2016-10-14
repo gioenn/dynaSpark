@@ -1102,6 +1102,7 @@ class DAGScheduler(
         logError("NO JSON FOR APP: " + jsonFile)
         listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties,
           1,
+          1,
           1000,
           List(),
           0.0,
