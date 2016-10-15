@@ -624,8 +624,8 @@ private[deploy] class Worker(
       val commandUpdateDocker = Seq("docker", "update",
         "--cpuset-cpus='" + cpuset + "'", appId + "." + execId)
       logDebug(commandUpdateDocker.toString)
-      val result = commandUpdateDocker.!!
-      logInfo(result.toString)
+      val result = commandUpdateDocker.lineStream
+      // logInfo(result.toString)
       execIdToProxy(execId.toString).proxyEndpoint.send(
         ExecutorScaled(execId, coresWanted, coresWanted))
       logInfo("Scaled executorId %s  of appId %s to  %d Core".format(execId, appId, coresWanted))
