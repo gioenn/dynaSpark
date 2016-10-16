@@ -115,6 +115,7 @@ class ControllerProxy
 
       case LaunchTask(taskId, data) =>
         if (taskLaunched == totalTask && taskFailed == 0) {
+          logInfo("Killed TID " + taskId.toString + " EID " + execId.toString)
           driver.get.send(StatusUpdate(execId.toString, taskId, TaskState.KILLED, data))
         } else {
           executorRefMap(executorIdToAddress(execId.toString).host).send(LaunchTask(taskId, data))
