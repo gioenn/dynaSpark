@@ -2,79 +2,92 @@
     "0": {
         "RDDIds": [
             8,
-            3,
             0,
-            2,
-            1
+            3,
+            1,
+            2
         ],
         "cachedRDDs": [
             3
         ],
+        "duration": 2853,
         "genstage": false,
-        "nominalrate": 0.0,
+        "nominalrate": 73313.78299120234,
         "parentsIds": [],
+        "recordsread": 200000,
+        "shufflerecordsread": 0.0,
         "skipped": false,
-        "weight": 4
+        "totalduration": 7620641,
+        "weight": 1338.0487206449352
     },
     "1": {
         "RDDIds": [
             9,
-            3,
             0,
-            2,
-            1
+            3,
+            1,
+            2
         ],
         "cachedRDDs": [
             3
         ],
+        "duration": 1943079,
         "genstage": false,
-        "nominalrate": 0.0,
+        "nominalrate": 102.92942283870084,
         "parentsIds": [
             0
         ],
+        "recordsread": 199979998,
+        "shufflerecordsread": 0.0,
         "skipped": false,
-        "weight": 0
+        "weight": 2.4602363053689533
     },
     "2": {
         "RDDIds": [
             10,
-            3,
             0,
-            2,
-            1
+            3,
+            1,
+            2
         ],
         "cachedRDDs": [
             3
         ],
+        "duration": 14591,
         "genstage": false,
-        "nominalrate": 0.0,
+        "nominalrate":  13707.079706668495,
         "parentsIds": [
             0
         ],
+        "recordsread": 179996837,
+        "shufflerecordsread": 0.0,
         "skipped": false,
-        "weight": 0
+        "weight": 194.95922143787266
     },
     "3": {
         "RDDIds": [
             13,
-            12,
-            3,
-            11,
             0,
+            3,
             10,
-            2,
-            1
+            11,
+            12,
+            1,
+            2
         ],
         "cachedRDDs": [
             3
         ],
+        "duration": 47511,
         "genstage": false,
-        "nominalrate": 0.0,
+        "nominalrate":  4209.551472290627,
         "parentsIds": [
             0
         ],
+        "recordsread": 179996837,
+        "shufflerecordsread": 0.0,
         "skipped": false,
-        "weight": 1
+        "weight": 60.566395150596705
     },
     "4": {
         "RDDIds": [
@@ -82,46 +95,55 @@
             14
         ],
         "cachedRDDs": [],
+        "duration": 3687,
         "genstage": false,
-        "nominalrate": 0.0,
+        "nominalrate": 271.22321670735016,
         "parentsIds": [
             3
         ],
+        "recordsread": 0.0,
+        "shufflerecordsread": 1000,
         "skipped": false,
-        "weight": 0
+        "weight": 761.6346623270952
     },
     "5": {
         "RDDIds": [
             5,
-            3,
             0,
-            2,
-            1
+            3,
+            1,
+            2
         ],
         "cachedRDDs": [
             3
         ],
+        "duration": 505777,
         "genstage": false,
-        "nominalrate": 0.0,
+        "nominalrate": 395.431188053233,
         "parentsIds": [
             0
         ],
+        "recordsread": 179996837,
+        "shufflerecordsread": 0.0,
         "skipped": false,
-        "weight": 3
+        "weight": 7.544854748238849
     },
     "6": {
         "RDDIds": [
             4,
             0,
-            2,
-            1
+            1,
+            2
         ],
         "cachedRDDs": [],
+        "duration": 2466920,
         "genstage": false,
-        "nominalrate": 0.0,
+        "nominalrate": 81072.75469005885,
         "parentsIds": [],
+        "recordsread": 200000000,
+        "shufflerecordsread": 0.0,
         "skipped": false,
-        "weight": 3
+        "weight": 3.0343146514682275
     },
     "7": {
         "RDDIds": [
@@ -130,41 +152,48 @@
             6
         ],
         "cachedRDDs": [],
+        "duration": 1335335,
         "genstage": false,
-        "nominalrate": 0.0,
+        "nominalrate": 284570.4164123609,
         "parentsIds": [
             5,
             6
         ],
+        "recordsread": 0.0,
+        "shufflerecordsread": 379996837,
         "skipped": false,
-        "weight": 2
+        "weight": 2.4871017385150544
     },
     "8": {
         "RDDIds": [
             19,
-            17,
-            18
+            18,
+            17
         ],
         "cachedRDDs": [],
+        "duration": 298531,
         "genstage": false,
-        "nominalrate": 0.0,
+        "nominalrate":  67005.31268109509,
         "parentsIds": [
             7
         ],
+        "recordsread": 0.0,
+        "shufflerecordsread": 20003163,
         "skipped": false,
-        "weight": 0
+        "weight": 2.678815600389909
     },
     "9": {
         "RDDIds": [
             5,
-            3,
             0,
-            2,
-            1
+            3,
+            1,
+            2
         ],
         "cachedRDDs": [
             3
         ],
+        "duration": 0,
         "genstage": false,
         "nominalrate": 0.0,
         "parentsIds": [
@@ -177,10 +206,11 @@
         "RDDIds": [
             4,
             0,
-            2,
-            1
+            1,
+            2
         ],
         "cachedRDDs": [],
+        "duration": 0,
         "genstage": false,
         "nominalrate": 0.0,
         "parentsIds": [],
@@ -194,6 +224,7 @@
             6
         ],
         "cachedRDDs": [],
+        "duration": 0,
         "genstage": false,
         "nominalrate": 0.0,
         "parentsIds": [
@@ -208,13 +239,16 @@
             17
         ],
         "cachedRDDs": [],
+        "duration": 406019,
         "genstage": false,
-        "nominalrate": 0.0,
+        "nominalrate": 49266.56880589332,
         "parentsIds": [
             7
         ],
+        "recordsread": 0.0,
+        "shufflerecordsread": 20003163,
         "skipped": false,
-        "weight": 1
+        "weight": 2.234372036776604
     },
     "13": {
         "RDDIds": [
@@ -223,25 +257,29 @@
             21
         ],
         "cachedRDDs": [],
+        "duration": 226294,
         "genstage": false,
-        "nominalrate": 0.0,
+        "nominalrate": 88394.57961766551,
         "parentsIds": [
             12
         ],
+        "recordsread": 0.0,
+        "shufflerecordsread": 20003163,
         "skipped": false,
-        "weight": 0
+        "weight": 1.817617789247616
     },
     "14": {
         "RDDIds": [
             5,
-            3,
             0,
-            2,
-            1
+            3,
+            1,
+            2
         ],
         "cachedRDDs": [
             3
         ],
+        "duration": 0,
         "genstage": false,
         "nominalrate": 0.0,
         "parentsIds": [
@@ -254,10 +292,11 @@
         "RDDIds": [
             4,
             0,
-            2,
-            1
+            1,
+            2
         ],
         "cachedRDDs": [],
+        "duration": 0,
         "genstage": false,
         "nominalrate": 0.0,
         "parentsIds": [],
@@ -271,6 +310,7 @@
             6
         ],
         "cachedRDDs": [],
+        "duration": 0,
         "genstage": false,
         "nominalrate": 0.0,
         "parentsIds": [
@@ -285,6 +325,7 @@
             17
         ],
         "cachedRDDs": [],
+        "duration": 0,
         "genstage": false,
         "nominalrate": 0.0,
         "parentsIds": [
@@ -296,36 +337,40 @@
     "18": {
         "RDDIds": [
             30,
-            27,
+            26,
             28,
-            23,
-            25,
-            24,
             20,
-            26
+            23,
+            24,
+            27,
+            25
         ],
         "cachedRDDs": [
             23
         ],
+        "duration": 347066,
         "genstage": false,
-        "nominalrate": 0.0,
+        "nominalrate": 57635.04059746562,
         "parentsIds": [
             12
         ],
+        "recordsread": 0.0,
+        "shufflerecordsread": 20003163,
         "skipped": false,
-        "weight": 0
+        "weight": 1.033103213797952
     },
     "19": {
         "RDDIds": [
             5,
-            3,
             0,
-            2,
-            1
+            3,
+            1,
+            2
         ],
         "cachedRDDs": [
             3
         ],
+        "duration": 0,
         "genstage": false,
         "nominalrate": 0.0,
         "parentsIds": [
@@ -338,10 +383,11 @@
         "RDDIds": [
             4,
             0,
-            2,
-            1
+            1,
+            2
         ],
         "cachedRDDs": [],
+        "duration": 0,
         "genstage": false,
         "nominalrate": 0.0,
         "parentsIds": [],
@@ -355,6 +401,7 @@
             6
         ],
         "cachedRDDs": [],
+        "duration": 0,
         "genstage": false,
         "nominalrate": 0.0,
         "parentsIds": [
@@ -369,6 +416,7 @@
             17
         ],
         "cachedRDDs": [],
+        "duration": 0,
         "genstage": false,
         "nominalrate": 0.0,
         "parentsIds": [
@@ -380,23 +428,26 @@
     "23": {
         "RDDIds": [
             29,
-            27,
+            26,
             28,
-            23,
-            25,
-            24,
             20,
-            26
+            23,
+            24,
+            27,
+            25
         ],
         "cachedRDDs": [
             23
         ],
+        "duration": 22978,
         "genstage": false,
-        "nominalrate": 0.0,
+        "nominalrate": 870535.4251893115,
         "parentsIds": [
             12
         ],
+        "recordsread": 20003163,
+        "shufflerecordsread": 0.0,
         "skipped": false,
-        "weight": 0
+        "weight": 1.0
     }
 }
