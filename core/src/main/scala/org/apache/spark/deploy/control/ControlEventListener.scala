@@ -257,6 +257,10 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       } else {
         stageIdToCore(stageId) = controller.computeCoreFirstStage(stage._2)
       }
+      if (stageId == lastStageId) {
+        stageIdToCore(stageId) = controller.fixCoreLastStage(stageId, newDeadline,
+          numRecord.asInstanceOf[Number].longValue)
+      }
       val stageExecNeeded = controller.computeCoreForExecutors(stageIdToCore(stageId),
         stageId == lastStageId).size
       if (executorAvailable.size >= stageExecNeeded) {
@@ -288,7 +292,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     stageWeight = average(List(stageWeight,
       (totaldurationremaining / stageSubmitted.duration) - 1))
     if (stageWeight < 0) stageWeight = 0.0
-    // if (stageWeight == 0.0) lastStageId = stage.stageId
+    if (stageWeight == 0.0) lastStageId = stage.stageId
     stageIdToDuration(stage.stageId) = stageSubmitted.duration
     logInfo("STAGE ID " + stage.stageId +" WEIGHT: " + stageWeight)
     val jobId = stageIdToActiveJobIds(stage.stageId)
@@ -349,6 +353,10 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
         stageIdsToComputeNominalRecord.add(stage.stageId)
       }
       val lastStage = stage.stageId == lastStageId
+      if (stage.stageId == lastStageId) {
+        stageIdToCore(stage.stageId) = controller.fixCoreLastStage(stage.stageId, deadlineStage,
+          stageIdToNumRecords(stage.stageId))
+      }
       // ASK MASTER NEEDED EXECUTORS
       val coreForExecutors = controller.computeCoreForExecutors(stageIdToCore(stage.stageId), lastStage)
       controller.askMasterNeededExecutors(master, firstStageId, coreForExecutors, appid)

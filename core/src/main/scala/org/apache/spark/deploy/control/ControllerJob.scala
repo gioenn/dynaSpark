@@ -79,6 +79,14 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
     conf.set("spark.control.nominalrate", NOMINAL_RATE_RECORD_S.toString)
   }
 
+  def fixCoreLastStage(stageId: Int, deadline: Long, numRecord: Long): Int = {
+    numExecutor = math.ceil(computeCoreStage(deadline, numRecord).toDouble
+      / coreForVM.toDouble).toInt
+    NOMINAL_RATE_RECORD_S = NOMINAL_RATE_RECORD_S * (1 - ((numMaxExecutor - numExecutor)
+      / numMaxExecutor))
+    computeCoreStage(deadline, numRecord)
+  }
+
   def computeCoreStage(deadlineStage: Long, numRecord: Long): Int = {
     logInfo("NumRecords: " + numRecord.toString +
       " DeadlineStage : " + deadlineStage.toString +
