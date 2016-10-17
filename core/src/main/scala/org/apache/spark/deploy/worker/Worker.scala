@@ -583,7 +583,7 @@ private[deploy] class Worker(
       execIdToStageId(executorId) = stageId.toInt
       val controllerExecutor = new ControllerExecutor(
         conf, executorId, deadline, coreMin, coreMax, tasks, core)
-      logInfo("Created ControllerExecutor: %s , %d , %d , %d , %d".format
+      logInfo("Created ControllerExecutor: %s , %d , %d , %d , %f".format
       (executorId, stageId, deadline, tasks, core))
       executorIdToController(executorId) = controllerExecutor
       controllerExecutor.worker = this
@@ -610,8 +610,8 @@ private[deploy] class Worker(
     }
     try {
       val cpuquota = (coresWanted * CPU_PERIOD).toString
-      val commandUpdateDocker = Seq("docker", "update",
-        "--cp='" + cpuquota + "'", appId + "." + execId)
+      val commandUpdateDocker = Seq("docker", "update", "--cpu-period='" + CPU_PERIOD.toString + "'",
+        "--cpu-quota='" + cpuquota + "'", appId + "." + execId)
       logDebug(commandUpdateDocker.toString)
       commandUpdateDocker.run
       execIdToProxy(execId.toString).proxyEndpoint.send(
