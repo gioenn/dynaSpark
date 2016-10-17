@@ -467,7 +467,7 @@ private[deploy] class Worker(
             }.toSeq)
           appDirectories(appId) = appLocalDirs
 
-          val cpuquota = (cores * CPU_PERIOD).toString
+          val cpuquota = math.ceil(cores * CPU_PERIOD).toInt.toString
           val driverUrl = appDesc.command.arguments(1)
           logInfo("CREATING PROXY FOR DRIVER: " + driverUrl)
           val controllerProxy = new ControllerProxy(rpcEnv, driverUrl, execId)
@@ -609,8 +609,9 @@ private[deploy] class Worker(
       appId = executors.values.map(_.appId).toSet.head
     }
     try {
-      val cpuquota = (coresWanted * CPU_PERIOD).toString
-      val commandUpdateDocker = Seq("docker", "update", "--cpu-period='" + CPU_PERIOD.toString + "'",
+      val cpuquota = math.ceil(coresWanted * CPU_PERIOD).toInt.toString
+      val commandUpdateDocker = Seq("docker", "update",
+        "--cpu-period='" + CPU_PERIOD.toString + "'",
         "--cpu-quota='" + cpuquota + "'", appId + "." + execId)
       logDebug(commandUpdateDocker.toString)
       commandUpdateDocker.run
