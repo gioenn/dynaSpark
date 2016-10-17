@@ -27,7 +27,7 @@ import org.apache.spark.internal.Logging
   */
 class ControllerExecutor
 (conf: SparkConf, executorId: String, deadline: Long,
- coreMin: Int, coreMax: Int, _tasks: Int, core: Int) extends Logging {
+ coreMin: Double, coreMax: Double, _tasks: Int, core: Double) extends Logging {
 
   val K: Double = conf.get("spark.control.k").toDouble
   val Ts: Long = conf.get("spark.control.tsample").toLong
