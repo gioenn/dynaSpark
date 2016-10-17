@@ -52,7 +52,7 @@ class ControllerExecutor
   def start(): Unit = {
     def timerTask() = {
       if (SP < 1.0) SP += Ts.toDouble / deadline.toDouble
-      var nextCore: Int = coreMin
+      var nextCore: Double = coreMin
       if (SP >= 1.0) {
         SP = 1.0
         nextCore = coreMax
@@ -76,7 +76,7 @@ class ControllerExecutor
     timer.cancel()
   }
 
-  def nextAllocation(statx: Int = 3): Int = {
+  def nextAllocation(statx: Int = 3): Double = {
     val csp = K * (SP - (completedTasks / tasks))
     if (statx != 3) {
       cs = coreMin
@@ -85,9 +85,9 @@ class ControllerExecutor
       val csi = csiOld + K * (Ts.toDouble / Ti) * (SP - (completedTasks / tasks))
       cs = math.min(coreMax.toDouble, math.max(coreMin.toDouble, csp + csi))
     }
-    cs = math.ceil(cs / CQ) * CQ
+    // cs = math.ceil(cs / CQ) * CQ
     csiOld = cs - csp
-    math.ceil(cs).toInt
+    cs
   }
 
 }

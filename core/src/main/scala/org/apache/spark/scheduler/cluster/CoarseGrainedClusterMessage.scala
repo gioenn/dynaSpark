@@ -39,21 +39,21 @@ private[spark] object CoarseGrainedClusterMessages {
 
   case class UnBind(executorId: String, stageId: Int) extends CoarseGrainedClusterMessage
 
-  case class ScaleExecutor(appId: String, execId: String, cores: Int)
+  case class ScaleExecutor(appId: String, execId: String, cores: Double)
     extends CoarseGrainedClusterMessage
 
-  case class ExecutorScaled(execId: String, cores: Int, newFreeCores: Int)
+  case class ExecutorScaled(execId: String, cores: Double, newFreeCores: Int)
     extends CoarseGrainedClusterMessage
 
   // ControllerJob to ControllerExecutor (Worker)
   case class InitControllerExecutor
   (executorId: String, stageId: Long,
-   coreMin: Int, coreMax: Int, tasks: Int, deadline: Long, core: Int)
+   coreMin: Double, coreMax: Double, tasks: Int, deadline: Long, core: Double)
   extends CoarseGrainedClusterMessage
 
   // ControllerJob to Master
   case class NeededCoreForExecutors
-  (stageId: Long, coreForExecutors: List[Int], driverUrl: String)
+  (stageId: Long, coreForExecutors: IndexedSeq[Double], driverUrl: String)
   extends CoarseGrainedClusterMessage
 
   // Proxy to driver

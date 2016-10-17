@@ -669,7 +669,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
         workerUrl,
         executorAssigned.executorId,
         stageId,
-        coreMin = 1,
+        coreMin = 0.0,
         maxCore,
         stageIdToDeadline(stageId),
         coreToStart,

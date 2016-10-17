@@ -37,23 +37,24 @@ import org.apache.spark.util.logging.FileAppender
  * This is currently only used in standalone mode.
  */
 private[deploy] class ExecutorRunner(
-    val appId: String,
-    val execId: Int,
-    val appDesc: ApplicationDescription,
-    val cores: Int,
-    val memory: Int,
-    val cpuset: String,
-    val worker: RpcEndpointRef,
-    val workerId: String,
-    val host: String,
-    val webUiPort: Int,
-    val publicAddress: String,
-    val sparkHome: File,
-    val executorDir: File,
-    val workerUrl: String,
-    conf: SparkConf,
-    val appLocalDirs: Seq[String],
-    @volatile var state: ExecutorState.Value)
+                                      val appId: String,
+                                      val execId: Int,
+                                      val appDesc: ApplicationDescription,
+                                      val cores: Int,
+                                      val memory: Int,
+                                      val cpuperiod: String,
+                                      val cpuquota: String,
+                                      val worker: RpcEndpointRef,
+                                      val workerId: String,
+                                      val host: String,
+                                      val webUiPort: Int,
+                                      val publicAddress: String,
+                                      val sparkHome: File,
+                                      val executorDir: File,
+                                      val workerUrl: String,
+                                      conf: SparkConf,
+                                      val appLocalDirs: Seq[String],
+                                      @volatile var state: ExecutorState.Value)
   extends Logging {
 
   private val fullId = appId + "/" + execId
@@ -144,7 +145,7 @@ private[deploy] class ExecutorRunner(
     try {
       // Launch the process
       val builder = CommandUtils.buildProcessBuilder(appDesc.command, new SecurityManager(conf),
-        memory, cpuset, sparkHome.getAbsolutePath, substituteVariables)
+        memory, cpuperiod, cpuquota, sparkHome.getAbsolutePath, substituteVariables)
       val command = builder.command()
       val formattedCommand = command.asScala.mkString("\"", "\" \"", "\"")
       logInfo(s"Launch command: $formattedCommand")

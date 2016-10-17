@@ -145,9 +145,9 @@ class ControllerProxy
         executorStageId = -1
 
       case ExecutorScaled(executorId, cores, newFreeCores) =>
-        val deltaFreeCore = cores - (taskLaunched - taskCompleted)
+        val deltaFreeCore = math.ceil(cores).toInt - (taskLaunched - taskCompleted)
         driver.get.send(ExecutorScaled(executorId, cores, deltaFreeCore))
-        logInfo("CORES: %d, RUNNING: %d, DELTA: %d".format(
+        logInfo("CORES: %f, RUNNING: %d, DELTA: %d".format(
           cores, taskLaunched - taskCompleted, deltaFreeCore))
 
     }

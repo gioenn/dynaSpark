@@ -162,7 +162,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
             case Some(executorData) =>
               executorDataMap(execId) = new ExecutorData(executorData.executorEndpoint,
                 executorData.executorAddress, executorData.executorHost,
-                newFreeCores, cores, executorData.logUrlMap)
+                newFreeCores, math.ceil(cores).toInt, executorData.logUrlMap)
               makeOffers(execId)
             case None =>
               logWarning(s"Scaled not registered executorID $execId")
