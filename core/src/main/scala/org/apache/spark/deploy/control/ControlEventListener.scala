@@ -292,7 +292,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     stageWeight = average(List(stageWeight,
       (totaldurationremaining / stageSubmitted.duration) - 1))
     if (stageWeight < 0) stageWeight = 0.0
-    if (stageWeight == 0.0) lastStageId = stage.stageId
+    // if (stageWeight == 0.0) lastStageId = stage.stageId
     stageIdToDuration(stage.stageId) = stageSubmitted.duration
     logInfo("STAGE ID " + stage.stageId +" WEIGHT: " + stageWeight)
     val jobId = stageIdToActiveJobIds(stage.stageId)
