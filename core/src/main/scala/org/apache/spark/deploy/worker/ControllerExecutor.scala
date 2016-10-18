@@ -85,7 +85,7 @@ class ControllerExecutor
       val csi = csiOld + K * (Ts.toDouble / Ti) * (SP - (completedTasks / tasks))
       cs = math.min(coreMax.toDouble, math.max(coreMin.toDouble, csp + csi))
     }
-    // cs = math.ceil(cs / CQ) * CQ
+    cs = math.ceil(cs / CQ) * CQ
     csiOld = cs - csp
     cs
   }

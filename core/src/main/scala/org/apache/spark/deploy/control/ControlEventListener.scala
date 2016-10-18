@@ -42,11 +42,11 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
   @volatile var endTime = -1L
   var totaldurationremaining = -1L
 
-  val ALPHA: Double = conf.get("spark.control.alpha").toDouble // 0.8
+  val ALPHA: Double = conf.get("spark.control.alpha").toDouble
   val DEADLINE: Int = conf.get("spark.control.deadline").toInt
-  // 1000000
   var executorNeeded: Int = conf.get("spark.control.maxexecutor").toInt
   var coreForVM: Int = conf.get("spark.control.coreforvm").toInt
+  val coreMin: Double = conf.getDouble("spark.control.coremin", 0.0)
 
   // Master
   def master: String = conf.get("spark.master")
@@ -669,7 +669,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
         workerUrl,
         executorAssigned.executorId,
         stageId,
-        coreMin = 0.01,
+        coreMin = coreMin,
         maxCore,
         stageIdToDeadline(stageId),
         coreToStart,
