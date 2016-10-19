@@ -127,7 +127,7 @@ private[deploy] class Worker(
   val execIdToAppId = new HashMap[String, String]
   val executorIdToController = new HashMap[String, ControllerExecutor]
   val execIdToStageId = new HashMap[String, Int]
-  val CPU_PERIOD = conf.getLong("spark.control.cpuquota", 100000)
+  val CPU_PERIOD = conf.getLong("spark.control.cpuperiod", 100000)
 
   val retainedExecutors = conf.getInt("spark.worker.ui.retainedExecutors",
     WorkerWebUI.DEFAULT_RETAINED_EXECUTORS)
