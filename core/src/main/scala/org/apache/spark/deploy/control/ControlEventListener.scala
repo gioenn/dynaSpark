@@ -247,8 +247,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       val controller = jobIdToController(stageIdToActiveJobIds(stageId).head)
       val weight = average(List(stageIdToWeight(stageId),
         (totaldurationremaining / stageIdToDuration(stageId)) - 1))
-      val newDeadline = controller.computeDeadlineStage(stage._2,
-        weight,
+      val newDeadline = controller.computeDeadlineStage(weight,
         System.currentTimeMillis(), ALPHA, DEADLINE)
       stageIdToDeadline(stageId) = newDeadline
       val numRecord = stageIdToNumRecords.getOrElse(stageId, 0)
@@ -321,7 +320,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
 //      if (activeStages.nonEmpty) {
 //        start = start + activeStages.map(x => stageIdToDeadline(x._1)).min
 //      }
-      val deadlineStage = controller.computeDeadlineStage(stage, stageWeight, start, ALPHA, DEADLINE)
+      val deadlineStage = controller.computeDeadlineStage(stageWeight, start, ALPHA, DEADLINE)
       stageIdToDeadline(stage.stageId) = deadlineStage
       logInfo("NOMINAL RATE PASSED = " + stageSubmitted.nominalrate.toString)
       controller.NOMINAL_RATE_RECORD_S = stageSubmitted.nominalrate
@@ -617,8 +616,7 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
       val controller = jobIdToController(stageIdToActiveJobIds(stageId).head)
       val weight = average(List(stageIdToWeight(stageId),
         (totaldurationremaining / stageIdToDuration(stageId)) - 1))
-      val newDeadline = controller.computeDeadlineStage(stage._2,
-        weight,
+      val newDeadline = controller.computeDeadlineStage(weight,
         System.currentTimeMillis(), ALPHA, DEADLINE)
       stageIdToDeadline(stageId) = newDeadline
       val numRecord = stageIdToNumRecords.getOrElse(stageId, 0)

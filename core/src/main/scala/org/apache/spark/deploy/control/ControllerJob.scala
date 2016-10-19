@@ -28,7 +28,7 @@ import org.apache.spark.{SecurityManager, SparkConf}
 import scala.collection.mutable.{HashMap, ListBuffer}
 
 
-class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Logging {
+class ControllerJob(conf: SparkConf, appDeadlineJobMillisecond: Long) extends Logging {
 
   var NOMINAL_RATE_RECORD_S: Double = conf.getDouble("spark.control.nominalrate", 1000.0)
   val OVERSCALE: Int = conf.getInt("spark.control.overscale", 2)
@@ -56,19 +56,19 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
     rpcEnv.stop(controllerEndpoint)
   }
 
-  def computeDeadlineStage(stage: StageInfo, weight: Double, startTime: Long,
+  def computeDeadlineStage(weight: Double, startTime: Long,
                            alpha: Double, deadline: Long): Long = {
-    var deadline = ((deadlineJobMillisecond - startTime) / (weight + 1)).toLong
-    if (deadline < 0) {
+    var stageDeadline = ((appDeadlineJobMillisecond - startTime) / (weight + 1)).toLong
+    if (stageDeadline < 0) {
       logError("ALPHA DEADLINE NEGATIVE -> ALPHA DEADLINE NOT SATISFIED")
-      deadline = (((deadlineJobMillisecond + (1 - alpha) * deadline) - startTime)
+      stageDeadline = (((appDeadlineJobMillisecond + (1 - alpha) * deadline) - startTime)
         / (weight + 1)).toLong
     }
-    if (deadline < 0) {
+    if (stageDeadline < 0) {
       logError("DEADLINE NEGATIVE -> DEADLINE NOT SATISFIED")
-      deadline = DEADLINE_TIMEOUT
+      stageDeadline = DEADLINE_TIMEOUT
     }
-    deadline
+    stageDeadline
   }
 
   def computeNominalRecord(stage: StageInfo, duration: Long, recordsRead: Double): Unit = {
@@ -96,7 +96,7 @@ class ControllerJob(conf: SparkConf, deadlineJobMillisecond: Long) extends Loggi
   }
 
   def computeDeadlineFirstStage(stage: StageInfo, weight: Double): Long = {
-    val deadline = ((deadlineJobMillisecond - stage.submissionTime.get) / (weight + 1)).toLong
+    val deadline = ((appDeadlineJobMillisecond - stage.submissionTime.get) / (weight + 1)).toLong
     if (deadline < 0) {
       logError("DEADLINE NEGATIVE -> DEADLINE NOT SATISFIED")
     }
