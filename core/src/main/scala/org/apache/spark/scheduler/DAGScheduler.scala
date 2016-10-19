@@ -185,12 +185,30 @@ class DAGScheduler(
       fields("totalduration").convertTo[Double]
     var stageJsonIds = appJson.asJsObject.fields.keys.toList.filter(id =>
       appJson.asJsObject.fields(id).asJsObject.fields("nominalrate").convertTo[Double] != 0.0)
-    var recordInput = sc.conf.getLong("spark.control.recordinput", 0)
     var maxRequestedCore = 0
+    val inputMap: HashMap[String, Long] = new HashMap[String, Long]
+    inputMap("0") = sc.conf.getLong("spark.control.inputrecord", 0)
+    val outputMap: HashMap[String, Long] = new HashMap[String, Long]
+    outputMap("0") = (inputMap("0") * appJson.asJsObject.fields("0").asJsObject.
+      fields("beta").convertTo[Double]).toLong
 
+    // FOR EACH STAGE CHECK CORE NEEDED AND UPDATE VALUES
     appJson.asJsObject.fields.keys.toList.foreach(id => {
       controller.NOMINAL_RATE_RECORD_S = appJson.asJsObject.fields(id).asJsObject.
         fields("nominalrate").convertTo[Double]
+      val parentsIds = appJson.asJsObject.fields(id).asJsObject.
+        fields("parentsIds").convertTo[List[Int]]
+      var inputRecord = parentsIds.foldLeft(0L) {
+        (agg, x) => outputMap(x.toString)
+      }
+      if (inputRecord == 0) {
+        inputRecord = parentsIds.foldLeft(0L) {
+          (agg, x) => inputMap(x.toString)
+        }
+      }
+      inputMap(id) = inputRecord
+      outputMap(id) = (inputMap(id) * appJson.asJsObject.fields(id).asJsObject.
+        fields("beta").convertTo[Double]).toLong
       val duration = appJson.asJsObject.fields(id).asJsObject.
         fields("duration").convertTo[Double]
       val weight = average(List(stageJsonIds.size,
@@ -199,10 +217,8 @@ class DAGScheduler(
       currentTime += deadlineStage
       totalDuration -= duration
       stageJsonIds = stageJsonIds.filter(x => x != id)
-      val coreStage = controller.computeCoreStage(deadlineStage, recordInput)
+      val coreStage = controller.computeCoreStage(deadlineStage, inputRecord)
       maxRequestedCore = math.max(coreStage, maxRequestedCore)
-      recordInput = (appJson.asJsObject.fields(id).asJsObject.
-        fields("beta").convertTo[Double] * recordInput).toLong
       val coreForExecutor = controller.computeCoreForExecutors(coreStage, false)
       if (coreForExecutor == IndexedSeq(-1)) {
         return false
@@ -215,11 +231,11 @@ class DAGScheduler(
     true
   }
 
-  if (appJson != null) {
-    if (!checkDeadline()) {
-      sc.stop()
-    }
-  }
+//  if (appJson != null) {
+//    if (!checkDeadline()) {
+//      sc.stop()
+//    }
+//  }
 
   /**
    * Contains the locations that each RDD's partitions are cached on.  This map's keys are RDD ids
