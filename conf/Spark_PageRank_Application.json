@@ -1,153 +1,411 @@
 {
-  "0": {
-    "genstage": false,
-    "nominalrate": 228822.92720251917,
-    "duration": 3148801,
-    "totalduration": 7955866,
-    "parentsIds": [],
-    "skipped": false,
-    "weight": 5
-  },
-  "1": {
-    "genstage": false,
-    "nominalrate": 2684872.036493498,
-    "duration": 311114,
-    "parentsIds": [
-      0
-    ],
-    "skipped": false,
-    "weight": 4
-  },
-  "2": {
-    "genstage": false,
-    "nominalrate": 1142490.4187348632,
-    "duration": 784785,
-    "parentsIds": [
-      0
-    ],
-    "skipped": false,
-    "weight": 4
-  },
-  "3": {
-    "genstage": false,
-    "nominalrate": 1122529.1178838124,
-    "duration": 1119009,
-    "parentsIds": [
-      1,
-      2
-    ],
-    "skipped": false,
-    "weight": 3
-  },
-  "4": {
-    "genstage": false,
-    "nominalrate": 4332509.252870176,
-    "duration": 284351,
-    "parentsIds": [
-      1,
-      2
-    ],
-    "skipped": false,
-    "weight": 3
-  },
-  "5": {
-    "genstage": false,
-    "nominalrate": 1672.7317130696385,
-    "duration": 1043539,
-    "parentsIds": [
-      3,
-      4
-    ],
-    "skipped": false,
-    "weight": 2
-  },
-  "6": {
-    "genstage": false,
-    "nominalrate": 2596794.5102349054,
-    "duration": 555506,
-    "parentsIds": [
-      1,
-      5,
-      2
-    ],
-    "skipped": false,
-    "weight": 1
-  },
-  "7": {
-    "genstage": false,
-    "nominalrate": 2324.41378284,
-    "duration": 647891,
-    "parentsIds": [
-      6,
-      3,
-      4
-    ],
-    "skipped": false,
-    "weight": 0
-  },
-  "8": {
-    "genstage": false,
-    "nominalrate": 0.0,
-    "duration": 0,
-    "parentsIds": [
-      0
-    ],
-    "skipped": true,
-    "weight": 0
-  },
-  "9": {
-    "genstage": false,
-    "nominalrate": 0.0,
-    "duration": 0,
-    "parentsIds": [
-      0
-    ],
-    "skipped": true,
-    "weight": 0
-  },
-  "10": {
-    "genstage": false,
-    "nominalrate": 0.0,
-    "duration": 0,
-    "parentsIds": [
-      2,
-      1
-    ],
-    "skipped": true,
-    "weight": 0
-  },
-  "11": {
-    "genstage": false,
-    "nominalrate": 0.0,
-    "duration": 0,
-    "parentsIds": [
-      2,
-      1
-    ],
-    "skipped": true,
-    "weight": 0
-  },
-  "12": {
-    "genstage": false,
-    "nominalrate": 0.0,
-    "duration": 0,
-    "parentsIds": [
-      3,
-      4
-    ],
-    "skipped": true,
-    "weight": 0
-  },
-  "13": {
-    "genstage": false,
-    "nominalrate": 39978865.1265,
-    "duration": 60870,
-    "parentsIds": [
-      5,
-      2,
-      1
-    ],
-    "skipped": false,
-    "weight": 0
-  }
+    "0": {
+        "RDDIds": [
+            3,
+            0,
+            1,
+            2
+        ],
+        "cachedRDDs": [
+            3
+        ],
+        "duration": 2339276,
+        "genstage": false,
+        "name": "count at GraphLoader.scala:94",
+        "nominalrate": 379055.5201694884,
+        "numtask": 1000,
+        "parentsIds": [],
+        "recordsread": 886715481,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
+        "totalduration": 6641627,
+        "weight": 5.919590292039075
+    },
+    "1": {
+        "RDDIds": [
+            12,
+            0,
+            1,
+            2,
+            3
+        ],
+        "cachedRDDs": [
+            3
+        ],
+        "duration": 280655,
+        "genstage": false,
+        "name": "mapPartitions at GraphImpl.scala:207",
+        "nominalrate": 3159450.146977606,
+        "numtask": 1000,
+        "parentsIds": [
+            0
+        ],
+        "recordsread": 1000,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 423694102,
+        "skipped": false,
+        "weight": 11.66483939356149
+    },
+    "2": {
+        "RDDIds": [
+            6,
+            0,
+            1,
+            2,
+            3
+        ],
+        "cachedRDDs": [
+            3
+        ],
+        "duration": 793790,
+        "genstage": false,
+        "name": "mapPartitions at VertexRDD.scala:356",
+        "nominalrate": 1117065.5727585382,
+        "numtask": 1000,
+        "parentsIds": [
+            0
+        ],
+        "recordsread": 1000,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 826066158,
+        "skipped": false,
+        "weight": 6.033224152483655
+    },
+    "3": {
+        "RDDIds": [
+            20,
+            14,
+            16,
+            9,
+            7,
+            8,
+            13
+        ],
+        "cachedRDDs": [
+            16,
+            9
+        ],
+        "duration": 1000045,
+        "genstage": false,
+        "name": "mapPartitions at VertexRDDImpl.scala:245",
+        "nominalrate": 1249704.0233189508,
+        "numtask": 1000,
+        "parentsIds": [
+            1,
+            2
+        ],
+        "recordsread": 1000,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 1249760260,
+        "shufflerecordswrite": 1000000,
+        "skipped": false,
+        "weight": 4.613880375383108
+    },
+    "4": {
+        "RDDIds": [
+            30,
+            14,
+            16,
+            9,
+            7,
+            26,
+            8,
+            13
+        ],
+        "cachedRDDs": [
+            16,
+            9,
+            26
+        ],
+        "duration": 242353,
+        "genstage": false,
+        "name": "mapPartitions at VertexRDDImpl.scala:245",
+        "nominalrate": 5156776.5201998735,
+        "numtask": 1000,
+        "parentsIds": [
+            1,
+            2
+        ],
+        "recordsread": 1000,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 1000000,
+        "skipped": false,
+        "weight": 7.096314054292705
+    },
+    "5": {
+        "RDDIds": [
+            34,
+            28,
+            21,
+            31,
+            0,
+            32,
+            1,
+            2,
+            18,
+            24,
+            22,
+            3
+        ],
+        "cachedRDDs": [
+            28,
+            18,
+            3
+        ],
+        "duration": 927998,
+        "genstage": false,
+        "name": "mapPartitions at GraphImpl.scala:207",
+        "nominalrate": 2155.177058571247,
+        "numtask": 1000,
+        "parentsIds": [
+            3,
+            4
+        ],
+        "recordsread": 1000,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 2000000,
+        "shufflerecordswrite": 423577744,
+        "skipped": false,
+        "weight": 3.06978032280242
+    },
+    "6": {
+        "RDDIds": [
+            42,
+            36,
+            14,
+            16,
+            38,
+            9,
+            7,
+            26,
+            8,
+            35,
+            40,
+            13
+        ],
+        "cachedRDDs": [
+            16,
+            38,
+            9,
+            26
+        ],
+        "duration": 440644,
+        "genstage": false,
+        "name": "mapPartitions at VertexRDDImpl.scala:245",
+        "nominalrate": 3797482.7842884506,
+        "numtask": 1000,
+        "parentsIds": [
+            1,
+            5,
+            2
+        ],
+        "recordsread": 3000,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 423577744,
+        "shufflerecordswrite": 1000000,
+        "skipped": false,
+        "weight": 2.699959604578753
+    },
+    "7": {
+        "RDDIds": [
+            45,
+            28,
+            21,
+            31,
+            44,
+            0,
+            32,
+            1,
+            2,
+            18,
+            24,
+            22,
+            3,
+            43
+        ],
+        "cachedRDDs": [
+            45,
+            28,
+            44,
+            18,
+            3
+        ],
+        "duration": 550091,
+        "genstage": false,
+        "name": "foreachPartition at PageRank.scala:155",
+        "nominalrate": 5453.643124501219,
+        "numtask": 1000,
+        "parentsIds": [
+            6,
+            3,
+            4
+        ],
+        "recordsread": 1000,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 2000000,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
+        "weight": 1.5606945032730948
+    },
+    "8": {
+        "RDDIds": [
+            12,
+            0,
+            1,
+            2,
+            3
+        ],
+        "cachedRDDs": [
+            3
+        ],
+        "duration": 0,
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            0
+        ],
+        "skipped": true,
+        "weight": 0
+    },
+    "9": {
+        "RDDIds": [
+            6,
+            0,
+            1,
+            2,
+            3
+        ],
+        "cachedRDDs": [
+            3
+        ],
+        "duration": 0,
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            0
+        ],
+        "skipped": true,
+        "weight": 0
+    },
+    "10": {
+        "RDDIds": [
+            20,
+            14,
+            16,
+            9,
+            7,
+            8,
+            13
+        ],
+        "cachedRDDs": [
+            16,
+            9
+        ],
+        "duration": 0,
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            2,
+            1
+        ],
+        "skipped": true,
+        "weight": 0
+    },
+    "11": {
+        "RDDIds": [
+            30,
+            14,
+            16,
+            9,
+            7,
+            26,
+            8,
+            13
+        ],
+        "cachedRDDs": [
+            16,
+            9
+        ],
+        "duration": 0,
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            2,
+            1
+        ],
+        "skipped": true,
+        "weight": 0
+    },
+    "12": {
+        "RDDIds": [
+            34,
+            28,
+            21,
+            31,
+            0,
+            32,
+            1,
+            2,
+            18,
+            24,
+            22,
+            3
+        ],
+        "cachedRDDs": [
+            18,
+            3
+        ],
+        "duration": 0,
+        "genstage": false,
+        "nominalrate": 0.0,
+        "parentsIds": [
+            3,
+            4
+        ],
+        "skipped": true,
+        "weight": 0
+    },
+    "13": {
+        "RDDIds": [
+            46,
+            39,
+            36,
+            14,
+            16,
+            38,
+            9,
+            7,
+            26,
+            8,
+            35,
+            13
+        ],
+        "cachedRDDs": [
+            39,
+            16,
+            38,
+            9
+        ],
+        "duration": 66775,
+        "genstage": false,
+        "name": "saveAsTextFile at pagerankApp.scala:72",
+        "nominalrate": 25059348.618494943,
+        "numtask": 1000,
+        "parentsIds": [
+            5,
+            2,
+            1
+        ],
+        "recordsread": 1000,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
+        "weight": 1.0
+    }
 }
