@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 import scala.annotation.tailrec
-import scala.collection.Map
+import scala.collection.{Map, mutable}
 import scala.collection.mutable.{HashMap, HashSet, Stack}
 import scala.concurrent.duration._
 import scala.language.existentials
@@ -43,8 +43,11 @@ import org.apache.spark.storage.BlockManagerMessages.BlockManagerHeartbeat
 import org.apache.spark.util._
 import spray.json._
 import DefaultJsonProtocol._
+
 import scala.io
-import java.nio.file.{Paths, Files}
+import java.nio.file.{Files, Paths}
+
+import org.apache.spark.deploy.control.ControllerJob
 
 
 /**
@@ -160,11 +163,63 @@ class DAGScheduler(
 
   val stageIdToWeight = new HashMap[Int, Int]
 
-  val jsonFile = "/usr/local/spark/conf/" + sc.appName.replaceAll("[^a-zA-Z0-9.-]", "_") + ".json"
+  val jsonFile = sys.env.getOrElse("SPARK_HOME", ".") +
+    sc.appName.replaceAll("[^a-zA-Z0-9.-]", "_") + ".json"
 
   val appJson = if (Files.exists(Paths.get(jsonFile))) {
     io.Source.fromFile(jsonFile).mkString.parseJson
   } else null
+
+  def average[T](ts: Iterable[T])(implicit num: Numeric[T]): Double = {
+    num.toDouble(ts.sum) / ts.size
+  }
+
+  def checkDeadline(): Boolean = {
+    val deadline = sc.conf.get("spark.control.deadline").toInt
+    val alpha = sc.conf.get("spark.control.alpha").toDouble
+    val appDeadline = System.currentTimeMillis() + (alpha * deadline).toLong
+    val controller: ControllerJob = new ControllerJob(sc.conf, appDeadline)
+
+    var currentTime = System.currentTimeMillis()
+    var totalDuration = appJson.asJsObject.fields("0").asJsObject.
+      fields("totalduration").convertTo[Double]
+    var stageJsonIds = appJson.asJsObject.fields.keys.toList.filter(id =>
+      appJson.asJsObject.fields(id).asJsObject.fields("nominalrate").convertTo[Double] != 0.0)
+    var recordInput = sc.conf.getLong("spark.control.recordinput", 0)
+    var maxRequestedCore = 0
+
+    appJson.asJsObject.fields.keys.toList.foreach(id => {
+      controller.NOMINAL_RATE_RECORD_S = appJson.asJsObject.fields(id).asJsObject.
+        fields("nominalrate").convertTo[Double]
+      val duration = appJson.asJsObject.fields(id).asJsObject.
+        fields("duration").convertTo[Double]
+      val weight = average(List(stageJsonIds.size,
+        (totalDuration / duration) - 1))
+      val deadlineStage = controller.computeDeadlineStage(weight, currentTime, alpha, deadline)
+      currentTime += deadlineStage
+      totalDuration -= duration
+      stageJsonIds = stageJsonIds.filter(x => x != id)
+      val coreStage = controller.computeCoreStage(deadlineStage, recordInput)
+      maxRequestedCore = math.max(coreStage, maxRequestedCore)
+      recordInput = (appJson.asJsObject.fields(id).asJsObject.
+        fields("beta").convertTo[Double] * recordInput).toLong
+      val coreForExecutor = controller.computeCoreForExecutors(coreStage, false)
+      if (coreForExecutor == IndexedSeq(-1)) {
+        return false
+      }
+    })
+    if (maxRequestedCore < (0.8 * controller.coreForVM * controller.numMaxExecutor)) {
+      logInfo("TOTAL CORE >> CORE NEEDED: REDUCE MAX EXECUTOR TO " +
+        math.ceil(maxRequestedCore / controller.coreForVM))
+    }
+    true
+  }
+
+  if (appJson != null) {
+    if (!checkDeadline()) {
+      sc.stop()
+    }
+  }
 
   /**
    * Contains the locations that each RDD's partitions are cached on.  This map's keys are RDD ids
@@ -1075,7 +1130,7 @@ class DAGScheduler(
         return
     }
 
-    if (tasks.size > 0) {
+    if (tasks.nonEmpty) {
       logInfo("Submitting " + tasks.size + " missing tasks from " + stage + " (" + stage.rdd + ")")
       stage.pendingPartitions ++= tasks.map(_.partitionId)
       logDebug("New pending partitions: " + stage.pendingPartitions)
