@@ -219,13 +219,32 @@ class DAGScheduler(
           stageJson.fields("shufflerecordsread").convertTo[Long]
         val recordsWriteProfile = stageJson.fields("recordswrite").convertTo[Long] +
           stageJson.fields("shufflerecordswrite").convertTo[Long]
+        val parentsIds = stageJson.fields("parentsIds").convertTo[List[Int]]
 
         // FILTERING FACTOR
         var beta = 1.0
-        if(recordsWriteProfile == 0L) {
-           beta = recordsReadProfile.toDouble / inputRecordProfile
+        if (recordsWriteProfile == 0L) {
+          beta = recordsReadProfile.toDouble / inputRecordProfile
         } else if (recordsReadProfile != numTaskProfile) {
           beta = recordsWriteProfile.toDouble / recordsReadProfile
+        } else {
+          var inputRecord = parentsIds.foldLeft(0L) {
+            (agg, x) => {
+              val stageJson = appJson.asJsObject.fields(x.toString).asJsObject
+              stageJson.fields("recordswrite").convertTo[Long] +
+                stageJson.fields("shufflerecordswrite").convertTo[Long]
+            }
+          }
+          if (inputRecord != 0) {
+            inputRecord = parentsIds.foldLeft(0L) {
+              (agg, x) => {
+                val stageJson = appJson.asJsObject.fields(x.toString).asJsObject
+                stageJson.fields("recordsread").convertTo[Long] +
+                  stageJson.fields("shufflerecordsread").convertTo[Long]
+              }
+            }
+          }
+          beta = recordsWriteProfile.toDouble / inputRecord
         }
 
         var inputRecord = 0L
@@ -233,7 +252,6 @@ class DAGScheduler(
           val recordForTask = math.ceil(inputRecordApp * beta / numTaskApp).toLong
           inputRecord = recordForTask * numTaskApp
         } else {
-          val parentsIds = stageJson.fields("parentsIds").convertTo[List[Int]]
           inputRecord = parentsIds.foldLeft(0L) {
             (agg, x) => outputMap(x.toString) * numTaskApp
           }
