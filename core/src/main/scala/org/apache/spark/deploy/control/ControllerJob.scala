@@ -33,6 +33,7 @@ class ControllerJob(conf: SparkConf, appDeadlineJobMillisecond: Long) extends Lo
   var NOMINAL_RATE_RECORD_S: Double = conf.getDouble("spark.control.nominalrate", 1000.0)
   val OVERSCALE: Int = conf.getInt("spark.control.overscale", 2)
   val minCoreExec: Int = conf.getInt("spark.control.mincore", 2)
+  val CQ: Double = conf.getDouble("spark.control.corequantum", 0.05)
 
   val NOMINAL_RATE_DATA_S: Double = conf.getDouble(
     "spark.control.nominalratedata", 48000000.0)
@@ -159,7 +160,7 @@ class ControllerJob(conf: SparkConf, appDeadlineJobMillisecond: Long) extends Lo
       coresToStart = math.ceil(coresToBeAllocated.toDouble / OVERSCALE).toInt
       numExecutor = numMaxExecutor
       (1 to numMaxExecutor).map { x =>
-        coresToStart / numExecutor.toDouble
+        math.ceil((coresToStart / numExecutor.toDouble) / CQ) * CQ
       }
     }
   }
