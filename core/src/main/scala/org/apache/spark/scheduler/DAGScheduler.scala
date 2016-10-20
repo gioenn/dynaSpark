@@ -248,13 +248,14 @@ class DAGScheduler(
           inputRecord = recordForTask * numTaskApp
         } else {
           inputRecord = parentsIds.foldLeft(0L) {
-            (agg, x) => outputMap(x.toString) * numTaskApp
+            (agg, x) => outputMap(x.toString)
           }
           if (inputRecord == 0L) {
             inputRecord = parentsIds.foldLeft(0L) {
-              (agg, x) => inputMap(x.toString) * numTaskApp
+              (agg, x) => inputMap(x.toString)
             }
           }
+          inputRecord = inputRecord * numTaskApp
         }
 
         controller.NOMINAL_RATE_RECORD_S = stageJson.fields("nominalrate").convertTo[Double]
