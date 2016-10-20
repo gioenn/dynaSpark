@@ -232,7 +232,7 @@ class DAGScheduler(
             (agg, x) => appJson.asJsObject.fields(x.toString).asJsObject.fields("recordswrite").convertTo[Long] +
               appJson.asJsObject.fields(x.toString).asJsObject.fields("shufflerecordswrite").convertTo[Long]
           }
-          if (inputRecord != 0) {
+          if (inputRecord == 0L) {
             inputRecord = parentsIds.foldLeft(0L) {
               (agg, x) => appJson.asJsObject.fields(x.toString).asJsObject.fields("recordsread").convertTo[Long] +
                 appJson.asJsObject.fields(x.toString).asJsObject.fields("shufflerecordsread").convertTo[Long]
