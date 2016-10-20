@@ -179,8 +179,7 @@ class DAGScheduler(
     val deadline = sc.conf.get("spark.control.deadline").toInt
     val alpha = sc.conf.get("spark.control.alpha").toDouble
     val numTaskApp = sc.conf.get("spark.control.numtask").toLong
-    val inputRecord = sc.conf.getLong("spark.control.inputrecord", 0)
-    val recordForTask = math.ceil(inputRecord / numTaskApp).toLong
+    val inputRecordApp = sc.conf.getLong("spark.control.inputrecord", 0)
     val appDeadline = System.currentTimeMillis() + (alpha * deadline).toLong
     val controller: ControllerJob = new ControllerJob(sc.conf, appDeadline)
 
@@ -190,6 +189,9 @@ class DAGScheduler(
       fields("totalduration").convertTo[Double]
     var stageJsonIds = appJson.asJsObject.fields.keys.toList.filter(id =>
       appJson.asJsObject.fields(id).asJsObject.fields("nominalrate").convertTo[Double] != 0.0)
+
+    val inputRecordProfile = appJson.asJsObject.fields("0").asJsObject.
+      fields("inputrecord").convertTo[Long]
 
     // MAX REQUESTED CORE FOR BETTER NUM MAX EXECUTOR
     var maxRequestedCore = 0
@@ -207,9 +209,10 @@ class DAGScheduler(
       logInfo("SID " + id + " " + stageJson.prettyPrint)
       // IF GENSTAGE OUTPUT IS INPUTRECORD TO GENERATE
       if (stageJson.fields("genstage").convertTo[Boolean]) {
-        outputMap(id) = inputRecord
+        outputMap(id) = inputRecordApp
         val duration = stageJson.fields("duration").convertTo[Double]
         totalDuration -= duration
+
       } else if (!stageJson.fields("skipped").convertTo[Boolean]) {
         val numTaskProfile = stageJson.fields("numtask").convertTo[Long]
         val recordsReadProfile = stageJson.fields("recordsread").convertTo[Long] +
@@ -218,10 +221,16 @@ class DAGScheduler(
           stageJson.fields("shufflerecordswrite").convertTo[Long]
 
         // FILTERING FACTOR
-        val beta = recordsWriteProfile / recordsReadProfile
-
+        var beta = 0L
+        if(recordsWriteProfile == 0L) {
+           beta = recordsReadProfile / inputRecordProfile
+        } else {
+          beta = recordsWriteProfile / recordsReadProfile
+        }
+        
         var inputRecord = 0L
         if (id == "0") {
+          val recordForTask = math.ceil(inputRecordApp * beta / numTaskApp).toLong
           inputRecord = recordForTask * numTaskApp
         } else {
           val parentsIds = stageJson.fields("parentsIds").convertTo[List[Int]]
