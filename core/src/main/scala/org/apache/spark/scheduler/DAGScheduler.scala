@@ -175,6 +175,7 @@ class DAGScheduler(
   }
 
   def checkDeadline(): Boolean = {
+    var feasibility = true
     val deadline = sc.conf.get("spark.control.deadline").toInt
     val alpha = sc.conf.get("spark.control.alpha").toDouble
     val numtask = sc.conf.get("spark.control.numtask").toLong
@@ -254,7 +255,9 @@ class DAGScheduler(
         maxRequestedCore = math.max(coreStage, maxRequestedCore)
         val coreForExecutor = controller.computeCoreForExecutors(coreStage, false)
         if (coreForExecutor == IndexedSeq(-1)) {
-          return false
+          controller.numMaxExecutor = math.ceil(coreStage.toDouble /
+            controller.coreForVM.toDouble).toInt
+          feasibility = false
         }
       }
     })
@@ -263,15 +266,7 @@ class DAGScheduler(
       logInfo("TOTAL CORE >> CORE NEEDED: REDUCE MAX EXECUTOR TO " +
         math.ceil(maxRequestedCore / controller.coreForVM))
     }
-    true
-  }
-
-  if (appJson != null) {
-    logInfo("LOADED JSON FOR APP: " + jsonFile)
-    if (!checkDeadline()) {
-      stop()
-      sc.stop()
-    }
+    feasibility
   }
 
   /**
@@ -305,6 +300,13 @@ class DAGScheduler(
 
   private[scheduler] val eventProcessLoop = new DAGSchedulerEventProcessLoop(this)
   taskScheduler.setDAGScheduler(this)
+
+  if (appJson != null) {
+    logInfo("LOADED JSON FOR APP: " + jsonFile)
+    if (!checkDeadline()) {
+      stop()
+    }
+  }
 
   /**
    * Called by the TaskSetManager to report task's starting.
