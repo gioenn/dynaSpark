@@ -200,22 +200,20 @@ class DAGScheduler(
 
     // FOR EACH STAGE CHECK CORE NEEDED AND UPDATE VALUES
     appJson.asJsObject.fields.keys.toList.foreach(id => {
+      // STAGE JSON
+      val stageJson = appJson.asJsObject.fields(id).asJsObject
+      
       // IF GENSTAGE OUTPUT IS INPUTRECORD TO GENERATE
-      if (appJson.asJsObject.fields(id).asJsObject.
-        fields("genstage").convertTo[Boolean]) {
+      if (stageJson.fields("genstage").convertTo[Boolean]) {
         outputMap(id) = inputrecord
-        val duration = appJson.asJsObject.fields(id).asJsObject.
-          fields("duration").convertTo[Double]
+        val duration = stageJson.fields("duration").convertTo[Double]
         totalDuration -= duration
       } else {
-        val numtask = appJson.asJsObject.fields(id).asJsObject.
-          fields("numtask").convertTo[Long]
-        val recordsReadProfile = appJson.asJsObject.fields(id).asJsObject.
-          fields("recordsread").convertTo[Long] + appJson.asJsObject.fields(id).asJsObject.
-          fields("shufflerecordsread").convertTo[Long]
-        val recordsWriteProfile = appJson.asJsObject.fields(id).asJsObject.
-          fields("recordswrite").convertTo[Long] + appJson.asJsObject.fields(id).asJsObject.
-          fields("shufflerecordswrite").convertTo[Long]
+        val numtask = stageJson.fields("numtask").convertTo[Long]
+        val recordsReadProfile = stageJson.fields("recordsread").convertTo[Long] +
+          stageJson.fields("shufflerecordsread").convertTo[Long]
+        val recordsWriteProfile = stageJson.fields("recordswrite").convertTo[Long] +
+          stageJson.fields("shufflerecordswrite").convertTo[Long]
 
         // FILTERING FACTOR
         val beta = recordsWriteProfile / recordsReadProfile
@@ -224,8 +222,7 @@ class DAGScheduler(
         if (id == "0") {
           inputRecord = recordForTask * numtask
         } else {
-          val parentsIds = appJson.asJsObject.fields(id).asJsObject.
-            fields("parentsIds").convertTo[List[Int]]
+          val parentsIds = stageJson.fields("parentsIds").convertTo[List[Int]]
           inputRecord = parentsIds.foldLeft(0L) {
             (agg, x) => outputMap(x.toString) * numtask
           }
@@ -236,12 +233,10 @@ class DAGScheduler(
           }
         }
 
-        controller.NOMINAL_RATE_RECORD_S = appJson.asJsObject.fields(id).asJsObject.
-          fields("nominalrate").convertTo[Double]
+        controller.NOMINAL_RATE_RECORD_S = stageJson.fields("nominalrate").convertTo[Double]
 
         // COMPUTE DEADLINE
-        val duration = appJson.asJsObject.fields(id).asJsObject.
-          fields("duration").convertTo[Double]
+        val duration = stageJson.fields("duration").convertTo[Double]
         val weight = average(List(stageJsonIds.size,
           (totalDuration / duration) - 1))
         val deadlineStage = controller.computeDeadlineStage(weight, currentTime, alpha, deadline)
