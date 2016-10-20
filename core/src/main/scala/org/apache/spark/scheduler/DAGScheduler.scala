@@ -229,19 +229,13 @@ class DAGScheduler(
           beta = recordsWriteProfile.toDouble / recordsReadProfile
         } else {
           var inputRecord = parentsIds.foldLeft(0L) {
-            (agg, x) => {
-              val stageJson = appJson.asJsObject.fields(x.toString).asJsObject
-              stageJson.fields("recordswrite").convertTo[Long] +
-                stageJson.fields("shufflerecordswrite").convertTo[Long]
-            }
+            (agg, x) => appJson.asJsObject.fields(x.toString).asJsObject.fields("recordswrite").convertTo[Long] +
+              appJson.asJsObject.fields(x.toString).asJsObject.fields("shufflerecordswrite").convertTo[Long]
           }
           if (inputRecord != 0) {
             inputRecord = parentsIds.foldLeft(0L) {
-              (agg, x) => {
-                val stageJson = appJson.asJsObject.fields(x.toString).asJsObject
-                stageJson.fields("recordsread").convertTo[Long] +
-                  stageJson.fields("shufflerecordsread").convertTo[Long]
-              }
+              (agg, x) => appJson.asJsObject.fields(x.toString).asJsObject.fields("recordsread").convertTo[Long] +
+                appJson.asJsObject.fields(x.toString).asJsObject.fields("shufflerecordsread").convertTo[Long]
             }
           }
           logInfo(inputRecord.toString)
