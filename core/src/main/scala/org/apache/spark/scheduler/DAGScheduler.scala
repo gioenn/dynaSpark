@@ -263,6 +263,8 @@ class DAGScheduler(
         } else {
           outputMap(id) = ((inputRecord / numTaskApp) * beta).toLong
         }
+        logInfo(inputMap.toString())
+        logInfo(outputMap.toString())
         currentTime += deadlineStage
         totalDuration -= duration
         stageJsonIds = stageJsonIds.filter(x => x != id)
