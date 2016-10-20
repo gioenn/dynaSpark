@@ -177,53 +177,92 @@ class DAGScheduler(
   def checkDeadline(): Boolean = {
     val deadline = sc.conf.get("spark.control.deadline").toInt
     val alpha = sc.conf.get("spark.control.alpha").toDouble
+    val numtask = sc.conf.get("spark.control.numtask").toLong
+    val inputrecord = sc.conf.getLong("spark.control.inputrecord", 0)
+    val recordForTask = math.ceil(inputrecord / numtask).toLong
     val appDeadline = System.currentTimeMillis() + (alpha * deadline).toLong
     val controller: ControllerJob = new ControllerJob(sc.conf, appDeadline)
 
+    // APP STATE PROGRESS VAR
     var currentTime = System.currentTimeMillis()
     var totalDuration = appJson.asJsObject.fields("0").asJsObject.
       fields("totalduration").convertTo[Double]
     var stageJsonIds = appJson.asJsObject.fields.keys.toList.filter(id =>
       appJson.asJsObject.fields(id).asJsObject.fields("nominalrate").convertTo[Double] != 0.0)
+
+    // MAX REQUESTED CORE FOR BETTER NUM MAX EXECUTOR
     var maxRequestedCore = 0
+
+    // INPUT / OUTPUT Normalized by numtask
     val inputMap: HashMap[String, Long] = new HashMap[String, Long]
-    inputMap("0") = sc.conf.getLong("spark.control.inputrecord", 0)
     val outputMap: HashMap[String, Long] = new HashMap[String, Long]
-    outputMap("0") = (inputMap("0") * appJson.asJsObject.fields("0").asJsObject.
-      fields("beta").convertTo[Double]).toLong
+
 
     // FOR EACH STAGE CHECK CORE NEEDED AND UPDATE VALUES
     appJson.asJsObject.fields.keys.toList.foreach(id => {
-      controller.NOMINAL_RATE_RECORD_S = appJson.asJsObject.fields(id).asJsObject.
-        fields("nominalrate").convertTo[Double]
-      val parentsIds = appJson.asJsObject.fields(id).asJsObject.
-        fields("parentsIds").convertTo[List[Int]]
-      var inputRecord = parentsIds.foldLeft(0L) {
-        (agg, x) => outputMap(x.toString)
-      }
-      if (inputRecord == 0) {
-        inputRecord = parentsIds.foldLeft(0L) {
-          (agg, x) => inputMap(x.toString)
+      // IF GENSTAGE OUTPUT IS INPUTRECORD TO GENERATE
+      if (appJson.asJsObject.fields(id).asJsObject.
+        fields("genstage").convertTo[Boolean]) {
+        outputMap(id) = inputrecord
+        val duration = appJson.asJsObject.fields(id).asJsObject.
+          fields("duration").convertTo[Double]
+        totalDuration -= duration
+      } else {
+        val numtask = appJson.asJsObject.fields(id).asJsObject.
+          fields("numtask").convertTo[Long]
+        val recordsReadProfile = appJson.asJsObject.fields(id).asJsObject.
+          fields("recordsread").convertTo[Long] + appJson.asJsObject.fields(id).asJsObject.
+          fields("shufflerecordsread").convertTo[Long]
+        val recordsWriteProfile = appJson.asJsObject.fields(id).asJsObject.
+          fields("recordswrite").convertTo[Long] + appJson.asJsObject.fields(id).asJsObject.
+          fields("shufflerecordswrite").convertTo[Long]
+
+        // FILTERING FACTOR
+        val beta = recordsWriteProfile / recordsReadProfile
+
+        var inputRecord = 0L
+        if (id == "0") {
+          inputRecord = recordForTask * numtask
+        } else {
+          val parentsIds = appJson.asJsObject.fields(id).asJsObject.
+            fields("parentsIds").convertTo[List[Int]]
+          inputRecord = parentsIds.foldLeft(0L) {
+            (agg, x) => outputMap(x.toString) * numtask
+          }
+          if (inputRecord == 0L) {
+            inputRecord = parentsIds.foldLeft(0L) {
+              (agg, x) => inputMap(x.toString) * numtask
+            }
+          }
+        }
+
+        controller.NOMINAL_RATE_RECORD_S = appJson.asJsObject.fields(id).asJsObject.
+          fields("nominalrate").convertTo[Double]
+
+        // COMPUTE DEADLINE
+        val duration = appJson.asJsObject.fields(id).asJsObject.
+          fields("duration").convertTo[Double]
+        val weight = average(List(stageJsonIds.size,
+          (totalDuration / duration) - 1))
+        val deadlineStage = controller.computeDeadlineStage(weight, currentTime, alpha, deadline)
+
+        // UPDATE RECORD AND APP STATE
+        inputMap(id) = inputRecord
+        outputMap(id) = inputMap(id) * beta
+        currentTime += deadlineStage
+        totalDuration -= duration
+        stageJsonIds = stageJsonIds.filter(x => x != id)
+
+        // COMPUTE CORE AND CHECK FEASIBILITY
+        val coreStage = controller.computeCoreStage(deadlineStage, inputRecord)
+        maxRequestedCore = math.max(coreStage, maxRequestedCore)
+        val coreForExecutor = controller.computeCoreForExecutors(coreStage, false)
+        if (coreForExecutor == IndexedSeq(-1)) {
+          return false
         }
       }
-      inputMap(id) = inputRecord
-      outputMap(id) = (inputMap(id) * appJson.asJsObject.fields(id).asJsObject.
-        fields("beta").convertTo[Double]).toLong
-      val duration = appJson.asJsObject.fields(id).asJsObject.
-        fields("duration").convertTo[Double]
-      val weight = average(List(stageJsonIds.size,
-        (totalDuration / duration) - 1))
-      val deadlineStage = controller.computeDeadlineStage(weight, currentTime, alpha, deadline)
-      currentTime += deadlineStage
-      totalDuration -= duration
-      stageJsonIds = stageJsonIds.filter(x => x != id)
-      val coreStage = controller.computeCoreStage(deadlineStage, inputRecord)
-      maxRequestedCore = math.max(coreStage, maxRequestedCore)
-      val coreForExecutor = controller.computeCoreForExecutors(coreStage, false)
-      if (coreForExecutor == IndexedSeq(-1)) {
-        return false
-      }
     })
+    // SUGGEST MAX EXECUTOR
     if (maxRequestedCore < (0.8 * controller.coreForVM * controller.numMaxExecutor)) {
       logInfo("TOTAL CORE >> CORE NEEDED: REDUCE MAX EXECUTOR TO " +
         math.ceil(maxRequestedCore / controller.coreForVM))
@@ -231,11 +270,11 @@ class DAGScheduler(
     true
   }
 
-//  if (appJson != null) {
-//    if (!checkDeadline()) {
-//      sc.stop()
-//    }
-//  }
+  if (appJson != null) {
+    if (!checkDeadline()) {
+      sc.stop()
+    }
+  }
 
   /**
    * Contains the locations that each RDD's partitions are cached on.  This map's keys are RDD ids
