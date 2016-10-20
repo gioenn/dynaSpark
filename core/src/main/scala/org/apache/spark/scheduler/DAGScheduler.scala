@@ -246,7 +246,7 @@ class DAGScheduler(
           }
           beta = recordsWriteProfile.toDouble / inputRecord
         }
-
+        logInfo("BETA " + beta.toString)
         var inputRecord = 0L
         if (id == "0") {
           val recordForTask = math.ceil(inputRecordApp * beta / numTaskApp).toLong
