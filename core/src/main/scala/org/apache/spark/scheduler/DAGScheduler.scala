@@ -199,7 +199,8 @@ class DAGScheduler(
 
 
     // FOR EACH STAGE CHECK CORE NEEDED AND UPDATE VALUES
-    appJson.asJsObject.fields.keys.toList.foreach(id => {
+    appJson.asJsObject.fields.keys.toList.
+      sortWith((x, y) => x.toInt < y.toInt).foreach(id => {
       // STAGE JSON
       val stageJson = appJson.asJsObject.fields(id).asJsObject
       logInfo(stageJson.prettyPrint)
