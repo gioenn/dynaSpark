@@ -178,9 +178,9 @@ class DAGScheduler(
     var feasibility = true
     val deadline = sc.conf.get("spark.control.deadline").toInt
     val alpha = sc.conf.get("spark.control.alpha").toDouble
-    val numtask = sc.conf.get("spark.control.numtask").toLong
-    val inputrecord = sc.conf.getLong("spark.control.inputrecord", 0)
-    val recordForTask = math.ceil(inputrecord / numtask).toLong
+    val numTaskApp = sc.conf.get("spark.control.numtask").toLong
+    val inputRecord = sc.conf.getLong("spark.control.inputrecord", 0)
+    val recordForTask = math.ceil(inputRecord / numTaskApp).toLong
     val appDeadline = System.currentTimeMillis() + (alpha * deadline).toLong
     val controller: ControllerJob = new ControllerJob(sc.conf, appDeadline)
 
@@ -207,11 +207,11 @@ class DAGScheduler(
       logInfo("SID " + id + " " + stageJson.prettyPrint)
       // IF GENSTAGE OUTPUT IS INPUTRECORD TO GENERATE
       if (stageJson.fields("genstage").convertTo[Boolean]) {
-        outputMap(id) = inputrecord
+        outputMap(id) = inputRecord
         val duration = stageJson.fields("duration").convertTo[Double]
         totalDuration -= duration
       } else if (!stageJson.fields("skipped").convertTo[Boolean]) {
-        val numtask = stageJson.fields("numtask").convertTo[Long]
+        val numTaskProfile = stageJson.fields("numtask").convertTo[Long]
         val recordsReadProfile = stageJson.fields("recordsread").convertTo[Long] +
           stageJson.fields("shufflerecordsread").convertTo[Long]
         val recordsWriteProfile = stageJson.fields("recordswrite").convertTo[Long] +
@@ -222,15 +222,15 @@ class DAGScheduler(
 
         var inputRecord = 0L
         if (id == "0") {
-          inputRecord = recordForTask * numtask
+          inputRecord = recordForTask * numTaskApp
         } else {
           val parentsIds = stageJson.fields("parentsIds").convertTo[List[Int]]
           inputRecord = parentsIds.foldLeft(0L) {
-            (agg, x) => outputMap(x.toString) * numtask
+            (agg, x) => outputMap(x.toString) * numTaskApp
           }
           if (inputRecord == 0L) {
             inputRecord = parentsIds.foldLeft(0L) {
-              (agg, x) => inputMap(x.toString) * numtask
+              (agg, x) => inputMap(x.toString) * numTaskApp
             }
           }
         }
@@ -244,8 +244,12 @@ class DAGScheduler(
         val deadlineStage = controller.computeDeadlineStage(weight, currentTime, alpha, deadline)
 
         // UPDATE RECORD AND APP STATE
-        inputMap(id) = inputRecord
-        outputMap(id) = inputMap(id) * beta
+        if (recordsReadProfile == numTaskApp) {
+          inputMap(id) = numTaskApp
+        } else {
+          inputMap(id) = inputRecord / numTaskApp
+        }
+        outputMap(id) = (inputRecord * beta) / numTaskApp
         currentTime += deadlineStage
         totalDuration -= duration
         stageJsonIds = stageJsonIds.filter(x => x != id)
