@@ -225,16 +225,14 @@ class DAGScheduler(
         var beta = 1.0
         if (recordsWriteProfile == 0L) {
           beta = recordsReadProfile.toDouble / inputRecordProfile
-        } else if (recordsReadProfile != numTaskProfile) {
-          beta = recordsWriteProfile.toDouble / recordsReadProfile
         } else {
           var inputRecord = parentsIds.foldLeft(0L) {
-            (agg, x) => appJson.asJsObject.fields(x.toString).asJsObject.fields("recordswrite").convertTo[Long] +
+            (agg, x) => agg + appJson.asJsObject.fields(x.toString).asJsObject.fields("recordswrite").convertTo[Long] +
               appJson.asJsObject.fields(x.toString).asJsObject.fields("shufflerecordswrite").convertTo[Long]
           }
           if (inputRecord == 0L) {
             inputRecord = parentsIds.foldLeft(0L) {
-              (agg, x) => appJson.asJsObject.fields(x.toString).asJsObject.fields("recordsread").convertTo[Long] +
+              (agg, x) => agg + appJson.asJsObject.fields(x.toString).asJsObject.fields("recordsread").convertTo[Long] +
                 appJson.asJsObject.fields(x.toString).asJsObject.fields("shufflerecordsread").convertTo[Long]
             }
           }
@@ -248,11 +246,11 @@ class DAGScheduler(
           inputRecord = recordForTask * numTaskApp
         } else {
           inputRecord = parentsIds.foldLeft(0L) {
-            (agg, x) => outputMap(x.toString)
+            (agg, x) => agg + outputMap(x.toString)
           }
           if (inputRecord == 0L) {
             inputRecord = parentsIds.foldLeft(0L) {
-              (agg, x) => inputMap(x.toString)
+              (agg, x) => agg + inputMap(x.toString)
             }
           }
           inputRecord = inputRecord * numTaskApp
