@@ -261,7 +261,7 @@ class DAGScheduler(
         if (recordsWriteProfile == 0L) {
           outputMap(id) = 0
         } else {
-          outputMap(id) = ((inputRecord * beta) / numTaskApp).toLong
+          outputMap(id) = ((inputRecord / numTaskApp) * beta).toLong
         }
         currentTime += deadlineStage
         totalDuration -= duration
