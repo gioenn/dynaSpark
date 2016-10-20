@@ -209,7 +209,7 @@ class DAGScheduler(
       logInfo("SID " + id + " " + stageJson.prettyPrint)
       // IF GENSTAGE OUTPUT IS INPUTRECORD TO GENERATE
       if (stageJson.fields("genstage").convertTo[Boolean]) {
-        outputMap(id) = inputRecordApp
+        outputMap(id) = inputRecordApp / numTaskApp
         val duration = stageJson.fields("duration").convertTo[Double]
         totalDuration -= duration
 
