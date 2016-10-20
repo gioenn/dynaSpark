@@ -197,8 +197,8 @@ class DAGScheduler(
     var maxRequestedCore = 0
 
     // INPUT / OUTPUT Normalized by numtask
-    val inputMap: HashMap[String, Long] = new HashMap[String, Long]
-    val outputMap: HashMap[String, Long] = new HashMap[String, Long]
+    val inputMap: HashMap[String, Double] = new HashMap[String, Double]
+    val outputMap: HashMap[String, Double] = new HashMap[String, Double]
 
 
     // FOR EACH STAGE CHECK CORE NEEDED AND UPDATE VALUES
@@ -240,16 +240,16 @@ class DAGScheduler(
           beta = recordsWriteProfile.toDouble / inputRecord
         }
         logInfo("BETA " + beta.toString)
-        var inputRecord = 0L
+        var inputRecord = 0.0
         if (id == "0") {
           val recordForTask = math.ceil(inputRecordApp * beta / numTaskApp).toLong
           inputRecord = recordForTask * numTaskApp
         } else {
-          inputRecord = parentsIds.foldLeft(0L) {
+          inputRecord = parentsIds.foldLeft(0.0) {
             (agg, x) => agg + outputMap(x.toString)
           }
           if (inputRecord == 0L) {
-            inputRecord = parentsIds.foldLeft(0L) {
+            inputRecord = parentsIds.foldLeft(0.0) {
               (agg, x) => agg + inputMap(x.toString)
             }
           }
@@ -273,7 +273,7 @@ class DAGScheduler(
         if (recordsWriteProfile == 0L) {
           outputMap(id) = 0
         } else {
-          outputMap(id) = ((inputRecord / numTaskApp) * beta).toLong
+          outputMap(id) = (inputRecord / numTaskApp) * beta
         }
         logInfo(inputMap.toString())
         logInfo(outputMap.toString())
@@ -282,7 +282,7 @@ class DAGScheduler(
         stageJsonIds = stageJsonIds.filter(x => x != id)
 
         // COMPUTE CORE AND CHECK FEASIBILITY
-        val coreStage = controller.computeCoreStage(deadlineStage, inputRecord)
+        val coreStage = controller.computeCoreStage(deadlineStage, inputRecord.toLong)
         maxRequestedCore = math.max(coreStage, maxRequestedCore)
         val coreForExecutor = controller.computeCoreForExecutors(coreStage, false)
         if (coreForExecutor == IndexedSeq(-1)) {
