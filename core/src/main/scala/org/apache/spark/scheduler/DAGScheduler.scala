@@ -203,7 +203,7 @@ class DAGScheduler(
       sortWith((x, y) => x.toInt < y.toInt).foreach(id => {
       // STAGE JSON
       val stageJson = appJson.asJsObject.fields(id).asJsObject
-      logInfo(stageJson.prettyPrint)
+      logDebug(stageJson.prettyPrint)
       // IF GENSTAGE OUTPUT IS INPUTRECORD TO GENERATE
       if (stageJson.fields("genstage").convertTo[Boolean]) {
         outputMap(id) = inputrecord
@@ -270,6 +270,7 @@ class DAGScheduler(
     logInfo("LOADED JSON FOR APP: " + jsonFile)
     if (!checkDeadline()) {
       sc.stop()
+      this.stop()
     }
   }
 
