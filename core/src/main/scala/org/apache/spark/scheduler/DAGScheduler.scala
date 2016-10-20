@@ -203,13 +203,13 @@ class DAGScheduler(
       sortWith((x, y) => x.toInt < y.toInt).foreach(id => {
       // STAGE JSON
       val stageJson = appJson.asJsObject.fields(id).asJsObject
-      logDebug(stageJson.prettyPrint)
+      logInfo("SID " + id + " " + stageJson.prettyPrint)
       // IF GENSTAGE OUTPUT IS INPUTRECORD TO GENERATE
       if (stageJson.fields("genstage").convertTo[Boolean]) {
         outputMap(id) = inputrecord
         val duration = stageJson.fields("duration").convertTo[Double]
         totalDuration -= duration
-      } else {
+      } else if (!stageJson.fields("skipped").convertTo[Boolean]) {
         val numtask = stageJson.fields("numtask").convertTo[Long]
         val recordsReadProfile = stageJson.fields("recordsread").convertTo[Long] +
           stageJson.fields("shufflerecordsread").convertTo[Long]
@@ -269,8 +269,8 @@ class DAGScheduler(
   if (appJson != null) {
     logInfo("LOADED JSON FOR APP: " + jsonFile)
     if (!checkDeadline()) {
+      stop()
       sc.stop()
-      this.stop()
     }
   }
 
