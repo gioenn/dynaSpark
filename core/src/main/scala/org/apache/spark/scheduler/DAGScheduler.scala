@@ -223,9 +223,7 @@ class DAGScheduler(
 
         // FILTERING FACTOR
         var beta = 1.0
-        if (recordsWriteProfile == 0L) {
-          beta = recordsReadProfile.toDouble / inputRecordProfile
-        } else if (recordsReadProfile != numTaskProfile) {
+        if (recordsReadProfile != numTaskProfile) {
           beta = recordsWriteProfile.toDouble / recordsReadProfile
         } else {
           var inputRecord = parentsIds.foldLeft(0L) {
