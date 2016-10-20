@@ -221,10 +221,10 @@ class DAGScheduler(
           stageJson.fields("shufflerecordswrite").convertTo[Long]
 
         // FILTERING FACTOR
-        var beta = 0.0
+        var beta = 1.0
         if(recordsWriteProfile == 0L) {
            beta = recordsReadProfile.toDouble / inputRecordProfile
-        } else {
+        } else if (recordsReadProfile != numTaskProfile) {
           beta = recordsWriteProfile.toDouble / recordsReadProfile
         }
 
