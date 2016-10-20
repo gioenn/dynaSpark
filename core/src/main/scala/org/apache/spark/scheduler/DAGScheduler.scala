@@ -168,7 +168,6 @@ class DAGScheduler(
 
   val appJson = if (Files.exists(Paths.get(jsonFile))) {
     io.Source.fromFile(jsonFile).mkString.parseJson
-    logInfo("LOADED JSON FOR APP: " + jsonFile)
   } else null
 
   def average[T](ts: Iterable[T])(implicit num: Numeric[T]): Double = {
@@ -267,6 +266,7 @@ class DAGScheduler(
   }
 
   if (appJson != null) {
+    logInfo("LOADED JSON FOR APP: " + jsonFile)
     if (!checkDeadline()) {
       sc.stop()
     }
