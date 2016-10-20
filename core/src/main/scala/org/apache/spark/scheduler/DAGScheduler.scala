@@ -221,13 +221,13 @@ class DAGScheduler(
           stageJson.fields("shufflerecordswrite").convertTo[Long]
 
         // FILTERING FACTOR
-        var beta = 0L
+        var beta = 0.0
         if(recordsWriteProfile == 0L) {
-           beta = recordsReadProfile / inputRecordProfile
+           beta = recordsReadProfile.toDouble / inputRecordProfile
         } else {
-          beta = recordsWriteProfile / recordsReadProfile
+          beta = recordsWriteProfile.toDouble / recordsReadProfile
         }
-        
+
         var inputRecord = 0L
         if (id == "0") {
           val recordForTask = math.ceil(inputRecordApp * beta / numTaskApp).toLong
@@ -258,7 +258,11 @@ class DAGScheduler(
         } else {
           inputMap(id) = inputRecord / numTaskApp
         }
-        outputMap(id) = (inputRecord * beta) / numTaskApp
+        if (recordsWriteProfile == 0L) {
+          outputMap(id) = 0
+        } else {
+          outputMap(id) = ((inputRecord * beta) / numTaskApp).toLong
+        }
         currentTime += deadlineStage
         totalDuration -= duration
         stageJsonIds = stageJsonIds.filter(x => x != id)
