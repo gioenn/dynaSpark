@@ -242,7 +242,7 @@ class DAGScheduler(
         logInfo("BETA " + beta.toString)
         var inputRecord = 0.0
         if (id == "0") {
-          val recordForTask = (inputRecordApp / numTaskApp) * beta
+          val recordForTask = (inputRecordApp.toDouble / numTaskApp) * beta
           inputRecord = recordForTask * numTaskApp
         } else {
           inputRecord = parentsIds.foldLeft(0.0) {
