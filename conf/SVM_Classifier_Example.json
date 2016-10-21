@@ -12,13 +12,17 @@
         ],
         "duration": 2853,
         "genstage": false,
-        "nominalrate": 73313.78299120234,
+        "name": "first at GeneralizedLinearAlgorithm.scala:204",
+        "nominalrate": 70101.64738871362,
+        "numtask": 1,
         "parentsIds": [],
         "recordsread": 200000,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
         "totalduration": 7620641,
-        "weight": 1338.0487206449352
+        "weight": 1342.0487206449352
     },
     "1": {
         "RDDIds": [
@@ -33,14 +37,18 @@
         ],
         "duration": 1943079,
         "genstage": false,
+        "name": "count at DataValidators.scala:40",
         "nominalrate": 102.92942283870084,
+        "numtask": 1000,
         "parentsIds": [
             0
         ],
         "recordsread": 199979998,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 2.4602363053689533
+        "weight": 7.960236305368953
     },
     "2": {
         "RDDIds": [
@@ -55,14 +63,18 @@
         ],
         "duration": 14591,
         "genstage": false,
-        "nominalrate":  13707.079706668495,
+        "name": "count at GradientDescent.scala:209",
+        "nominalrate": 13707.079706668495,
+        "numtask": 1000,
         "parentsIds": [
             0
         ],
         "recordsread": 179996837,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 194.95922143787266
+        "weight": 199.95922143787266
     },
     "3": {
         "RDDIds": [
@@ -80,14 +92,18 @@
         ],
         "duration": 47511,
         "genstage": false,
-        "nominalrate":  4209.551472290627,
+        "name": "treeAggregate at GradientDescent.scala:239",
+        "nominalrate": 4209.551472290627,
+        "numtask": 1000,
         "parentsIds": [
             0
         ],
         "recordsread": 179996837,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 1000,
         "skipped": false,
-        "weight": 60.566395150596705
+        "weight": 64.5663951505967
     },
     "4": {
         "RDDIds": [
@@ -97,14 +113,18 @@
         "cachedRDDs": [],
         "duration": 3687,
         "genstage": false,
+        "name": "treeAggregate at GradientDescent.scala:239",
         "nominalrate": 271.22321670735016,
+        "numtask": 31,
         "parentsIds": [
             3
         ],
         "recordsread": 0.0,
+        "recordswrite": 0.0,
         "shufflerecordsread": 1000,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 761.6346623270952
+        "weight": 765.6346623270952
     },
     "5": {
         "RDDIds": [
@@ -119,14 +139,18 @@
         ],
         "duration": 505777,
         "genstage": false,
+        "name": "subtract at SVMApp.java:79",
         "nominalrate": 395.431188053233,
+        "numtask": 1000,
         "parentsIds": [
             0
         ],
         "recordsread": 179996837,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 179996837,
         "skipped": false,
-        "weight": 7.544854748238849
+        "weight": 9.544854748238848
     },
     "6": {
         "RDDIds": [
@@ -138,12 +162,16 @@
         "cachedRDDs": [],
         "duration": 2466920,
         "genstage": false,
+        "name": "subtract at SVMApp.java:79",
         "nominalrate": 81072.75469005885,
+        "numtask": 1000,
         "parentsIds": [],
         "recordsread": 200000000,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 200000000,
         "skipped": false,
-        "weight": 3.0343146514682275
+        "weight": 4.534314651468227
     },
     "7": {
         "RDDIds": [
@@ -154,15 +182,19 @@
         "cachedRDDs": [],
         "duration": 1335335,
         "genstage": false,
+        "name": "map at SVMApp.java:99",
         "nominalrate": 284570.4164123609,
+        "numtask": 1000,
         "parentsIds": [
             5,
             6
         ],
         "recordsread": 0.0,
+        "recordswrite": 0.0,
         "shufflerecordsread": 379996837,
+        "shufflerecordswrite": 20003163,
         "skipped": false,
-        "weight": 2.4871017385150544
+        "weight": 3.9871017385150544
     },
     "8": {
         "RDDIds": [
@@ -173,14 +205,18 @@
         "cachedRDDs": [],
         "duration": 298531,
         "genstage": false,
-        "nominalrate":  67005.31268109509,
+        "name": "sortByKey at BinaryClassificationMetrics.scala:153",
+        "nominalrate": 67005.31268109509,
+        "numtask": 1000,
         "parentsIds": [
             7
         ],
         "recordsread": 0.0,
+        "recordswrite": 0.0,
         "shufflerecordsread": 20003163,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 2.678815600389909
+        "weight": 4.678815600389909
     },
     "9": {
         "RDDIds": [
@@ -241,14 +277,18 @@
         "cachedRDDs": [],
         "duration": 406019,
         "genstage": false,
+        "name": "combineByKey at BinaryClassificationMetrics.scala:149",
         "nominalrate": 49266.56880589332,
+        "numtask": 1000,
         "parentsIds": [
             7
         ],
         "recordsread": 0.0,
+        "recordswrite": 0.0,
         "shufflerecordsread": 20003163,
+        "shufflerecordswrite": 20003163,
         "skipped": false,
-        "weight": 2.234372036776604
+        "weight": 3.234372036776604
     },
     "13": {
         "RDDIds": [
@@ -259,14 +299,18 @@
         "cachedRDDs": [],
         "duration": 226294,
         "genstage": false,
+        "name": "collect at BinaryClassificationMetrics.scala:190",
         "nominalrate": 88394.57961766551,
+        "numtask": 1000,
         "parentsIds": [
             12
         ],
         "recordsread": 0.0,
+        "recordswrite": 0.0,
         "shufflerecordsread": 20003163,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 1.817617789247616
+        "weight": 2.817617789247616
     },
     "14": {
         "RDDIds": [
@@ -350,14 +394,18 @@
         ],
         "duration": 347066,
         "genstage": false,
+        "name": "collect at SlidingRDD.scala:81",
         "nominalrate": 57635.04059746562,
+        "numtask": 1002,
         "parentsIds": [
             12
         ],
         "recordsread": 0.0,
+        "recordswrite": 0.0,
         "shufflerecordsread": 20003163,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 1.033103213797952
+        "weight": 1.533103213797952
     },
     "19": {
         "RDDIds": [
@@ -441,12 +489,16 @@
         ],
         "duration": 22978,
         "genstage": false,
+        "name": "aggregate at AreaUnderCurve.scala:45",
         "nominalrate": 870535.4251893115,
+        "numtask": 1001,
         "parentsIds": [
             12
         ],
         "recordsread": 20003163,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
         "weight": 1.0
     }

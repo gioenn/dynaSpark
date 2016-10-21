@@ -1,89 +1,89 @@
 {
-   "0": {
-      "RDDIds": [
-         4,
-         1,
-         0,
-         3,
-         2
-      ],
-      "cachedRDDs": [],
-      "duration": 36908718,
-      "genstage": true,
-      "name": "saveAsTextFile at DataGenerator.scala:140",
-      "nominalrate": 0.0,
-      "numtask": 4000,
-      "parentsIds": [],
-      "recordsread": 0.0,
-      "recordswrite": 0.0,
-      "shufflerecordsread": 0.0,
-      "shufflerecordswrite": 0.0,
-      "skipped": false,
-      "totalduration": 51879060,
-      "weight": 2.702802248509417
-   },
-   "1": {
-      "RDDIds": [
-         10,
-         7,
-         6,
-         5,
-         8,
-         9
-      ],
-      "cachedRDDs": [],
-      "duration": 1147159,
-      "genstage": false,
-      "name": "sortByKey at KVDataTest.scala:158",
-      "nominalrate": 1743437.4833828614,
-      "numtask": 4000,
-      "parentsIds": [],
-      "recordsread": 2000000000,
-      "recordswrite": 0.0,
-      "shufflerecordsread": 0.0,
-      "shufflerecordswrite": 0.0,
-      "skipped": false,
-      "weight": 8.024963845465187
-   },
-   "2": {
-      "RDDIds": [
-         8,
-         7,
-         6,
-         5
-      ],
-      "cachedRDDs": [],
-      "duration": 4058999,
-      "genstage": false,
-      "name": "map at DataGenerator.scala:145",
-      "nominalrate": 492732.32144181366,
-      "numtask": 4000,
-      "parentsIds": [],
-      "recordsread": 2000000000,
-      "recordswrite": 0.0,
-      "shufflerecordsread": 0.0,
-      "shufflerecordswrite": 2000000000,
-      "skipped": false,
-      "weight": 2.702782262326253
-   },
-   "3": {
-      "RDDIds": [
-         11
-      ],
-      "cachedRDDs": [],
-      "duration": 9764184,
-      "genstage": false,
-      "name": "count at KVDataTest.scala:158",
-      "nominalrate": 204830.2244201871,
-      "numtask": 4000,
-      "parentsIds": [
-         2
-      ],
-      "recordsread": 0.0,
-      "recordswrite": 0.0,
-      "shufflerecordsread": 2000000000,
-      "shufflerecordswrite": 0.0,
-      "skipped": false,
-      "weight": 1.0
-   }
+    "0": {
+        "RDDIds": [
+            4,
+            1,
+            0,
+            3,
+            2
+        ],
+        "cachedRDDs": [],
+        "duration": 36908718,
+        "genstage": true,
+        "name": "saveAsTextFile at DataGenerator.scala:140",
+        "nominalrate": 0.0,
+        "numtask": 4000,
+        "parentsIds": [],
+        "recordsread": 0.0,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
+        "totalduration": 51879060,
+        "weight": 2.702802248509417
+    },
+    "1": {
+        "RDDIds": [
+            10,
+            7,
+            6,
+            5,
+            8,
+            9
+        ],
+        "cachedRDDs": [],
+        "duration": 1147159,
+        "genstage": false,
+        "name": "sortByKey at KVDataTest.scala:158",
+        "nominalrate": 1743437.4833828614,
+        "numtask": 4000,
+        "parentsIds": [],
+        "recordsread": 2000000000,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
+        "weight": 8.024963845465187
+    },
+    "2": {
+        "RDDIds": [
+            8,
+            7,
+            6,
+            5
+        ],
+        "cachedRDDs": [],
+        "duration": 4058999,
+        "genstage": false,
+        "name": "map at DataGenerator.scala:145",
+        "nominalrate": 492732.32144181366,
+        "numtask": 4000,
+        "parentsIds": [],
+        "recordsread": 2000000000,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 2000000000,
+        "skipped": false,
+        "weight": 2.702782262326253
+    },
+    "3": {
+        "RDDIds": [
+            11
+        ],
+        "cachedRDDs": [],
+        "duration": 9764184,
+        "genstage": false,
+        "name": "count at KVDataTest.scala:158",
+        "nominalrate": 204830.2244201871,
+        "numtask": 4000,
+        "parentsIds": [
+            2
+        ],
+        "recordsread": 0.0,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 2000000000,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
+        "weight": 1.0
+    }
 }
