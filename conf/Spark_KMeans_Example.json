@@ -17,6 +17,7 @@
         "nominalrate": 75966.94526277726,
         "parentsIds": [],
         "recordsread": 200000000,
+        "inputrecord": 100000000,
         "shufflerecordsread": 0.0,
         "skipped": false,
         "totalduration": 7944717,

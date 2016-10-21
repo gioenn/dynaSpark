@@ -18,6 +18,7 @@
         "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 0.0,
+        "inputrecord": 2000000000,
         "skipped": false,
         "totalduration": 51879060,
         "weight": 2.702802248509417
