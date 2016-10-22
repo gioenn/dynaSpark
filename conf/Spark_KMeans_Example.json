@@ -14,14 +14,18 @@
         ],
         "duration": 1672793,
         "genstage": false,
-        "nominalrate": 75966.94526277726,
+        "name": "takeSample at KMeans.scala:386",
+        "nominalrate": 119560.51944263278,
+        "numtask": 1000,
         "parentsIds": [],
         "recordsread": 200000000,
         "inputrecord": 100000000,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
         "totalduration": 7944717,
-        "weight": 6.374686228361788
+        "weight": 11.374686228361789
     },
     "1": {
         "RDDIds": [
@@ -39,14 +43,18 @@
         ],
         "duration": 13278,
         "genstage": false,
+        "name": "takeSample at KMeans.scala:386",
         "nominalrate": 14765596.160944998,
+        "numtask": 1000,
         "parentsIds": [
             0
         ],
         "recordsread": 200000000,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 239.6772857358036
+        "weight": 244.6772857358036
     },
     "2": {
         "RDDIds": [
@@ -67,15 +75,19 @@
         ],
         "duration": 98935,
         "genstage": false,
+        "name": "aggregate at KMeans.scala:414",
         "nominalrate": 3949603.0648919786,
+        "numtask": 1000,
         "parentsIds": [
             0,
             1
         ],
         "recordsread": 400000000,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 34.63009046343559
+        "weight": 39.63009046343559
     },
     "3": {
         "RDDIds": [
@@ -98,16 +110,20 @@
         ],
         "duration": 47370,
         "genstage": false,
+        "name": "collect at KMeans.scala:446",
         "nominalrate": 20648358.45550279,
+        "numtask": 1000,
         "parentsIds": [
             0,
             1,
             2
         ],
         "recordsread": 300000000,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 65.51700443318556
+        "weight": 72.51700443318556
     },
     "4": {
         "RDDIds": [
@@ -131,16 +147,20 @@
         ],
         "duration": 162423,
         "genstage": false,
+        "name": "aggregate at KMeans.scala:414",
         "nominalrate": 4974876.871797423,
+        "numtask": 1000,
         "parentsIds": [
             0,
             1,
             2
         ],
         "recordsread": 300000000,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 21.316119022552225
+        "weight": 25.816119022552225
     },
     "5": {
         "RDDIds": [
@@ -165,16 +185,20 @@
         ],
         "duration": 40579,
         "genstage": false,
+        "name": "collect at KMeans.scala:446",
         "nominalrate": 18134715.025906734,
+        "numtask": 1000,
         "parentsIds": [
             0,
             1,
             4
         ],
         "recordsread": 300000000,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 73.81277261637793
+        "weight": 79.81277261637793
     },
     "6": {
         "RDDIds": [
@@ -200,16 +224,20 @@
         ],
         "duration": 203913,
         "genstage": false,
-        "nominalrate":  3025143.2621416287,
+        "name": "aggregate at KMeans.scala:414",
+        "nominalrate": 3025143.2621416287,
+        "numtask": 1000,
         "parentsIds": [
             0,
             1,
             4
         ],
         "recordsread": 300000000,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 16.489853515960238
+        "weight": 20.489853515960238
     },
     "7": {
         "RDDIds": [
@@ -236,16 +264,20 @@
         ],
         "duration": 40774,
         "genstage": false,
+        "name": "collect at KMeans.scala:446",
         "nominalrate": 17949178.184056,
+        "numtask": 1000,
         "parentsIds": [
             0,
             0,
             6
         ],
         "recordsread": 300000000,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 70.464021189974
+        "weight": 75.464021189974
     },
     "8": {
         "RDDIds": [
@@ -273,16 +305,20 @@
         ],
         "duration": 525914,
         "genstage": false,
+        "name": "aggregate at KMeans.scala:414",
         "nominalrate": 1263752.3334284157,
+        "numtask": 1000,
         "parentsIds": [
             0,
             0,
             6
         ],
         "recordsread": 300000000,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 6.88553071414718
+        "weight": 10.38553071414718
     },
     "9": {
         "RDDIds": [
@@ -311,16 +347,20 @@
         ],
         "duration": 42145,
         "genstage": false,
-        "nominalrate":  17388712.241653416,
+        "name": "collect at KMeans.scala:446",
+        "nominalrate": 17388712.241653416,
+        "numtask": 1000,
         "parentsIds": [
             0,
             0,
             8
         ],
         "recordsread": 300000000,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 61.464978051963456
+        "weight": 65.46497805196346
     },
     "10": {
         "RDDIds": [
@@ -350,16 +390,20 @@
         ],
         "duration": 309310,
         "genstage": false,
+        "name": "aggregate at KMeans.scala:414",
         "nominalrate": 1586276.4426617718,
+        "numtask": 1000,
         "parentsIds": [
             0,
             0,
             8
         ],
         "recordsread": 300000000,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 9.238648928259675
+        "weight": 12.238648928259675
     },
     "11": {
         "RDDIds": [
@@ -390,16 +434,20 @@
         ],
         "duration": 39644,
         "genstage": false,
+        "name": "collect at KMeans.scala:446",
         "nominalrate":  17952400.4924087,
+        "numtask": 1000,
         "parentsIds": [
             0,
             0,
             10
         ],
         "recordsread": 300000000,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 60.87840530723439
+        "weight": 63.87840530723439
     },
     "12": {
         "RDDIds": [
@@ -417,15 +465,19 @@
         ],
         "duration": 604672,
         "genstage": false,
+        "name": "flatMap at KMeans.scala:461",
         "nominalrate": 566286.6882988182,
+        "numtask": 1000,
         "parentsIds": [
             0,
             1
         ],
         "recordsread": 200000000,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 132000,
         "skipped": false,
-        "weight": 4.925796960997037
+        "weight": 6.925796960997037
     },
     "13": {
         "RDDIds": [
@@ -434,14 +486,18 @@
         "cachedRDDs": [],
         "duration": 43743,
         "genstage": false,
+        "name": "collectAsMap at KMeans.scala:465",
         "nominalrate": 3652.058432934927,
+        "numtask": 1000,
         "parentsIds": [
             12
         ],
         "recordsread": 0.0,
+        "recordswrite": 0.0,
         "shufflerecordsread": 132000,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 47.85577120910774
+        "weight": 49.85577120910774
     },
     "14": {
         "RDDIds": [
@@ -459,15 +515,19 @@
         ],
         "duration": 85175,
         "genstage": false,
+        "name": "mapPartitions at KMeans.scala:287",
         "nominalrate": 4214607.83074135,
+        "numtask": 1000,
         "parentsIds": [
             0,
             1
         ],
         "recordsread": 200000000,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 10000,
         "skipped": false,
-        "weight": 25.063539771059585
+        "weight": 26.063539771059585
     },
     "15": {
         "RDDIds": [
@@ -476,14 +536,18 @@
         "cachedRDDs": [],
         "duration": 12896,
         "genstage": false,
+        "name": "collectAsMap at KMeans.scala:310",
         "nominalrate": 3162.5553447185325,
+        "numtask": 1000,
         "parentsIds": [
             14
         ],
         "recordsread": 0.0,
+        "recordswrite": 0.0,
         "shufflerecordsread": 10000,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 156.13155241935485
+        "weight": 157.13155241935485
     },
     "16": {
         "RDDIds": [
@@ -498,14 +562,18 @@
         ],
         "duration": 3941544,
         "genstage": false,
+        "name": "saveAsTextFile at kmeans.scala:60",
         "nominalrate": 48854.16226470309,
+        "numtask": 1000,
         "parentsIds": [
             0
         ],
         "recordsread": 100000000,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 1.0075616306706205
+        "weight": 1.5075616306706205
     },
     "17": {
         "RDDIds": [
@@ -519,12 +587,16 @@
         ],
         "duration": 59609,
         "genstage": false,
+        "name": "sum at KMeansModel.scala:87",
         "nominalrate": 3423895.3657576228,
+        "numtask": 1000,
         "parentsIds": [
             0
         ],
         "recordsread": 100000000,
+        "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
         "skipped": false,
         "weight": 1.0
     }
