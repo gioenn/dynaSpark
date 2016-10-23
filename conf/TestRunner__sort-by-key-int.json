@@ -1,27 +1,89 @@
 {
-   "0":{
-      "weight":3,
-      "parentsIds":[],
-      "nominalrate":0.0,
-      "genstage":true
-   },
-   "1":{
-      "weight":2,
-      "parentsIds":[],
-      "nominalrate":4807692.307692308,
-      "genstage":false
-   },
-   "2":{
-      "weight":1,
-      "parentsIds":[1],
-      "nominalrate":654964.6319098768,
-      "genstage":false
-   },
-   "3":{
-      "weight":0,
-      "parentsIds":[2],
-      "nominalrate":354736.0392156862,
-      "genstage":false
-   }
+    "0": {
+        "RDDIds": [
+            3,
+            1,
+            2,
+            0
+        ],
+        "cachedRDDs": [],
+        "duration": 11150599,
+        "genstage": true,
+        "name": "saveAsTextFile at DataGenerator.scala:88",
+        "nominalrate": 0.0,
+        "numtask": 4000,
+        "parentsIds": [],
+        "recordsread": 0.0,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
+        "inputrecord": 2000000000,
+        "skipped": false,
+        "totalduration": 21825392,
+        "weight": 2.9786645542539913
+    },
+    "1": {
+        "RDDIds": [
+            9,
+            4,
+            7,
+            6,
+            8,
+            5
+        ],
+        "cachedRDDs": [],
+        "duration": 1216020,
+        "genstage": false,
+        "name": "sortByKey at KVDataTest.scala:165",
+        "nominalrate": 1644709.7909573857,
+        "numtask": 4000,
+        "parentsIds": [],
+        "recordsread": 2000000000,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
+        "weight": 5.889234140885841
+    },
+    "2": {
+        "RDDIds": [
+            7,
+            4,
+            6,
+            5
+        ],
+        "cachedRDDs": [],
+        "duration": 3841539,
+        "genstage": false,
+        "name": "map at DataGenerator.scala:93",
+        "nominalrate": 520624.67672461475,
+        "numtask": 4000,
+        "parentsIds": [],
+        "recordsread": 2000000000,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 2000000000,
+        "skipped": false,
+        "weight": 2.231117658834129
+    },
+    "3": {
+        "RDDIds": [
+            10
+        ],
+        "cachedRDDs": [],
+        "duration": 5617234,
+        "genstage": false,
+        "name": "count at KVDataTest.scala:165",
+        "nominalrate": 356047.1221245189,
+        "numtask": 4000,
+        "parentsIds": [
+            2
+        ],
+        "recordsread": 0.0,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 2000000000,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
+        "weight": 1.0
+    }
 }
-

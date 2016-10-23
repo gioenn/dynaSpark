@@ -1,20 +1,68 @@
 {
-   "0":{
-      "weight":2,
-      "parentsIds":[],
-      "nominalrate":0.0,
-      "genstage":true
-   },
-   "1":{
-      "weight":1,
-      "parentsIds":[],
-      "nominalrate":914478.0159484965,
-      "genstage":false
-   },
-   "2":{
-      "weight":0,
-      "parentsIds":[1],
-      "nominalrate":145517.95841209829,
-      "genstage":false
-   }
+    "0": {
+        "RDDIds": [
+            4,
+            0,
+            2,
+            1,
+            3
+        ],
+        "cachedRDDs": [],
+        "duration": 27972126,
+        "genstage": true,
+        "name": "saveAsTextFile at DataGenerator.scala:140",
+        "nominalrate": 0.0,
+        "numtask": 4000,
+        "parentsIds": [],
+        "recordsread": 0.0,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
+        "inputrecord": 2000000000,
+        "skipped": false,
+        "totalduration": 37324874,
+        "weight": 2.167179784618445
+    },
+    "1": {
+        "RDDIds": [
+            9,
+            7,
+            5,
+            8,
+            6
+        ],
+        "cachedRDDs": [],
+        "duration": 6660735,
+        "genstage": false,
+        "name": "map at KVDataTest.scala:137",
+        "nominalrate": 300267.1627080195,
+        "numtask": 4000,
+        "parentsIds": [],
+        "recordsread": 2000000000,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 734330212,
+        "skipped": false,
+        "weight": 1.702080776370776
+    },
+    "2": {
+        "RDDIds": [
+            10
+        ],
+        "cachedRDDs": [],
+        "duration": 2692013,
+        "genstage": false,
+        "name": "count at KVDataTest.scala:137",
+        "nominalrate": 272781.0794375807,
+        "numtask": 4000,
+        "parentsIds": [
+            1
+        ],
+        "recordsread": 0.0,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 734330212,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
+        "weight": 1.0
+    }
 }

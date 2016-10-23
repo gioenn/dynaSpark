@@ -1,20 +1,66 @@
 {
-   "0":{
-      "weight":2,
-      "parentsIds":[],
-      "nominalrate":0.0,
-      "genstage":true
-   },
-   "1":{
-      "weight":1,
-      "parentsIds":[],
-      "nominalrate":1677402.0397208803,
-      "genstage":false
-   },
-   "2":{
-      "weight":0,
-      "parentsIds":[1],
-      "nominalrate":220701.83182520416,
-      "genstage":false
-   }
+    "0": {
+        "RDDIds": [
+            3,
+            1,
+            0,
+            2
+        ],
+        "cachedRDDs": [],
+        "duration": 12050426,
+        "genstage": true,
+        "name": "saveAsTextFile at DataGenerator.scala:88",
+        "nominalrate": 0.0,
+        "numtask": 4000,
+        "parentsIds": [],
+        "recordsread": 0.0,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
+        "inputrecord": 2000000000,
+        "skipped": false,
+        "totalduration": 20968411,
+        "weight": 2.3700277898889217
+    },
+    "1": {
+        "RDDIds": [
+            7,
+            6,
+            4,
+            5
+        ],
+        "cachedRDDs": [],
+        "duration": 6152188,
+        "genstage": false,
+        "name": "map at DataGenerator.scala:93",
+        "nominalrate": 325087.59485243296,
+        "numtask": 4000,
+        "parentsIds": [],
+        "recordsread": 2000000000,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 734330212,
+        "skipped": false,
+        "weight": 1.7247815736450187
+    },
+    "2": {
+        "RDDIds": [
+            8
+        ],
+        "cachedRDDs": [],
+        "duration": 2765797,
+        "genstage": false,
+        "name": "count at KVDataTest.scala:144",
+        "nominalrate": 265504.0163829811,
+        "numtask": 4000,
+        "parentsIds": [
+            1
+        ],
+        "recordsread": 0.0,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 734330212,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
+        "weight": 1.0
+    }
 }
