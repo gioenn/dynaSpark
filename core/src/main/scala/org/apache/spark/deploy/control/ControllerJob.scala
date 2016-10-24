@@ -186,13 +186,14 @@ class ControllerJob(conf: SparkConf, appDeadlineJobMillisecond: Long) extends Lo
 
   def initControllerExecutor(workerUrl: String, executorId: String,
                              stageId: Long, coreMin: Double, coreMax: Double,
-                             deadline: Long, core: Double, tasksForExecutor: Int): Unit = {
-    val workerEndpoint = rpcEnv.setupEndpointRefByURI(workerUrl)
-    workerEndpoint.send(InitControllerExecutor(
-      executorId, stageId, coreMin, coreMax, tasksForExecutor, deadline, core))
-    logInfo("SEND INIT TO EXECUTOR CONTROLLER EID %s, SID %s, TASK %s, DL %s, C %s".format
-    (executorId, stageId, tasksForExecutor, deadline, core))
-  }
+                             deadline: Long, core: Double, tasksForExecutor: Int): Unit =
+    synchronized {
+      val workerEndpoint = rpcEnv.setupEndpointRefByURI(workerUrl)
+      workerEndpoint.send(InitControllerExecutor(
+        executorId, stageId, coreMin, coreMax, tasksForExecutor, deadline, core))
+      logInfo("SEND INIT TO EXECUTOR CONTROLLER EID %s, SID %s, TASK %s, DL %s, C %s".format
+      (executorId, stageId, tasksForExecutor, deadline, core))
+    }
 
   def askMasterNeededExecutors
   (masterUrl: String, stageId: Long,
