@@ -38,8 +38,6 @@ class ControllerJob(conf: SparkConf, appDeadlineJobMillisecond: Long) extends Lo
   val NOMINAL_RATE_DATA_S: Double = conf.getDouble(
     "spark.control.nominalratedata", 48000000.0)
 
-  val DEADLINE_TIMEOUT = 300000
-
   var numMaxExecutor: Int = conf.getInt("spark.control.maxexecutor", 4)
   val coreForVM: Int = conf.getInt("spark.control.coreforvm", 8)
 
@@ -62,12 +60,7 @@ class ControllerJob(conf: SparkConf, appDeadlineJobMillisecond: Long) extends Lo
     var stageDeadline = ((appDeadlineJobMillisecond - startTime) / (weight + 1)).toLong
     if (stageDeadline < 0) {
       logError("ALPHA DEADLINE NEGATIVE -> ALPHA DEADLINE NOT SATISFIED")
-      stageDeadline = (((appDeadlineJobMillisecond + (1 - alpha) * deadline) - startTime)
-        / (weight + 1)).toLong
-    }
-    if (stageDeadline < 0) {
-      logError("DEADLINE NEGATIVE -> DEADLINE NOT SATISFIED")
-      stageDeadline = DEADLINE_TIMEOUT
+      stageDeadline = 1
     }
     stageDeadline
   }
@@ -93,7 +86,12 @@ class ControllerJob(conf: SparkConf, appDeadlineJobMillisecond: Long) extends Lo
     logInfo("NumRecords: " + numRecord.toString +
       " DeadlineStage : " + deadlineStage.toString +
       " NominalRate: " + NOMINAL_RATE_RECORD_S.toString)
-    OVERSCALE * math.ceil((numRecord / (deadlineStage / 1000.0)) / NOMINAL_RATE_RECORD_S).toInt
+    if (deadlineStage > 1) {
+      OVERSCALE * math.ceil((numRecord / (deadlineStage / 1000.0)) / NOMINAL_RATE_RECORD_S).toInt
+    } else {
+      coreForVM * numMaxExecutor
+    }
+
   }
 
   def computeDeadlineFirstStage(stage: StageInfo, weight: Double): Long = {
@@ -110,7 +108,7 @@ class ControllerJob(conf: SparkConf, appDeadlineJobMillisecond: Long) extends Lo
 
   def computeCoreStageFromSize(deadlineStage: Long, totalSize: Long): Int = {
     logInfo("TotalSize RDD First Stage: " + totalSize.toString)
-    if (deadlineStage > 0) {
+    if (deadlineStage > 1) {
       OVERSCALE * math.ceil(totalSize / (deadlineStage / 1000.0) / NOMINAL_RATE_DATA_S).toInt
     } else {
       numMaxExecutor * coreForVM
