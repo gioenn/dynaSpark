@@ -19,6 +19,7 @@
         "numtask": 1000,
         "parentsIds": [],
         "recordsread": 200000000,
+        "inputrecord": 100000000,
         "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 0.0,
