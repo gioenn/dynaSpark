@@ -2,49 +2,48 @@
     "0": {
         "RDDIds": [
             5,
+            2,
             4,
             3,
             1,
-            2,
             0
         ],
         "cachedRDDs": [
-            3,
-            2
+            2,
+            3
         ],
-        "duration": 1672793,
+        "duration": 1827097,
         "genstage": false,
         "name": "takeSample at KMeans.scala:386",
-        "nominalrate": 119560.51944263278,
+        "nominalrate": 109463.26330785941,
         "numtask": 1000,
         "parentsIds": [],
         "recordsread": 200000000,
-        "inputrecord": 100000000,
         "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "totalduration": 7944717,
-        "weight": 11.374686228361789
+        "totalduration": 10738386,
+        "weight": 11.938646935548578
     },
     "1": {
         "RDDIds": [
             7,
+            2,
             4,
             3,
             1,
-            2,
             5,
             0
         ],
         "cachedRDDs": [
-            3,
-            2
+            2,
+            3
         ],
-        "duration": 13278,
+        "duration": 29230,
         "genstage": false,
         "name": "takeSample at KMeans.scala:386",
-        "nominalrate": 14765596.160944998,
+        "nominalrate": 6842285.323297981,
         "numtask": 1000,
         "parentsIds": [
             0
@@ -54,29 +53,29 @@
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 244.6772857358036
+        "weight": 160.93395484091687
     },
     "2": {
         "RDDIds": [
             9,
+            2,
+            8,
             4,
             3,
-            6,
             1,
-            8,
-            2,
             5,
-            0
+            0,
+            6
         ],
         "cachedRDDs": [
             9,
-            3,
-            2
+            2,
+            3
         ],
-        "duration": 98935,
+        "duration": 151824,
         "genstage": false,
         "name": "aggregate at KMeans.scala:414",
-        "nominalrate": 3949603.0648919786,
+        "nominalrate": 2634629.5710823056,
         "numtask": 1000,
         "parentsIds": [
             0,
@@ -87,31 +86,31 @@
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 39.63009046343559
+        "weight": 37.25116911687216
     },
     "3": {
         "RDDIds": [
             11,
-            4,
-            10,
-            3,
-            6,
-            1,
-            8,
             2,
+            8,
+            4,
+            3,
+            1,
+            10,
             5,
+            9,
             0,
-            9
+            6
         ],
         "cachedRDDs": [
-            3,
             2,
+            3,
             9
         ],
-        "duration": 47370,
+        "duration": 49726,
         "genstage": false,
         "name": "collect at KMeans.scala:446",
-        "nominalrate": 20648358.45550279,
+        "nominalrate": 16088163.13397418,
         "numtask": 1000,
         "parentsIds": [
             0,
@@ -123,32 +122,32 @@
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 72.51700443318556
+        "weight": 95.28340304870692
     },
     "4": {
         "RDDIds": [
             13,
+            2,
+            8,
             4,
             3,
-            6,
-            12,
             1,
-            8,
-            2,
             5,
+            9,
             0,
-            9
+            12,
+            6
         ],
         "cachedRDDs": [
             13,
-            3,
             2,
+            3,
             9
         ],
-        "duration": 162423,
+        "duration": 372997,
         "genstage": false,
         "name": "aggregate at KMeans.scala:414",
-        "nominalrate": 4974876.871797423,
+        "nominalrate": 2144789.3682791013,
         "numtask": 1000,
         "parentsIds": [
             0,
@@ -160,37 +159,37 @@
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 25.816119022552225
+        "weight": 18.636164634031907
     },
     "5": {
         "RDDIds": [
             15,
-            4,
-            14,
-            13,
-            3,
-            6,
-            12,
-            1,
-            8,
             2,
+            8,
+            13,
+            4,
+            3,
+            1,
+            14,
             5,
+            9,
             0,
-            9
+            12,
+            6
         ],
         "cachedRDDs": [
+            2,
             13,
-            3,
-            2
+            3
         ],
-        "duration": 40579,
+        "duration": 46067,
         "genstage": false,
         "name": "collect at KMeans.scala:446",
-        "nominalrate": 18134715.025906734,
+        "nominalrate": 15195259.079167299,
         "numtask": 1000,
         "parentsIds": [
             0,
-            1,
+            0,
             4
         ],
         "recordsread": 300000000,
@@ -198,38 +197,38 @@
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 79.81277261637793
+        "weight": 96.66771224520807
     },
     "6": {
         "RDDIds": [
             17,
-            16,
-            4,
-            13,
-            3,
-            6,
-            12,
-            1,
-            8,
             2,
+            8,
+            13,
+            4,
+            3,
+            1,
             5,
+            9,
             0,
-            9
+            16,
+            12,
+            6
         ],
         "cachedRDDs": [
             17,
+            2,
             13,
-            3,
-            2
+            3
         ],
-        "duration": 203913,
+        "duration": 510345,
         "genstage": false,
         "name": "aggregate at KMeans.scala:414",
-        "nominalrate": 3025143.2621416287,
+        "nominalrate": 1371621.1582360952,
         "numtask": 1000,
         "parentsIds": [
             0,
-            1,
+            0,
             4
         ],
         "recordsread": 300000000,
@@ -237,39 +236,39 @@
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 20.489853515960238
+        "weight": 14.09398054257414
     },
     "7": {
         "RDDIds": [
             19,
-            3,
-            12,
-            1,
             8,
-            0,
-            4,
-            16,
-            17,
-            18,
-            13,
-            6,
-            2,
+            3,
             5,
-            9
+            9,
+            2,
+            13,
+            4,
+            1,
+            18,
+            0,
+            16,
+            12,
+            6,
+            17
         ],
         "cachedRDDs": [
             3,
-            17,
-            2
+            2,
+            17
         ],
-        "duration": 40774,
+        "duration": 38566,
         "genstage": false,
         "name": "collect at KMeans.scala:446",
-        "nominalrate": 17949178.184056,
+        "nominalrate": 18150702.691489913,
         "numtask": 1000,
         "parentsIds": [
             0,
-            0,
+            1,
             6
         ],
         "recordsread": 300000000,
@@ -277,40 +276,40 @@
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 75.464021189974
+        "weight": 105.99136545143391
     },
     "8": {
         "RDDIds": [
             21,
-            3,
-            12,
-            1,
             8,
-            20,
-            0,
-            4,
-            16,
-            17,
-            13,
-            6,
-            2,
+            3,
             5,
-            9
+            9,
+            2,
+            13,
+            4,
+            1,
+            0,
+            16,
+            12,
+            6,
+            20,
+            17
         ],
         "cachedRDDs": [
             21,
             3,
-            17,
-            2
+            2,
+            17
         ],
-        "duration": 525914,
+        "duration": 258756,
         "genstage": false,
         "name": "aggregate at KMeans.scala:414",
-        "nominalrate": 1263752.3334284157,
+        "nominalrate": 2705251.2791973907,
         "numtask": 1000,
         "parentsIds": [
             0,
-            0,
+            1,
             6
         ],
         "recordsread": 300000000,
@@ -318,41 +317,41 @@
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 10.38553071414718
+        "weight": 19.903101763823834
     },
     "9": {
         "RDDIds": [
             23,
-            3,
-            12,
-            21,
-            1,
             8,
-            20,
-            0,
-            4,
-            16,
-            17,
-            13,
-            6,
-            2,
-            22,
+            3,
             5,
-            9
+            9,
+            2,
+            13,
+            4,
+            1,
+            21,
+            0,
+            16,
+            22,
+            12,
+            20,
+            6,
+            17
         ],
         "cachedRDDs": [
             3,
-            21,
-            2
+            2,
+            21
         ],
-        "duration": 42145,
+        "duration": 37318,
         "genstage": false,
         "name": "collect at KMeans.scala:446",
-        "nominalrate": 17388712.241653416,
+        "nominalrate": 18757704.05702342,
         "numtask": 1000,
         "parentsIds": [
             0,
-            0,
+            1,
             8
         ],
         "recordsread": 300000000,
@@ -360,42 +359,42 @@
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 65.46497805196346
+        "weight": 104.36840130767995
     },
     "10": {
         "RDDIds": [
             25,
-            3,
-            12,
-            21,
-            1,
             8,
-            20,
+            3,
+            5,
+            9,
+            2,
+            13,
+            4,
+            1,
+            21,
             0,
             24,
-            4,
             16,
-            17,
-            13,
+            12,
+            20,
             6,
-            2,
-            5,
-            9
+            17
         ],
         "cachedRDDs": [
             25,
             3,
-            21,
-            2
+            2,
+            21
         ],
-        "duration": 309310,
+        "duration": 1336917,
         "genstage": false,
         "name": "aggregate at KMeans.scala:414",
-        "nominalrate": 1586276.4426617718,
+        "nominalrate": 523592.7136837964,
         "numtask": 1000,
         "parentsIds": [
             0,
-            0,
+            1,
             8
         ],
         "recordsread": 300000000,
@@ -403,43 +402,43 @@
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 12.238648928259675
+        "weight": 6.773717440948092
     },
     "11": {
         "RDDIds": [
             27,
-            3,
-            12,
-            21,
-            1,
             8,
-            20,
+            3,
+            5,
+            9,
+            2,
+            13,
+            4,
+            1,
+            21,
+            25,
+            26,
             0,
             24,
-            4,
             16,
-            17,
-            25,
-            13,
+            12,
+            20,
             6,
-            26,
-            2,
-            5,
-            9
+            17
         ],
         "cachedRDDs": [
             3,
-            25,
-            2
+            2,
+            25
         ],
-        "duration": 39644,
+        "duration": 39091,
         "genstage": false,
         "name": "collect at KMeans.scala:446",
-        "nominalrate":  17952400.4924087,
+        "nominalrate": 17906935.100150928,
         "numtask": 1000,
         "parentsIds": [
             0,
-            0,
+            1,
             10
         ],
         "recordsread": 300000000,
@@ -447,26 +446,26 @@
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 63.87840530723439
+        "weight": 81.26141567112634
     },
     "12": {
         "RDDIds": [
             28,
+            2,
             4,
             3,
             1,
-            2,
             5,
             0
         ],
         "cachedRDDs": [
-            3,
-            2
+            2,
+            3
         ],
-        "duration": 604672,
+        "duration": 630638,
         "genstage": false,
         "name": "flatMap at KMeans.scala:461",
-        "nominalrate": 566286.6882988182,
+        "nominalrate": 634278.3022906961,
         "numtask": 1000,
         "parentsIds": [
             0,
@@ -477,17 +476,17 @@
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 132000,
         "skipped": false,
-        "weight": 6.925796960997037
+        "weight": 7.78915954953555
     },
     "13": {
         "RDDIds": [
             29
         ],
         "cachedRDDs": [],
-        "duration": 43743,
+        "duration": 50118,
         "genstage": false,
         "name": "collectAsMap at KMeans.scala:465",
-        "nominalrate": 3652.058432934927,
+        "nominalrate": 2633.784269124865,
         "numtask": 1000,
         "parentsIds": [
             12
@@ -497,26 +496,26 @@
         "shufflerecordsread": 132000,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 49.85577120910774
+        "weight": 56.47076898519494
     },
     "14": {
         "RDDIds": [
             30,
+            2,
             4,
             3,
             1,
-            2,
             5,
             0
         ],
         "cachedRDDs": [
-            3,
-            2
+            2,
+            3
         ],
-        "duration": 85175,
+        "duration": 89509,
         "genstage": false,
         "name": "mapPartitions at KMeans.scala:287",
-        "nominalrate": 4214607.83074135,
+        "nominalrate": 4468824.364030433,
         "numtask": 1000,
         "parentsIds": [
             0,
@@ -527,17 +526,17 @@
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 10000,
         "skipped": false,
-        "weight": 26.063539771059585
+        "weight": 31.93942508574557
     },
     "15": {
         "RDDIds": [
             31
         ],
         "cachedRDDs": [],
-        "duration": 12896,
+        "duration": 138775,
         "genstage": false,
         "name": "collectAsMap at KMeans.scala:310",
-        "nominalrate": 3162.5553447185325,
+        "nominalrate": 72.05908845253107,
         "numtask": 1000,
         "parentsIds": [
             14
@@ -547,23 +546,23 @@
         "shufflerecordsread": 10000,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 157.13155241935485
+        "weight": 20.48824355971897
     },
     "16": {
         "RDDIds": [
             33,
-            1,
-            32,
             2,
-            0
+            1,
+            0,
+            32
         ],
         "cachedRDDs": [
             2
         ],
-        "duration": 3941544,
+        "duration": 5066464,
         "genstage": false,
         "name": "saveAsTextFile at kmeans.scala:60",
-        "nominalrate": 48854.16226470309,
+        "nominalrate": 39475.26322105516,
         "numtask": 1000,
         "parentsIds": [
             0
@@ -573,22 +572,22 @@
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 1.5075616306706205
+        "weight": 1.5064095984892028
     },
     "17": {
         "RDDIds": [
             34,
-            1,
             2,
+            1,
             0
         ],
         "cachedRDDs": [
             2
         ],
-        "duration": 59609,
+        "duration": 64948,
         "genstage": false,
         "name": "sum at KMeansModel.scala:87",
-        "nominalrate": 3423895.3657576228,
+        "nominalrate": 3079386.586192031,
         "numtask": 1000,
         "parentsIds": [
             0
