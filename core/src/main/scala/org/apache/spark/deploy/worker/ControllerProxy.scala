@@ -145,12 +145,15 @@ class ControllerProxy
         executorStageId = -1
 
       case ExecutorScaled(timestamp, executorId, cores, newFreeCores) =>
-        val deltaFreeCore = math.ceil(cores).toInt - (taskLaunched - taskCompleted)
-        driver.get.send(ExecutorScaled(System.currentTimeMillis(),
-          executorId, cores, deltaFreeCore))
-        logInfo("CORES: %f, RUNNING: %d, DELTA: %d".format(
-          cores, taskLaunched - taskCompleted, deltaFreeCore))
-
+        ControllerProxy.this.synchronized {
+          val core = math.ceil(cores).toInt
+          var deltaFreeCore = core - (taskLaunched - taskCompleted)
+          if (deltaFreeCore > core) deltaFreeCore = core
+          driver.get.send(ExecutorScaled(timestamp,
+            executorId, cores, deltaFreeCore))
+          logInfo("CORES: %f, RUNNING: %d, DELTA: %d".format(
+            cores, taskLaunched - taskCompleted, deltaFreeCore))
+        }
     }
 
     override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
