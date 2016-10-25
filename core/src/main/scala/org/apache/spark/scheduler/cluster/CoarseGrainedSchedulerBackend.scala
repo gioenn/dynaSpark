@@ -171,7 +171,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
                 logWarning(s"Scaled not registered executorID $execId")
             }
             lastExecutorScaledTimestamp(execId) = timestamp
-          }else{
+          } else {
             logInfo("TS ExecutorScaled arrived old")
           }
 

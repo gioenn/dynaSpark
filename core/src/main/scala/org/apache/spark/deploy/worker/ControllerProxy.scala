@@ -146,9 +146,12 @@ class ControllerProxy
 
       case ExecutorScaled(timestamp, executorId, cores, newFreeCores) =>
         ControllerProxy.this.synchronized {
-          val core = math.ceil(cores).toInt
+          val core = math.round(cores).toInt
           var deltaFreeCore = core - (taskLaunched - taskCompleted)
-          if (deltaFreeCore > core) deltaFreeCore = core
+          if (deltaFreeCore > core) {
+            deltaFreeCore = core
+            logInfo("Delta Free Core > CORE")
+          }
           driver.get.send(ExecutorScaled(timestamp,
             executorId, cores, deltaFreeCore))
           logInfo("CORES: %f, RUNNING: %d, DELTA: %d".format(
