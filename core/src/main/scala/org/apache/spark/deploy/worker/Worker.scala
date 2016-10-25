@@ -616,7 +616,7 @@ private[deploy] class Worker(
       logDebug(commandUpdateDocker.toString)
       commandUpdateDocker.run
       execIdToProxy(execId.toString).proxyEndpoint.send(
-        ExecutorScaled(execId, coresWanted, math.ceil(coresWanted).toInt))
+        ExecutorScaled(System.currentTimeMillis(), execId, coresWanted, math.ceil(coresWanted).toInt))
       logInfo("Scaled executorId %s  of appId %s to  %f Core".format(execId, appId, coresWanted))
 
       sendToMaster(ExecutorStateChanged(appId, execId.toInt, ExecutorState.RUNNING, None, None))

@@ -69,6 +69,8 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
   // `CoarseGrainedSchedulerBackend.this`.
   private val executorDataMap = new HashMap[String, ExecutorData]
 
+  private val lastExecutorScaledTimestamp = new HashMap[String, Long]
+
   // Number of executors requested from the cluster manager that have not registered yet
   @GuardedBy("CoarseGrainedSchedulerBackend.this")
   private var numPendingExecutors = 0
@@ -156,17 +158,23 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
         scheduler.bind(executorId, stageId)
         makeOffers(executorId)
 
-      case ExecutorScaled(execId, cores, newFreeCores) =>
+      case ExecutorScaled(timestamp, execId, cores, newFreeCores) =>
         CoarseGrainedSchedulerBackend.this.synchronized {
-          executorDataMap.get(execId) match {
-            case Some(executorData) =>
-              executorDataMap(execId) = new ExecutorData(executorData.executorEndpoint,
-                executorData.executorAddress, executorData.executorHost,
-                newFreeCores, math.ceil(cores).toInt, executorData.logUrlMap)
-              makeOffers(execId)
-            case None =>
-              logWarning(s"Scaled not registered executorID $execId")
+          if (lastExecutorScaledTimestamp.getOrElse(execId, 0L) < timestamp) {
+            executorDataMap.get(execId) match {
+              case Some(executorData) =>
+                executorDataMap(execId) = new ExecutorData(executorData.executorEndpoint,
+                  executorData.executorAddress, executorData.executorHost,
+                  newFreeCores, math.ceil(cores).toInt, executorData.logUrlMap)
+                makeOffers(execId)
+              case None =>
+                logWarning(s"Scaled not registered executorID $execId")
+            }
+            lastExecutorScaledTimestamp(execId) = timestamp
+          }else{
+            logInfo("TS ExecutorScaled arrived old")
           }
+
         }
     }
 

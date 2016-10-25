@@ -734,8 +734,9 @@ private[deploy] class Master(
   private def scaleExecutor(worker: WorkerInfo, exec: ExecutorDesc): Unit = {
     logInfo("Scaling executor " + exec.fullId + " on worker " + worker.id)
     worker.scaleExecutor(exec)
-    worker.endpoint.send(ScaleExecutor(exec.application.id, exec.id.toString, exec.cores))
-    exec.application.driver.send(ExecutorScaled(exec.id.toString, exec.cores, exec.cores))
+    worker.endpoint.send(ScaleExecutor(exec.application.id, exec.id.toString, exec.cores.toDouble))
+    exec.application.driver.send(ExecutorScaled(System.currentTimeMillis(),
+      exec.id.toString, exec.cores, exec.cores))
   }
 
   private def registerWorker(worker: WorkerInfo): Boolean = {
