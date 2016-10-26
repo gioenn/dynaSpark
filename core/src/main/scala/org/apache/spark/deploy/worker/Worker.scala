@@ -615,8 +615,11 @@ private[deploy] class Worker(
         "--cpu-quota='" + cpuquota + "'", appId + "." + execId)
       logDebug(commandUpdateDocker.toString)
       commandUpdateDocker.run
+      var coreFree =  math.round(coresWanted).toInt
+      if (coreFree == 0) coreFree = 1
       execIdToProxy(execId.toString).proxyEndpoint.send(
-        ExecutorScaled(System.currentTimeMillis(), execId, coresWanted, math.ceil(coresWanted).toInt))
+        ExecutorScaled(System.currentTimeMillis(), execId,
+          coresWanted, coreFree))
       logInfo("Scaled executorId %s  of appId %s to  %f Core".format(execId, appId, coresWanted))
 
       sendToMaster(ExecutorStateChanged(appId, execId.toInt, ExecutorState.RUNNING, None, None))
