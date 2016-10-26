@@ -244,7 +244,8 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     for (stage <- activePendingStages) {
       val stageId = stage._2.stageId
       val controller = jobIdToController(stageIdToActiveJobIds(stageId).head)
-      val weight = (totaldurationremaining.toDouble / stageIdToDuration(stageId)) - 1
+      val weight = (stageIdToWeight(stageId)/3) +
+        (((totaldurationremaining.toDouble / stageIdToDuration(stageId)) - 1) * 2/3)
       val newDeadline = controller.computeDeadlineStage(weight,
         System.currentTimeMillis(), ALPHA, DEADLINE)
       stageIdToDeadline(stageId) = newDeadline
@@ -287,7 +288,8 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
         activePendingStages.size - activeStages.size - 1 + genstage
     }
     stageIdToWeight(stage.stageId) = stageWeight
-    stageWeight = (totaldurationremaining.toDouble / stageSubmitted.duration) - 1
+    stageWeight = (stageIdToWeight(stage.stageId)/3) +
+      (((totaldurationremaining.toDouble / stageIdToDuration(stage.stageId)) - 1) * 2/3)
     if (stageWeight < 0) stageWeight = 0.0
     // if (stageWeight == 0.0) lastStageId = stage.stageId
     stageIdToDuration(stage.stageId) = stageSubmitted.duration
@@ -611,7 +613,8 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
     for (stage <- activePendingStages) {
       val stageId = stage._2.stageId
       val controller = jobIdToController(stageIdToActiveJobIds(stageId).head)
-      val weight = (totaldurationremaining.toDouble / stageIdToDuration(stageId)) - 1
+      val weight = (stageIdToWeight(stageId)/3) +
+        (((totaldurationremaining.toDouble / stageIdToDuration(stageId)) - 1) * 2/3)
       val newDeadline = controller.computeDeadlineStage(weight,
         System.currentTimeMillis(), ALPHA, DEADLINE)
       stageIdToDeadline(stageId) = newDeadline
