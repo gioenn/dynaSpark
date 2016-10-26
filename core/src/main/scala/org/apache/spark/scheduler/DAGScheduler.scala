@@ -331,7 +331,7 @@ class DAGScheduler(
   private[scheduler] val eventProcessLoop = new DAGSchedulerEventProcessLoop(this)
   taskScheduler.setDAGScheduler(this)
 
-  if (appJson != null) {
+  if (appJson != null && sc.conf.getBoolean("spark.control.checkdeadline", falses)) {
     logInfo("LOADED JSON FOR APP: " + jsonFile)
     if (!checkDeadline()) {
       stop()
