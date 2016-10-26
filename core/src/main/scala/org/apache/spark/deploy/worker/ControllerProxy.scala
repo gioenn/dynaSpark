@@ -147,7 +147,7 @@ class ControllerProxy
       case ExecutorScaled(timestamp, executorId, cores, newFreeCores) =>
         ControllerProxy.this.synchronized {
           var core = math.round(cores).toInt
-          if (core == 0) core = 1
+          if (core == 0  && cores != 0.0) core = 1
           var deltaFreeCore = core - (taskLaunched - taskCompleted)
           if (deltaFreeCore > core) {
             deltaFreeCore = core
