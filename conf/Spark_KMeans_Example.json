@@ -1,603 +1,1137 @@
 {
-    "0": {
-        "RDDIds": [
-            5,
-            2,
-            4,
-            3,
-            1,
-            0
-        ],
-        "cachedRDDs": [
-            2,
-            3
-        ],
-        "duration": 1827097,
-        "genstage": false,
-        "name": "takeSample at KMeans.scala:386",
-        "nominalrate": 109463.26330785941,
-        "numtask": 1000,
-        "parentsIds": [],
-        "recordsread": 200000000,
-        "inputrecord": 100000000,
-        "recordswrite": 0.0,
-        "shufflerecordsread": 0.0,
-        "shufflerecordswrite": 0.0,
-        "skipped": false,
-        "totalduration": 10738386,
-        "weight": 11.938646935548578
+  "0": {
+    "RDDIds": {
+      "0": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "1": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "2": {
+        "callsite": "map at kmeans.scala:46",
+        "name": "MapPartitionsRDD"
+      },
+      "3": {
+        "callsite": "map at KMeans.scala:214",
+        "name": "MapPartitionsRDD"
+      },
+      "4": {
+        "callsite": "zip at KMeans.scala:216",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "5": {
+        "callsite": "map at KMeans.scala:216",
+        "name": "MapPartitionsRDD"
+      }
     },
-    "1": {
-        "RDDIds": [
-            7,
-            2,
-            4,
-            3,
-            1,
-            5,
-            0
-        ],
-        "cachedRDDs": [
-            2,
-            3
-        ],
-        "duration": 29230,
-        "genstage": false,
-        "name": "takeSample at KMeans.scala:386",
-        "nominalrate": 6842285.323297981,
-        "numtask": 1000,
-        "parentsIds": [
-            0
-        ],
-        "recordsread": 200000000,
-        "recordswrite": 0.0,
-        "shufflerecordsread": 0.0,
-        "shufflerecordswrite": 0.0,
-        "skipped": false,
-        "weight": 160.93395484091687
+    "cachedRDDs": [
+      2,
+      3
+    ],
+    "duration": 1434677,
+    "genstage": false,
+    "name": "takeSample at KMeans.scala:386",
+    "nominalrate": 139404.2003879619,
+    "numtask": 1000,
+    "parentsIds": [],
+    "recordsread": 200000000,
+    "inputrecord": 100000000,
+    "recordswrite": 0.0,
+    "shufflerecordsread": 0.0,
+    "shufflerecordswrite": 0.0,
+    "skipped": false,
+    "totalduration": 4850882,
+    "weight": 10.690583315965894
+  },
+  "1": {
+    "RDDIds": {
+      "0": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "1": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "2": {
+        "callsite": "map at kmeans.scala:46",
+        "name": "MapPartitionsRDD"
+      },
+      "3": {
+        "callsite": "map at KMeans.scala:214",
+        "name": "MapPartitionsRDD"
+      },
+      "4": {
+        "callsite": "zip at KMeans.scala:216",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "5": {
+        "callsite": "map at KMeans.scala:216",
+        "name": "MapPartitionsRDD"
+      },
+      "7": {
+        "callsite": "takeSample at KMeans.scala:386",
+        "name": "PartitionwiseSampledRDD"
+      }
     },
-    "2": {
-        "RDDIds": [
-            9,
-            2,
-            8,
-            4,
-            3,
-            1,
-            5,
-            0,
-            6
-        ],
-        "cachedRDDs": [
-            9,
-            2,
-            3
-        ],
-        "duration": 151824,
-        "genstage": false,
-        "name": "aggregate at KMeans.scala:414",
-        "nominalrate": 2634629.5710823056,
-        "numtask": 1000,
-        "parentsIds": [
-            0,
-            1
-        ],
-        "recordsread": 400000000,
-        "recordswrite": 0.0,
-        "shufflerecordsread": 0.0,
-        "shufflerecordswrite": 0.0,
-        "skipped": false,
-        "weight": 37.25116911687216
+    "cachedRDDs": [
+      2,
+      3
+    ],
+    "duration": 12712,
+    "genstage": false,
+    "name": "takeSample at KMeans.scala:386",
+    "nominalrate": 15733165.512901196,
+    "numtask": 1000,
+    "parentsIds": [
+      0
+    ],
+    "recordsread": 200000000,
+    "recordswrite": 0.0,
+    "shufflerecordsread": 0.0,
+    "shufflerecordswrite": 0.0,
+    "skipped": false,
+    "weight": 142.86929672750156
+  },
+  "2": {
+    "RDDIds": {
+      "0": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "1": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "2": {
+        "callsite": "map at kmeans.scala:46",
+        "name": "MapPartitionsRDD"
+      },
+      "3": {
+        "callsite": "map at KMeans.scala:214",
+        "name": "MapPartitionsRDD"
+      },
+      "4": {
+        "callsite": "zip at KMeans.scala:216",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "5": {
+        "callsite": "map at KMeans.scala:216",
+        "name": "MapPartitionsRDD"
+      },
+      "6": {
+        "callsite": "map at KMeans.scala:382",
+        "name": "MapPartitionsRDD"
+      },
+      "8": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "9": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      }
     },
-    "3": {
-        "RDDIds": [
-            11,
-            2,
-            8,
-            4,
-            3,
-            1,
-            10,
-            5,
-            9,
-            0,
-            6
-        ],
-        "cachedRDDs": [
-            2,
-            3,
-            9
-        ],
-        "duration": 49726,
-        "genstage": false,
-        "name": "collect at KMeans.scala:446",
-        "nominalrate": 16088163.13397418,
-        "numtask": 1000,
-        "parentsIds": [
-            0,
-            1,
-            2
-        ],
-        "recordsread": 300000000,
-        "recordswrite": 0.0,
-        "shufflerecordsread": 0.0,
-        "shufflerecordswrite": 0.0,
-        "skipped": false,
-        "weight": 95.28340304870692
+    "cachedRDDs": [
+      9,
+      2,
+      3
+    ],
+    "duration": 181925,
+    "genstage": false,
+    "name": "aggregate at KMeans.scala:414",
+    "nominalrate": 2198708.2588978973,
+    "numtask": 1000,
+    "parentsIds": [
+      0,
+      1
+    ],
+    "recordsread": 400000000,
+    "recordswrite": 0.0,
+    "shufflerecordsread": 0.0,
+    "shufflerecordswrite": 0.0,
+    "skipped": false,
+    "weight": 17.354110210251477
+  },
+  "3": {
+    "RDDIds": {
+      "0": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "1": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "2": {
+        "callsite": "map at kmeans.scala:46",
+        "name": "MapPartitionsRDD"
+      },
+      "3": {
+        "callsite": "map at KMeans.scala:214",
+        "name": "MapPartitionsRDD"
+      },
+      "4": {
+        "callsite": "zip at KMeans.scala:216",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "5": {
+        "callsite": "map at KMeans.scala:216",
+        "name": "MapPartitionsRDD"
+      },
+      "6": {
+        "callsite": "map at KMeans.scala:382",
+        "name": "MapPartitionsRDD"
+      },
+      "8": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "9": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "10": {
+        "callsite": "zip at KMeans.scala:438",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "11": {
+        "callsite": "mapPartitionsWithIndex at KMeans.scala:438",
+        "name": "MapPartitionsRDD"
+      }
     },
-    "4": {
-        "RDDIds": [
-            13,
-            2,
-            8,
-            4,
-            3,
-            1,
-            5,
-            9,
-            0,
-            12,
-            6
-        ],
-        "cachedRDDs": [
-            13,
-            2,
-            3,
-            9
-        ],
-        "duration": 372997,
-        "genstage": false,
-        "name": "aggregate at KMeans.scala:414",
-        "nominalrate": 2144789.3682791013,
-        "numtask": 1000,
-        "parentsIds": [
-            0,
-            1,
-            2
-        ],
-        "recordsread": 300000000,
-        "recordswrite": 0.0,
-        "shufflerecordsread": 0.0,
-        "shufflerecordswrite": 0.0,
-        "skipped": false,
-        "weight": 18.636164634031907
+    "cachedRDDs": [
+      9,
+      2,
+      3
+    ],
+    "duration": 43294,
+    "genstage": false,
+    "name": "collect at KMeans.scala:446",
+    "nominalrate": 18478311.082367074,
+    "numtask": 1000,
+    "parentsIds": [
+      0,
+      1,
+      2
+    ],
+    "recordsread": 300000000,
+    "recordswrite": 0.0,
+    "shufflerecordsread": 0.0,
+    "shufflerecordswrite": 0.0,
+    "skipped": false,
+    "weight": 44.70570979812445
+  },
+  "4": {
+    "RDDIds": {
+      "0": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "1": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "2": {
+        "callsite": "map at kmeans.scala:46",
+        "name": "MapPartitionsRDD"
+      },
+      "3": {
+        "callsite": "map at KMeans.scala:214",
+        "name": "MapPartitionsRDD"
+      },
+      "4": {
+        "callsite": "zip at KMeans.scala:216",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "5": {
+        "callsite": "map at KMeans.scala:216",
+        "name": "MapPartitionsRDD"
+      },
+      "6": {
+        "callsite": "map at KMeans.scala:382",
+        "name": "MapPartitionsRDD"
+      },
+      "8": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "9": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "12": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "13": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      }
     },
-    "5": {
-        "RDDIds": [
-            15,
-            2,
-            8,
-            13,
-            4,
-            3,
-            1,
-            14,
-            5,
-            9,
-            0,
-            12,
-            6
-        ],
-        "cachedRDDs": [
-            2,
-            13,
-            3
-        ],
-        "duration": 46067,
-        "genstage": false,
-        "name": "collect at KMeans.scala:446",
-        "nominalrate": 15195259.079167299,
-        "numtask": 1000,
-        "parentsIds": [
-            0,
-            0,
-            4
-        ],
-        "recordsread": 300000000,
-        "recordswrite": 0.0,
-        "shufflerecordsread": 0.0,
-        "shufflerecordswrite": 0.0,
-        "skipped": false,
-        "weight": 96.66771224520807
+    "cachedRDDs": [
+      13,
+      9,
+      2,
+      3
+    ],
+    "duration": 160131,
+    "genstage": false,
+    "name": "aggregate at KMeans.scala:414",
+    "nominalrate": 4995909.599015806,
+    "numtask": 1000,
+    "parentsIds": [
+      0,
+      1,
+      2
+    ],
+    "recordsread": 300000000,
+    "recordswrite": 0.0,
+    "shufflerecordsread": 0.0,
+    "shufflerecordswrite": 0.0,
+    "skipped": false,
+    "weight": 16.923980990563976
+  },
+  "5": {
+    "RDDIds": {
+      "0": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "1": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "2": {
+        "callsite": "map at kmeans.scala:46",
+        "name": "MapPartitionsRDD"
+      },
+      "3": {
+        "callsite": "map at KMeans.scala:214",
+        "name": "MapPartitionsRDD"
+      },
+      "4": {
+        "callsite": "zip at KMeans.scala:216",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "5": {
+        "callsite": "map at KMeans.scala:216",
+        "name": "MapPartitionsRDD"
+      },
+      "6": {
+        "callsite": "map at KMeans.scala:382",
+        "name": "MapPartitionsRDD"
+      },
+      "8": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "9": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "12": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "13": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "14": {
+        "callsite": "zip at KMeans.scala:438",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "15": {
+        "callsite": "mapPartitionsWithIndex at KMeans.scala:438",
+        "name": "MapPartitionsRDD"
+      }
     },
-    "6": {
-        "RDDIds": [
-            17,
-            2,
-            8,
-            13,
-            4,
-            3,
-            1,
-            5,
-            9,
-            0,
-            16,
-            12,
-            6
-        ],
-        "cachedRDDs": [
-            17,
-            2,
-            13,
-            3
-        ],
-        "duration": 510345,
-        "genstage": false,
-        "name": "aggregate at KMeans.scala:414",
-        "nominalrate": 1371621.1582360952,
-        "numtask": 1000,
-        "parentsIds": [
-            0,
-            0,
-            4
-        ],
-        "recordsread": 300000000,
-        "recordswrite": 0.0,
-        "shufflerecordsread": 0.0,
-        "shufflerecordswrite": 0.0,
-        "skipped": false,
-        "weight": 14.09398054257414
+    "cachedRDDs": [
+      2,
+      13,
+      3
+    ],
+    "duration": 40410,
+    "genstage": false,
+    "name": "collect at KMeans.scala:446",
+    "nominalrate": 17322444.939371444,
+    "numtask": 1000,
+    "parentsIds": [
+      0,
+      0,
+      4
+    ],
+    "recordsread": 300000000,
+    "recordswrite": 0.0,
+    "shufflerecordsread": 0.0,
+    "shufflerecordswrite": 0.0,
+    "skipped": false,
+    "weight": 43.84401138332096
+  },
+  "6": {
+    "RDDIds": {
+      "0": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "1": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "2": {
+        "callsite": "map at kmeans.scala:46",
+        "name": "MapPartitionsRDD"
+      },
+      "3": {
+        "callsite": "map at KMeans.scala:214",
+        "name": "MapPartitionsRDD"
+      },
+      "4": {
+        "callsite": "zip at KMeans.scala:216",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "5": {
+        "callsite": "map at KMeans.scala:216",
+        "name": "MapPartitionsRDD"
+      },
+      "6": {
+        "callsite": "map at KMeans.scala:382",
+        "name": "MapPartitionsRDD"
+      },
+      "8": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "9": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "12": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "13": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "16": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "17": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      }
     },
-    "7": {
-        "RDDIds": [
-            19,
-            8,
-            3,
-            5,
-            9,
-            2,
-            13,
-            4,
-            1,
-            18,
-            0,
-            16,
-            12,
-            6,
-            17
-        ],
-        "cachedRDDs": [
-            3,
-            2,
-            17
-        ],
-        "duration": 38566,
-        "genstage": false,
-        "name": "collect at KMeans.scala:446",
-        "nominalrate": 18150702.691489913,
-        "numtask": 1000,
-        "parentsIds": [
-            0,
-            1,
-            6
-        ],
-        "recordsread": 300000000,
-        "recordswrite": 0.0,
-        "shufflerecordsread": 0.0,
-        "shufflerecordswrite": 0.0,
-        "skipped": false,
-        "weight": 105.99136545143391
+    "cachedRDDs": [
+      17,
+      2,
+      13,
+      3
+    ],
+    "duration": 168552,
+    "genstage": false,
+    "name": "aggregate at KMeans.scala:414",
+    "nominalrate": 4153021.026152167,
+    "numtask": 1000,
+    "parentsIds": [
+      0,
+      0,
+      4
+    ],
+    "recordsread": 300000000,
+    "recordswrite": 0.0,
+    "shufflerecordsread": 0.0,
+    "shufflerecordswrite": 0.0,
+    "skipped": false,
+    "weight": 14.833276970905121
+  },
+  "7": {
+    "RDDIds": {
+      "0": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "1": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "2": {
+        "callsite": "map at kmeans.scala:46",
+        "name": "MapPartitionsRDD"
+      },
+      "3": {
+        "callsite": "map at KMeans.scala:214",
+        "name": "MapPartitionsRDD"
+      },
+      "4": {
+        "callsite": "zip at KMeans.scala:216",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "5": {
+        "callsite": "map at KMeans.scala:216",
+        "name": "MapPartitionsRDD"
+      },
+      "6": {
+        "callsite": "map at KMeans.scala:382",
+        "name": "MapPartitionsRDD"
+      },
+      "8": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "9": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "12": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "13": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "16": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "17": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "18": {
+        "callsite": "zip at KMeans.scala:438",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "19": {
+        "callsite": "mapPartitionsWithIndex at KMeans.scala:438",
+        "name": "MapPartitionsRDD"
+      }
     },
-    "8": {
-        "RDDIds": [
-            21,
-            8,
-            3,
-            5,
-            9,
-            2,
-            13,
-            4,
-            1,
-            0,
-            16,
-            12,
-            6,
-            20,
-            17
-        ],
-        "cachedRDDs": [
-            21,
-            3,
-            2,
-            17
-        ],
-        "duration": 258756,
-        "genstage": false,
-        "name": "aggregate at KMeans.scala:414",
-        "nominalrate": 2705251.2791973907,
-        "numtask": 1000,
-        "parentsIds": [
-            0,
-            1,
-            6
-        ],
-        "recordsread": 300000000,
-        "recordswrite": 0.0,
-        "shufflerecordsread": 0.0,
-        "shufflerecordswrite": 0.0,
-        "skipped": false,
-        "weight": 19.903101763823834
+    "cachedRDDs": [
+      17,
+      2,
+      3
+    ],
+    "duration": 40113,
+    "genstage": false,
+    "name": "collect at KMeans.scala:446",
+    "nominalrate": 17450701.767506793,
+    "numtask": 1000,
+    "parentsIds": [
+      0,
+      1,
+      6
+    ],
+    "recordsread": 300000000,
+    "recordswrite": 0.0,
+    "shufflerecordsread": 0.0,
+    "shufflerecordswrite": 0.0,
+    "skipped": false,
+    "weight": 40.5158427442475
+  },
+  "8": {
+    "RDDIds": {
+      "0": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "1": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "2": {
+        "callsite": "map at kmeans.scala:46",
+        "name": "MapPartitionsRDD"
+      },
+      "3": {
+        "callsite": "map at KMeans.scala:214",
+        "name": "MapPartitionsRDD"
+      },
+      "4": {
+        "callsite": "zip at KMeans.scala:216",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "5": {
+        "callsite": "map at KMeans.scala:216",
+        "name": "MapPartitionsRDD"
+      },
+      "6": {
+        "callsite": "map at KMeans.scala:382",
+        "name": "MapPartitionsRDD"
+      },
+      "8": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "9": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "12": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "13": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "16": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "17": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "20": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "21": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      }
     },
-    "9": {
-        "RDDIds": [
-            23,
-            8,
-            3,
-            5,
-            9,
-            2,
-            13,
-            4,
-            1,
-            21,
-            0,
-            16,
-            22,
-            12,
-            20,
-            6,
-            17
-        ],
-        "cachedRDDs": [
-            3,
-            2,
-            21
-        ],
-        "duration": 37318,
-        "genstage": false,
-        "name": "collect at KMeans.scala:446",
-        "nominalrate": 18757704.05702342,
-        "numtask": 1000,
-        "parentsIds": [
-            0,
-            1,
-            8
-        ],
-        "recordsread": 300000000,
-        "recordswrite": 0.0,
-        "shufflerecordsread": 0.0,
-        "shufflerecordswrite": 0.0,
-        "skipped": false,
-        "weight": 104.36840130767995
+    "cachedRDDs": [
+      21,
+      17,
+      2,
+      3
+    ],
+    "duration": 258365,
+    "genstage": false,
+    "name": "aggregate at KMeans.scala:414",
+    "nominalrate": 2709345.306059257,
+    "numtask": 1000,
+    "parentsIds": [
+      0,
+      1,
+      6
+    ],
+    "recordsread": 300000000,
+    "recordswrite": 0.0,
+    "shufflerecordsread": 0.0,
+    "shufflerecordswrite": 0.0,
+    "skipped": false,
+    "weight": 10.358829562827783
+  },
+  "9": {
+    "RDDIds": {
+      "0": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "1": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "2": {
+        "callsite": "map at kmeans.scala:46",
+        "name": "MapPartitionsRDD"
+      },
+      "3": {
+        "callsite": "map at KMeans.scala:214",
+        "name": "MapPartitionsRDD"
+      },
+      "4": {
+        "callsite": "zip at KMeans.scala:216",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "5": {
+        "callsite": "map at KMeans.scala:216",
+        "name": "MapPartitionsRDD"
+      },
+      "6": {
+        "callsite": "map at KMeans.scala:382",
+        "name": "MapPartitionsRDD"
+      },
+      "8": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "9": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "12": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "13": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "16": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "17": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "20": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "21": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "22": {
+        "callsite": "zip at KMeans.scala:438",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "23": {
+        "callsite": "mapPartitionsWithIndex at KMeans.scala:438",
+        "name": "MapPartitionsRDD"
+      }
     },
-    "10": {
-        "RDDIds": [
-            25,
-            8,
-            3,
-            5,
-            9,
-            2,
-            13,
-            4,
-            1,
-            21,
-            0,
-            24,
-            16,
-            12,
-            20,
-            6,
-            17
-        ],
-        "cachedRDDs": [
-            25,
-            3,
-            2,
-            21
-        ],
-        "duration": 1336917,
-        "genstage": false,
-        "name": "aggregate at KMeans.scala:414",
-        "nominalrate": 523592.7136837964,
-        "numtask": 1000,
-        "parentsIds": [
-            0,
-            1,
-            8
-        ],
-        "recordsread": 300000000,
-        "recordswrite": 0.0,
-        "shufflerecordsread": 0.0,
-        "shufflerecordswrite": 0.0,
-        "skipped": false,
-        "weight": 6.773717440948092
+    "cachedRDDs": [
+      2,
+      3,
+      21
+    ],
+    "duration": 40719,
+    "genstage": false,
+    "name": "collect at KMeans.scala:446",
+    "nominalrate": 17190991.920233797,
+    "numtask": 1000,
+    "parentsIds": [
+      0,
+      1,
+      8
+    ],
+    "recordsread": 300000000,
+    "recordswrite": 0.0,
+    "shufflerecordsread": 0.0,
+    "shufflerecordswrite": 0.0,
+    "skipped": false,
+    "weight": 35.329624990790535
+  },
+  "10": {
+    "RDDIds": {
+      "0": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "1": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "2": {
+        "callsite": "map at kmeans.scala:46",
+        "name": "MapPartitionsRDD"
+      },
+      "3": {
+        "callsite": "map at KMeans.scala:214",
+        "name": "MapPartitionsRDD"
+      },
+      "4": {
+        "callsite": "zip at KMeans.scala:216",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "5": {
+        "callsite": "map at KMeans.scala:216",
+        "name": "MapPartitionsRDD"
+      },
+      "6": {
+        "callsite": "map at KMeans.scala:382",
+        "name": "MapPartitionsRDD"
+      },
+      "8": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "9": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "12": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "13": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "16": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "17": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "20": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "21": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "24": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "25": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      }
     },
-    "11": {
-        "RDDIds": [
-            27,
-            8,
-            3,
-            5,
-            9,
-            2,
-            13,
-            4,
-            1,
-            21,
-            25,
-            26,
-            0,
-            24,
-            16,
-            12,
-            20,
-            6,
-            17
-        ],
-        "cachedRDDs": [
-            3,
-            2,
-            25
-        ],
-        "duration": 39091,
-        "genstage": false,
-        "name": "collect at KMeans.scala:446",
-        "nominalrate": 17906935.100150928,
-        "numtask": 1000,
-        "parentsIds": [
-            0,
-            1,
-            10
-        ],
-        "recordsread": 300000000,
-        "recordswrite": 0.0,
-        "shufflerecordsread": 0.0,
-        "shufflerecordswrite": 0.0,
-        "skipped": false,
-        "weight": 81.26141567112634
+    "cachedRDDs": [
+      25,
+      2,
+      3,
+      21
+    ],
+    "duration": 200724,
+    "genstage": false,
+    "name": "aggregate at KMeans.scala:414",
+    "nominalrate": 3487375.699966123,
+    "numtask": 1000,
+    "parentsIds": [
+      0,
+      1,
+      8
+    ],
+    "recordsread": 300000000,
+    "recordswrite": 0.0,
+    "shufflerecordsread": 0.0,
+    "shufflerecordswrite": 0.0,
+    "skipped": false,
+    "weight": 10.152687272075088
+  },
+  "11": {
+    "RDDIds": {
+      "0": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "1": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "2": {
+        "callsite": "map at kmeans.scala:46",
+        "name": "MapPartitionsRDD"
+      },
+      "3": {
+        "callsite": "map at KMeans.scala:214",
+        "name": "MapPartitionsRDD"
+      },
+      "4": {
+        "callsite": "zip at KMeans.scala:216",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "5": {
+        "callsite": "map at KMeans.scala:216",
+        "name": "MapPartitionsRDD"
+      },
+      "6": {
+        "callsite": "map at KMeans.scala:382",
+        "name": "MapPartitionsRDD"
+      },
+      "8": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "9": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "12": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "13": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "16": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "17": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "20": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "21": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "24": {
+        "callsite": "zip at KMeans.scala:408",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "25": {
+        "callsite": "map at KMeans.scala:408",
+        "name": "MapPartitionsRDD"
+      },
+      "26": {
+        "callsite": "zip at KMeans.scala:438",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "27": {
+        "callsite": "mapPartitionsWithIndex at KMeans.scala:438",
+        "name": "MapPartitionsRDD"
+      }
     },
-    "12": {
-        "RDDIds": [
-            28,
-            2,
-            4,
-            3,
-            1,
-            5,
-            0
-        ],
-        "cachedRDDs": [
-            2,
-            3
-        ],
-        "duration": 630638,
-        "genstage": false,
-        "name": "flatMap at KMeans.scala:461",
-        "nominalrate": 634278.3022906961,
-        "numtask": 1000,
-        "parentsIds": [
-            0,
-            1
-        ],
-        "recordsread": 200000000,
-        "recordswrite": 0.0,
-        "shufflerecordsread": 0.0,
-        "shufflerecordswrite": 132000,
-        "skipped": false,
-        "weight": 7.78915954953555
+    "cachedRDDs": [
+      2,
+      3,
+      25
+    ],
+    "duration": 40351,
+    "genstage": false,
+    "name": "collect at KMeans.scala:446",
+    "nominalrate": 17347773.289385643,
+    "numtask": 1000,
+    "parentsIds": [
+      0,
+      1,
+      10
+    ],
+    "recordsread": 300000000,
+    "recordswrite": 0.0,
+    "shufflerecordsread": 0.0,
+    "shufflerecordswrite": 0.0,
+    "skipped": false,
+    "weight": 31.619005724765184
+  },
+  "12": {
+    "RDDIds": {
+      "0": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "1": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "2": {
+        "callsite": "map at kmeans.scala:46",
+        "name": "MapPartitionsRDD"
+      },
+      "3": {
+        "callsite": "map at KMeans.scala:214",
+        "name": "MapPartitionsRDD"
+      },
+      "4": {
+        "callsite": "zip at KMeans.scala:216",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "5": {
+        "callsite": "map at KMeans.scala:216",
+        "name": "MapPartitionsRDD"
+      },
+      "28": {
+        "callsite": "flatMap at KMeans.scala:461",
+        "name": "MapPartitionsRDD"
+      }
     },
-    "13": {
-        "RDDIds": [
-            29
-        ],
-        "cachedRDDs": [],
-        "duration": 50118,
-        "genstage": false,
-        "name": "collectAsMap at KMeans.scala:465",
-        "nominalrate": 2633.784269124865,
-        "numtask": 1000,
-        "parentsIds": [
-            12
-        ],
-        "recordsread": 0.0,
-        "recordswrite": 0.0,
-        "shufflerecordsread": 132000,
-        "shufflerecordswrite": 0.0,
-        "skipped": false,
-        "weight": 56.47076898519494
+    "cachedRDDs": [
+      2,
+      3
+    ],
+    "duration": 608324,
+    "genstage": false,
+    "name": "flatMap at KMeans.scala:461",
+    "nominalrate": 657544.3349267825,
+    "numtask": 1000,
+    "parentsIds": [
+      0,
+      1
+    ],
+    "recordsread": 200000000,
+    "recordswrite": 0.0,
+    "shufflerecordsread": 0.0,
+    "shufflerecordswrite": 132000,
+    "skipped": false,
+    "weight": 4.832008107521649
+  },
+  "13": {
+    "RDDIds": {
+      "29": {
+        "callsite": "reduceByKey at KMeans.scala:465",
+        "name": "ShuffledRDD"
+      }
     },
-    "14": {
-        "RDDIds": [
-            30,
-            2,
-            4,
-            3,
-            1,
-            5,
-            0
-        ],
-        "cachedRDDs": [
-            2,
-            3
-        ],
-        "duration": 89509,
-        "genstage": false,
-        "name": "mapPartitions at KMeans.scala:287",
-        "nominalrate": 4468824.364030433,
-        "numtask": 1000,
-        "parentsIds": [
-            0,
-            1
-        ],
-        "recordsread": 200000000,
-        "recordswrite": 0.0,
-        "shufflerecordsread": 0.0,
-        "shufflerecordswrite": 10000,
-        "skipped": false,
-        "weight": 31.93942508574557
+    "cachedRDDs": [],
+    "duration": 28792,
+    "genstage": false,
+    "name": "collectAsMap at KMeans.scala:465",
+    "nominalrate": 4584.606835232009,
+    "numtask": 1000,
+    "parentsIds": [
+      12
+    ],
+    "recordsread": 0.0,
+    "recordswrite": 0.0,
+    "shufflerecordsread": 132000,
+    "shufflerecordswrite": 0.0,
+    "skipped": false,
+    "weight": 30.642973742706307
+  },
+  "14": {
+    "RDDIds": {
+      "0": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "1": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "2": {
+        "callsite": "map at kmeans.scala:46",
+        "name": "MapPartitionsRDD"
+      },
+      "3": {
+        "callsite": "map at KMeans.scala:214",
+        "name": "MapPartitionsRDD"
+      },
+      "4": {
+        "callsite": "zip at KMeans.scala:216",
+        "name": "ZippedPartitionsRDD2"
+      },
+      "5": {
+        "callsite": "map at KMeans.scala:216",
+        "name": "MapPartitionsRDD"
+      },
+      "30": {
+        "callsite": "mapPartitions at KMeans.scala:287",
+        "name": "MapPartitionsRDD"
+      }
     },
-    "15": {
-        "RDDIds": [
-            31
-        ],
-        "cachedRDDs": [],
-        "duration": 138775,
-        "genstage": false,
-        "name": "collectAsMap at KMeans.scala:310",
-        "nominalrate": 72.05908845253107,
-        "numtask": 1000,
-        "parentsIds": [
-            14
-        ],
-        "recordsread": 0.0,
-        "recordswrite": 0.0,
-        "shufflerecordsread": 10000,
-        "shufflerecordswrite": 0.0,
-        "skipped": false,
-        "weight": 20.48824355971897
+    "cachedRDDs": [
+      2,
+      3
+    ],
+    "duration": 77605,
+    "genstage": false,
+    "name": "mapPartitions at KMeans.scala:287",
+    "nominalrate": 5154307.067843567,
+    "numtask": 1000,
+    "parentsIds": [
+      0,
+      1
+    ],
+    "recordsread": 200000000,
+    "recordswrite": 0.0,
+    "shufflerecordsread": 0.0,
+    "shufflerecordswrite": 10000,
+    "skipped": false,
+    "weight": 12.255737388054893
+  },
+  "15": {
+    "RDDIds": {
+      "31": {
+        "callsite": "reduceByKey at KMeans.scala:310",
+        "name": "ShuffledRDD"
+      }
     },
-    "16": {
-        "RDDIds": [
-            33,
-            2,
-            1,
-            0,
-            32
-        ],
-        "cachedRDDs": [
-            2
-        ],
-        "duration": 5066464,
-        "genstage": false,
-        "name": "saveAsTextFile at kmeans.scala:60",
-        "nominalrate": 39475.26322105516,
-        "numtask": 1000,
-        "parentsIds": [
-            0
-        ],
-        "recordsread": 100000000,
-        "recordswrite": 0.0,
-        "shufflerecordsread": 0.0,
-        "shufflerecordswrite": 0.0,
-        "skipped": false,
-        "weight": 1.5064095984892028
+    "cachedRDDs": [],
+    "duration": 2765,
+    "genstage": false,
+    "name": "collectAsMap at KMeans.scala:310",
+    "nominalrate": 3616.636528028933,
+    "numtask": 1000,
+    "parentsIds": [
+      14
+    ],
+    "recordsread": 0.0,
+    "recordswrite": 0.0,
+    "shufflerecordsread": 10000,
+    "shufflerecordswrite": 0.0,
+    "skipped": false,
+    "weight": 275.3133815551537
+  },
+  "16": {
+    "RDDIds": {
+      "0": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "1": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "2": {
+        "callsite": "map at kmeans.scala:46",
+        "name": "MapPartitionsRDD"
+      },
+      "32": {
+        "callsite": "map at kmeans.scala:56",
+        "name": "MapPartitionsRDD"
+      },
+      "33": {
+        "callsite": "saveAsTextFile at kmeans.scala:60",
+        "name": "MapPartitionsRDD"
+      }
     },
-    "17": {
-        "RDDIds": [
-            34,
-            2,
-            1,
-            0
-        ],
-        "cachedRDDs": [
-            2
-        ],
-        "duration": 64948,
-        "genstage": false,
-        "name": "sum at KMeansModel.scala:87",
-        "nominalrate": 3079386.586192031,
-        "numtask": 1000,
-        "parentsIds": [
-            0
-        ],
-        "recordsread": 100000000,
-        "recordswrite": 0.0,
-        "shufflerecordsread": 0.0,
-        "shufflerecordswrite": 0.0,
-        "skipped": false,
-        "weight": 1.0
-    }
+    "cachedRDDs": [
+      2
+    ],
+    "duration": 1452858,
+    "genstage": false,
+    "name": "saveAsTextFile at kmeans.scala:60",
+    "nominalrate": 137659.7024623191,
+    "numtask": 1000,
+    "parentsIds": [
+      0
+    ],
+    "recordsread": 100000000,
+    "recordswrite": 0.0,
+    "shufflerecordsread": 0.0,
+    "shufflerecordswrite": 0.0,
+    "skipped": false,
+    "weight": 1.5201551011867642
+  },
+  "17": {
+    "RDDIds": {
+      "0": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "1": {
+        "callsite": "textFile at kmeans.scala:45",
+        "name": "hdfs://ec2-35-160-77-121.us-west-2.compute.amazonaws.com:9000/SparkBench/KMeans/Input"
+      },
+      "2": {
+        "callsite": "map at kmeans.scala:46",
+        "name": "MapPartitionsRDD"
+      },
+      "34": {
+        "callsite": "map at KMeansModel.scala:87",
+        "name": "MapPartitionsRDD"
+      }
+    },
+    "cachedRDDs": [
+      2
+    ],
+    "duration": 58565,
+    "genstage": false,
+    "name": "sum at KMeansModel.scala:87",
+    "nominalrate": 3415008.9643985317,
+    "numtask": 1000,
+    "parentsIds": [
+      0
+    ],
+    "recordsread": 100000000,
+    "recordswrite": 0.0,
+    "shufflerecordsread": 0.0,
+    "shufflerecordswrite": 0.0,
+    "skipped": false,
+    "weight": 1.0
+  }
 }
