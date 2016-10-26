@@ -260,8 +260,7 @@ class DAGScheduler(
 
         // COMPUTE DEADLINE
         val duration = stageJson.fields("duration").convertTo[Double]
-        val weight = average(List(stageJsonIds.size,
-          (totalDuration / duration) - 1))
+        val weight = (totalDuration / duration) - 1)
         val deadlineStage = controller.computeDeadlineStage(weight, currentTime, alpha, deadline)
 
         // UPDATE RECORD AND APP STATE
