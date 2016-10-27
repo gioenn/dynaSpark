@@ -1,45 +1,75 @@
 {
     "0": {
-        "RDDIds": [
-            8,
-            0,
-            3,
-            1,
-            2
-        ],
+        "RDDIds": {
+            "0": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "1": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "2": {
+                "callsite": "map at SVMApp.java:60",
+                "name": "MapPartitionsRDD"
+            },
+            "3": {
+                "callsite": "sample at SVMApp.java:68",
+                "name": "PartitionwiseSampledRDD"
+            },
+            "8": {
+                "callsite": "map at GeneralizedLinearAlgorithm.scala:204",
+                "name": "MapPartitionsRDD"
+            }
+        },
         "cachedRDDs": [
             3
         ],
-        "duration": 2853,
+        "duration": 5185,
         "genstage": false,
         "name": "first at GeneralizedLinearAlgorithm.scala:204",
-        "nominalrate": 70101.64738871362,
+        "nominalrate": 38572.80617164899,
         "numtask": 1,
         "parentsIds": [],
         "recordsread": 200000,
+        "inputrecord": 200000000,
         "recordswrite": 0.0,
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 0.0,
-        "inputrecord": 200000000,
         "skipped": false,
-        "totalduration": 7620641,
-        "weight": 1342.0487206449352
+        "totalduration": 6696591,
+        "weight": 652.2657666345226
     },
     "1": {
-        "RDDIds": [
-            9,
-            0,
-            3,
-            1,
-            2
-        ],
+        "RDDIds": {
+            "0": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "1": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "2": {
+                "callsite": "map at SVMApp.java:60",
+                "name": "MapPartitionsRDD"
+            },
+            "3": {
+                "callsite": "sample at SVMApp.java:68",
+                "name": "PartitionwiseSampledRDD"
+            },
+            "9": {
+                "callsite": "filter at DataValidators.scala:40",
+                "name": "MapPartitionsRDD"
+            }
+        },
         "cachedRDDs": [
             3
         ],
-        "duration": 1943079,
+        "duration": 1975324,
         "genstage": false,
         "name": "count at DataValidators.scala:40",
-        "nominalrate": 102.92942283870084,
+        "nominalrate": 101.24921278737058,
         "numtask": 1000,
         "parentsIds": [
             0
@@ -49,23 +79,38 @@
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 7.960236305368953
+        "weight": 7.6937489748517205
     },
     "2": {
-        "RDDIds": [
-            10,
-            0,
-            3,
-            1,
-            2
-        ],
+        "RDDIds": {
+            "0": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "1": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "2": {
+                "callsite": "map at SVMApp.java:60",
+                "name": "MapPartitionsRDD"
+            },
+            "3": {
+                "callsite": "sample at SVMApp.java:68",
+                "name": "PartitionwiseSampledRDD"
+            },
+            "10": {
+                "callsite": "map at GeneralizedLinearAlgorithm.scala:297",
+                "name": "MapPartitionsRDD"
+            }
+        },
         "cachedRDDs": [
             3
         ],
-        "duration": 14591,
+        "duration": 10613,
         "genstage": false,
         "name": "count at GradientDescent.scala:209",
-        "nominalrate": 13707.079706668495,
+        "nominalrate": 18844.812965231322,
         "numtask": 1000,
         "parentsIds": [
             0
@@ -75,26 +120,50 @@
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 199.95922143787266
+        "weight": 227.68420804673514
     },
     "3": {
-        "RDDIds": [
-            13,
-            0,
-            3,
-            10,
-            11,
-            12,
-            1,
-            2
-        ],
+        "RDDIds": {
+            "0": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "1": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "2": {
+                "callsite": "map at SVMApp.java:60",
+                "name": "MapPartitionsRDD"
+            },
+            "3": {
+                "callsite": "sample at SVMApp.java:68",
+                "name": "PartitionwiseSampledRDD"
+            },
+            "10": {
+                "callsite": "map at GeneralizedLinearAlgorithm.scala:297",
+                "name": "MapPartitionsRDD"
+            },
+            "11": {
+                "callsite": "sample at GradientDescent.scala:238",
+                "name": "PartitionwiseSampledRDD"
+            },
+            "12": {
+                "callsite": "treeAggregate at GradientDescent.scala:239",
+                "name": "MapPartitionsRDD"
+            },
+            "13": {
+                "callsite": "treeAggregate at GradientDescent.scala:239",
+                "name": "MapPartitionsRDD"
+            }
+        },
         "cachedRDDs": [
             3
         ],
-        "duration": 47511,
+        "duration": 40440,
         "genstage": false,
         "name": "treeAggregate at GradientDescent.scala:239",
-        "nominalrate": 4209.551472290627,
+        "nominalrate": 4945.598417408507,
         "numtask": 1000,
         "parentsIds": [
             0
@@ -104,18 +173,24 @@
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 1000,
         "skipped": false,
-        "weight": 64.5663951505967
+        "weight": 63.17840009891197
     },
     "4": {
-        "RDDIds": [
-            15,
-            14
-        ],
+        "RDDIds": {
+            "14": {
+                "callsite": "treeAggregate at GradientDescent.scala:239",
+                "name": "ShuffledRDD"
+            },
+            "15": {
+                "callsite": "treeAggregate at GradientDescent.scala:239",
+                "name": "MapPartitionsRDD"
+            }
+        },
         "cachedRDDs": [],
-        "duration": 3687,
+        "duration": 4006,
         "genstage": false,
         "name": "treeAggregate at GradientDescent.scala:239",
-        "nominalrate": 271.22321670735016,
+        "nominalrate": 249.6255616575137,
         "numtask": 31,
         "parentsIds": [
             3
@@ -125,23 +200,38 @@
         "shufflerecordsread": 1000,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 765.6346623270952
+        "weight": 586.7552421367948
     },
     "5": {
-        "RDDIds": [
-            5,
-            0,
-            3,
-            1,
-            2
-        ],
+        "RDDIds": {
+            "0": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "1": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "2": {
+                "callsite": "map at SVMApp.java:60",
+                "name": "MapPartitionsRDD"
+            },
+            "3": {
+                "callsite": "sample at SVMApp.java:68",
+                "name": "PartitionwiseSampledRDD"
+            },
+            "5": {
+                "callsite": "subtract at SVMApp.java:79",
+                "name": "MapPartitionsRDD"
+            }
+        },
         "cachedRDDs": [
             3
         ],
-        "duration": 505777,
+        "duration": 468236,
         "genstage": false,
         "name": "subtract at SVMApp.java:79",
-        "nominalrate": 395.431188053233,
+        "nominalrate": 427.1350344697973,
         "numtask": 1000,
         "parentsIds": [
             0
@@ -151,20 +241,32 @@
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 179996837,
         "skipped": false,
-        "weight": 9.544854748238848
+        "weight": 8.977215549423795
     },
     "6": {
-        "RDDIds": [
-            4,
-            0,
-            1,
-            2
-        ],
+        "RDDIds": {
+            "0": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "1": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "2": {
+                "callsite": "map at SVMApp.java:60",
+                "name": "MapPartitionsRDD"
+            },
+            "4": {
+                "callsite": "subtract at SVMApp.java:79",
+                "name": "MapPartitionsRDD"
+            }
+        },
         "cachedRDDs": [],
-        "duration": 2466920,
+        "duration": 2105772,
         "genstage": false,
         "name": "subtract at SVMApp.java:79",
-        "nominalrate": 81072.75469005885,
+        "nominalrate": 94977.04404845349,
         "numtask": 1000,
         "parentsIds": [],
         "recordsread": 200000000,
@@ -172,19 +274,28 @@
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 200000000,
         "skipped": false,
-        "weight": 4.534314651468227
+        "weight": 4.4955462889619575
     },
     "7": {
-        "RDDIds": [
-            16,
-            7,
-            6
-        ],
+        "RDDIds": {
+            "6": {
+                "callsite": "subtract at SVMApp.java:79",
+                "name": "SubtractedRDD"
+            },
+            "7": {
+                "callsite": "subtract at SVMApp.java:79",
+                "name": "MapPartitionsRDD"
+            },
+            "16": {
+                "callsite": "map at SVMApp.java:99",
+                "name": "MapPartitionsRDD"
+            }
+        },
         "cachedRDDs": [],
-        "duration": 1335335,
+        "duration": 1104732,
         "genstage": false,
         "name": "map at SVMApp.java:99",
-        "nominalrate": 284570.4164123609,
+        "nominalrate": 343971.96514629794,
         "numtask": 1000,
         "parentsIds": [
             5,
@@ -195,19 +306,28 @@
         "shufflerecordsread": 379996837,
         "shufflerecordswrite": 20003163,
         "skipped": false,
-        "weight": 3.9871017385150544
+        "weight": 3.9445797713834665
     },
     "8": {
-        "RDDIds": [
-            19,
-            18,
-            17
-        ],
+        "RDDIds": {
+            "17": {
+                "callsite": "combineByKey at BinaryClassificationMetrics.scala:149",
+                "name": "ShuffledRDD"
+            },
+            "18": {
+                "callsite": "sortByKey at BinaryClassificationMetrics.scala:153",
+                "name": "MapPartitionsRDD"
+            },
+            "19": {
+                "callsite": "sortByKey at BinaryClassificationMetrics.scala:153",
+                "name": "MapPartitionsRDD"
+            }
+        },
         "cachedRDDs": [],
-        "duration": 298531,
+        "duration": 173635,
         "genstage": false,
         "name": "sortByKey at BinaryClassificationMetrics.scala:153",
-        "nominalrate": 67005.31268109509,
+        "nominalrate": 115202.36703429608,
         "numtask": 1000,
         "parentsIds": [
             7
@@ -217,69 +337,123 @@
         "shufflerecordsread": 20003163,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 4.678815600389909
+        "weight": 5.3285858265902615
     },
     "9": {
-        "RDDIds": [
-            5,
-            0,
-            3,
-            1,
-            2
-        ],
+        "RDDIds": {
+            "0": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "1": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "2": {
+                "callsite": "map at SVMApp.java:60",
+                "name": "MapPartitionsRDD"
+            },
+            "3": {
+                "callsite": "sample at SVMApp.java:68",
+                "name": "PartitionwiseSampledRDD"
+            },
+            "5": {
+                "callsite": "subtract at SVMApp.java:79",
+                "name": "MapPartitionsRDD"
+            }
+        },
         "cachedRDDs": [
             3
         ],
-        "duration": 0,
         "genstage": false,
+        "name": "subtract at SVMApp.java:79",
         "nominalrate": 0.0,
+        "numtask": 0,
         "parentsIds": [
             0
         ],
-        "skipped": true,
+        "recordsread": 0.0,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
         "weight": 0
     },
     "10": {
-        "RDDIds": [
-            4,
-            0,
-            1,
-            2
-        ],
+        "RDDIds": {
+            "0": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "1": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "2": {
+                "callsite": "map at SVMApp.java:60",
+                "name": "MapPartitionsRDD"
+            },
+            "4": {
+                "callsite": "subtract at SVMApp.java:79",
+                "name": "MapPartitionsRDD"
+            }
+        },
         "cachedRDDs": [],
-        "duration": 0,
         "genstage": false,
+        "name": "subtract at SVMApp.java:79",
         "nominalrate": 0.0,
+        "numtask": 0,
         "parentsIds": [],
-        "skipped": true,
+        "recordsread": 0.0,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
         "weight": 0
     },
     "11": {
-        "RDDIds": [
-            16,
-            7,
-            6
-        ],
+        "RDDIds": {
+            "6": {
+                "callsite": "subtract at SVMApp.java:79",
+                "name": "SubtractedRDD"
+            },
+            "7": {
+                "callsite": "subtract at SVMApp.java:79",
+                "name": "MapPartitionsRDD"
+            },
+            "16": {
+                "callsite": "map at SVMApp.java:99",
+                "name": "MapPartitionsRDD"
+            }
+        },
         "cachedRDDs": [],
-        "duration": 0,
         "genstage": false,
+        "name": "map at SVMApp.java:99",
         "nominalrate": 0.0,
+        "numtask": 0,
         "parentsIds": [
             5,
             6
         ],
-        "skipped": true,
+        "recordsread": 0.0,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
         "weight": 0
     },
     "12": {
-        "RDDIds": [
-            17
-        ],
+        "RDDIds": {
+            "17": {
+                "callsite": "combineByKey at BinaryClassificationMetrics.scala:149",
+                "name": "ShuffledRDD"
+            }
+        },
         "cachedRDDs": [],
-        "duration": 406019,
+        "duration": 256613,
         "genstage": false,
         "name": "combineByKey at BinaryClassificationMetrics.scala:149",
-        "nominalrate": 49266.56880589332,
+        "nominalrate": 77950.7000814456,
         "numtask": 1000,
         "parentsIds": [
             7
@@ -289,19 +463,28 @@
         "shufflerecordsread": 20003163,
         "shufflerecordswrite": 20003163,
         "skipped": false,
-        "weight": 3.234372036776604
+        "weight": 3.5756177590379288
     },
     "13": {
-        "RDDIds": [
-            22,
-            20,
-            21
-        ],
+        "RDDIds": {
+            "20": {
+                "callsite": "sortByKey at BinaryClassificationMetrics.scala:153",
+                "name": "ShuffledRDD"
+            },
+            "21": {
+                "callsite": "values at BinaryClassificationMetrics.scala:186",
+                "name": "MapPartitionsRDD"
+            },
+            "22": {
+                "callsite": "mapPartitions at BinaryClassificationMetrics.scala:186",
+                "name": "MapPartitionsRDD"
+            }
+        },
         "cachedRDDs": [],
-        "duration": 226294,
+        "duration": 245086,
         "genstage": false,
         "name": "collect at BinaryClassificationMetrics.scala:190",
-        "nominalrate": 88394.57961766551,
+        "nominalrate": 81616.91406281876,
         "numtask": 1000,
         "parentsIds": [
             12
@@ -311,92 +494,175 @@
         "shufflerecordsread": 20003163,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 2.817617789247616
+        "weight": 2.626206719274051
     },
     "14": {
-        "RDDIds": [
-            5,
-            0,
-            3,
-            1,
-            2
-        ],
+        "RDDIds": {
+            "0": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "1": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "2": {
+                "callsite": "map at SVMApp.java:60",
+                "name": "MapPartitionsRDD"
+            },
+            "3": {
+                "callsite": "sample at SVMApp.java:68",
+                "name": "PartitionwiseSampledRDD"
+            },
+            "5": {
+                "callsite": "subtract at SVMApp.java:79",
+                "name": "MapPartitionsRDD"
+            }
+        },
         "cachedRDDs": [
             3
         ],
-        "duration": 0,
         "genstage": false,
+        "name": "subtract at SVMApp.java:79",
         "nominalrate": 0.0,
+        "numtask": 0,
         "parentsIds": [
             0
         ],
-        "skipped": true,
+        "recordsread": 0.0,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
         "weight": 0
     },
     "15": {
-        "RDDIds": [
-            4,
-            0,
-            1,
-            2
-        ],
+        "RDDIds": {
+            "0": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "1": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "2": {
+                "callsite": "map at SVMApp.java:60",
+                "name": "MapPartitionsRDD"
+            },
+            "4": {
+                "callsite": "subtract at SVMApp.java:79",
+                "name": "MapPartitionsRDD"
+            }
+        },
         "cachedRDDs": [],
-        "duration": 0,
         "genstage": false,
+        "name": "subtract at SVMApp.java:79",
         "nominalrate": 0.0,
+        "numtask": 0,
         "parentsIds": [],
-        "skipped": true,
+        "recordsread": 0.0,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
         "weight": 0
     },
     "16": {
-        "RDDIds": [
-            16,
-            7,
-            6
-        ],
+        "RDDIds": {
+            "6": {
+                "callsite": "subtract at SVMApp.java:79",
+                "name": "SubtractedRDD"
+            },
+            "7": {
+                "callsite": "subtract at SVMApp.java:79",
+                "name": "MapPartitionsRDD"
+            },
+            "16": {
+                "callsite": "map at SVMApp.java:99",
+                "name": "MapPartitionsRDD"
+            }
+        },
         "cachedRDDs": [],
-        "duration": 0,
         "genstage": false,
+        "name": "map at SVMApp.java:99",
         "nominalrate": 0.0,
+        "numtask": 0,
         "parentsIds": [
             6,
             5
         ],
-        "skipped": true,
+        "recordsread": 0.0,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
         "weight": 0
     },
     "17": {
-        "RDDIds": [
-            17
-        ],
+        "RDDIds": {
+            "17": {
+                "callsite": "combineByKey at BinaryClassificationMetrics.scala:149",
+                "name": "ShuffledRDD"
+            }
+        },
         "cachedRDDs": [],
-        "duration": 0,
         "genstage": false,
+        "name": "combineByKey at BinaryClassificationMetrics.scala:149",
         "nominalrate": 0.0,
+        "numtask": 0,
         "parentsIds": [
             7
         ],
-        "skipped": true,
+        "recordsread": 0.0,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
         "weight": 0
     },
     "18": {
-        "RDDIds": [
-            30,
-            26,
-            28,
-            20,
-            23,
-            24,
-            27,
-            25
-        ],
+        "RDDIds": {
+            "20": {
+                "callsite": "sortByKey at BinaryClassificationMetrics.scala:153",
+                "name": "ShuffledRDD"
+            },
+            "23": {
+                "callsite": "mapPartitionsWithIndex at BinaryClassificationMetrics.scala:195",
+                "name": "MapPartitionsRDD"
+            },
+            "24": {
+                "callsite": "map at BinaryClassificationMetrics.scala:204",
+                "name": "MapPartitionsRDD"
+            },
+            "25": {
+                "callsite": "map at BinaryClassificationMetrics.scala:221",
+                "name": "MapPartitionsRDD"
+            },
+            "26": {
+                "callsite": "makeRDD at BinaryClassificationMetrics.scala:87",
+                "name": "ParallelCollectionRDD"
+            },
+            "27": {
+                "callsite": "makeRDD at BinaryClassificationMetrics.scala:88",
+                "name": "ParallelCollectionRDD"
+            },
+            "28": {
+                "callsite": "UnionRDD at BinaryClassificationMetrics.scala:89",
+                "name": "UnionRDD"
+            },
+            "30": {
+                "callsite": "mapPartitions at SlidingRDD.scala:78",
+                "name": "MapPartitionsRDD"
+            }
+        },
         "cachedRDDs": [
             23
         ],
-        "duration": 347066,
+        "duration": 287222,
         "genstage": false,
         "name": "collect at SlidingRDD.scala:81",
-        "nominalrate": 57635.04059746562,
+        "nominalrate": 69643.56142635315,
         "numtask": 1002,
         "parentsIds": [
             12
@@ -406,92 +672,175 @@
         "shufflerecordsread": 20003163,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "weight": 1.533103213797952
+        "weight": 1.534341032372172
     },
     "19": {
-        "RDDIds": [
-            5,
-            0,
-            3,
-            1,
-            2
-        ],
+        "RDDIds": {
+            "0": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "1": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "2": {
+                "callsite": "map at SVMApp.java:60",
+                "name": "MapPartitionsRDD"
+            },
+            "3": {
+                "callsite": "sample at SVMApp.java:68",
+                "name": "PartitionwiseSampledRDD"
+            },
+            "5": {
+                "callsite": "subtract at SVMApp.java:79",
+                "name": "MapPartitionsRDD"
+            }
+        },
         "cachedRDDs": [
             3
         ],
-        "duration": 0,
         "genstage": false,
+        "name": "subtract at SVMApp.java:79",
         "nominalrate": 0.0,
+        "numtask": 0,
         "parentsIds": [
             0
         ],
-        "skipped": true,
+        "recordsread": 0.0,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
         "weight": 0
     },
     "20": {
-        "RDDIds": [
-            4,
-            0,
-            1,
-            2
-        ],
+        "RDDIds": {
+            "0": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "1": {
+                "callsite": "textFile at SVMApp.java:58",
+                "name": "hdfs://ec2-35-160-234-34.us-west-2.compute.amazonaws.com:9000/SparkBench/SVM/Input"
+            },
+            "2": {
+                "callsite": "map at SVMApp.java:60",
+                "name": "MapPartitionsRDD"
+            },
+            "4": {
+                "callsite": "subtract at SVMApp.java:79",
+                "name": "MapPartitionsRDD"
+            }
+        },
         "cachedRDDs": [],
-        "duration": 0,
         "genstage": false,
+        "name": "subtract at SVMApp.java:79",
         "nominalrate": 0.0,
+        "numtask": 0,
         "parentsIds": [],
-        "skipped": true,
+        "recordsread": 0.0,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
         "weight": 0
     },
     "21": {
-        "RDDIds": [
-            16,
-            7,
-            6
-        ],
+        "RDDIds": {
+            "6": {
+                "callsite": "subtract at SVMApp.java:79",
+                "name": "SubtractedRDD"
+            },
+            "7": {
+                "callsite": "subtract at SVMApp.java:79",
+                "name": "MapPartitionsRDD"
+            },
+            "16": {
+                "callsite": "map at SVMApp.java:99",
+                "name": "MapPartitionsRDD"
+            }
+        },
         "cachedRDDs": [],
-        "duration": 0,
         "genstage": false,
+        "name": "map at SVMApp.java:99",
         "nominalrate": 0.0,
+        "numtask": 0,
         "parentsIds": [
             5,
             6
         ],
-        "skipped": true,
+        "recordsread": 0.0,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
         "weight": 0
     },
     "22": {
-        "RDDIds": [
-            17
-        ],
+        "RDDIds": {
+            "17": {
+                "callsite": "combineByKey at BinaryClassificationMetrics.scala:149",
+                "name": "ShuffledRDD"
+            }
+        },
         "cachedRDDs": [],
-        "duration": 0,
         "genstage": false,
+        "name": "combineByKey at BinaryClassificationMetrics.scala:149",
         "nominalrate": 0.0,
+        "numtask": 0,
         "parentsIds": [
             7
         ],
-        "skipped": true,
+        "recordsread": 0.0,
+        "recordswrite": 0.0,
+        "shufflerecordsread": 0.0,
+        "shufflerecordswrite": 0.0,
+        "skipped": false,
         "weight": 0
     },
     "23": {
-        "RDDIds": [
-            29,
-            26,
-            28,
-            20,
-            23,
-            24,
-            27,
-            25
-        ],
+        "RDDIds": {
+            "20": {
+                "callsite": "sortByKey at BinaryClassificationMetrics.scala:153",
+                "name": "ShuffledRDD"
+            },
+            "23": {
+                "callsite": "mapPartitionsWithIndex at BinaryClassificationMetrics.scala:195",
+                "name": "MapPartitionsRDD"
+            },
+            "24": {
+                "callsite": "map at BinaryClassificationMetrics.scala:204",
+                "name": "MapPartitionsRDD"
+            },
+            "25": {
+                "callsite": "map at BinaryClassificationMetrics.scala:221",
+                "name": "MapPartitionsRDD"
+            },
+            "26": {
+                "callsite": "makeRDD at BinaryClassificationMetrics.scala:87",
+                "name": "ParallelCollectionRDD"
+            },
+            "27": {
+                "callsite": "makeRDD at BinaryClassificationMetrics.scala:88",
+                "name": "ParallelCollectionRDD"
+            },
+            "28": {
+                "callsite": "UnionRDD at BinaryClassificationMetrics.scala:89",
+                "name": "UnionRDD"
+            },
+            "29": {
+                "callsite": "RDD at SlidingRDD.scala:50",
+                "name": "SlidingRDD"
+            }
+        },
         "cachedRDDs": [
             23
         ],
-        "duration": 22978,
+        "duration": 19727,
         "genstage": false,
         "name": "aggregate at AreaUnderCurve.scala:45",
-        "nominalrate": 870535.4251893115,
+        "nominalrate": 1013999.2396208242,
         "numtask": 1001,
         "parentsIds": [
             12
