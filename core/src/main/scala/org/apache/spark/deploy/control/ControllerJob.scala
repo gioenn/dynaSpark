@@ -170,11 +170,13 @@ class ControllerJob(conf: SparkConf, appDeadlineJobMillisecond: Long) extends Lo
 
   def bindwithtasks(
                      workerUrl: String, executorId: String, stageId: Long, tasks: Int): Unit = {
-    val workerEndpoint = rpcEnv.setupEndpointRefByURI(workerUrl)
-    workerEndpoint.send(BindWithTasks(
-      executorId, stageId.toInt, tasks))
-    logInfo("SEND BIND TO WORKER EID %s, SID %s WITH TASKS %d".format
-    (executorId, stageId, tasks))
+    if (tasks > 0) {
+      val workerEndpoint = rpcEnv.setupEndpointRefByURI(workerUrl)
+      workerEndpoint.send(BindWithTasks(
+        executorId, stageId.toInt, tasks))
+      logInfo("SEND BIND TO WORKER EID %s, SID %s WITH TASKS %d".format
+      (executorId, stageId, tasks))
+    }
   }
 
   def unbind(workerUrl: String, executorId: String, stageId: Long): Unit = {
@@ -188,11 +190,13 @@ class ControllerJob(conf: SparkConf, appDeadlineJobMillisecond: Long) extends Lo
                              stageId: Long, coreMin: Double, coreMax: Double,
                              deadline: Long, core: Double, tasksForExecutor: Int): Unit =
     synchronized {
-      val workerEndpoint = rpcEnv.setupEndpointRefByURI(workerUrl)
-      workerEndpoint.send(InitControllerExecutor(
-        executorId, stageId, coreMin, coreMax, tasksForExecutor, deadline, core))
-      logInfo("SEND INIT TO EXECUTOR CONTROLLER EID %s, SID %s, TASK %s, DL %s, C %s".format
-      (executorId, stageId, tasksForExecutor, deadline, core))
+      if (tasksForExecutor > 0) {
+        val workerEndpoint = rpcEnv.setupEndpointRefByURI(workerUrl)
+        workerEndpoint.send(InitControllerExecutor(
+          executorId, stageId, coreMin, coreMax, tasksForExecutor, deadline, core))
+        logInfo("SEND INIT TO EXECUTOR CONTROLLER EID %s, SID %s, TASK %s, DL %s, C %s".format
+        (executorId, stageId, tasksForExecutor, deadline, core))
+      }
     }
 
   def askMasterNeededExecutors
