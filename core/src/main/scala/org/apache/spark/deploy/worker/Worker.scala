@@ -603,7 +603,7 @@ private[deploy] class Worker(
 
   }
 
-  def onScaleExecutor(_appId: String, execId: String, coresWanted: Double): Unit = synchronized {
+  def onScaleExecutor(_appId: String, execId: String, coresWanted: Double): Unit = {
     var appId = _appId
     if (appId.isEmpty) {
       appId = executors.values.map(_.appId).toSet.head
