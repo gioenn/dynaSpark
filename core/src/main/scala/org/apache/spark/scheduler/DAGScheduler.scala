@@ -190,7 +190,7 @@ class DAGScheduler(
     var stageJsonIds = appJson.asJsObject.fields.keys.toList.filter(id =>
       appJson.asJsObject.fields(id).asJsObject.fields("nominalrate").convertTo[Double] != 0.0)
 
-    val inputRecordProfile = appJson.asJsObject.fields("0").asJsObject.
+    val inputRecordProfileApp = appJson.asJsObject.fields("0").asJsObject.
       fields("inputrecord").convertTo[Long]
 
     // MAX REQUESTED CORE FOR BETTER NUM MAX EXECUTOR
@@ -234,7 +234,7 @@ class DAGScheduler(
               appJson.asJsObject.fields(x.toString).asJsObject.fields("shufflerecordsread").convertTo[Long]
           }
         }
-        if (inputRecordProfile == 0) inputRecordProfile = inputRecordApp
+        if (inputRecordProfile == 0) inputRecordProfile = inputRecordProfileApp
         logInfo(inputRecordProfile.toString)
         val gamma = inputRecordProfile / recordsReadProfile.toDouble
         logInfo("GAMMA " + gamma.toString)
@@ -246,6 +246,7 @@ class DAGScheduler(
             (agg, x) => agg + inputMap(x.toString)
           }
         }
+        if (inputRecord == 0) inputRecord = inputRecordApp
         inputRecord = (inputRecord / gamma) * numTaskApp
 
         controller.NOMINAL_RATE_RECORD_S = stageJson.fields("nominalrate").convertTo[Double]
