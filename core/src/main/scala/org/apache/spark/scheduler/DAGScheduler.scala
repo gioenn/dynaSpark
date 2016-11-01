@@ -246,7 +246,7 @@ class DAGScheduler(
             (agg, x) => agg + inputMap(x.toString)
           }
         }
-        if (inputRecord == 0) inputRecord = inputRecordApp
+        if (inputRecord == 0) inputRecord = inputRecordApp / numTaskApp
         inputRecord = (inputRecord / gamma) * numTaskApp
 
         controller.NOMINAL_RATE_RECORD_S = stageJson.fields("nominalrate").convertTo[Double]
