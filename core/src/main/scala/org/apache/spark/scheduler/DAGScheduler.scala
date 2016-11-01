@@ -235,6 +235,7 @@ class DAGScheduler(
           }
         }
         logInfo(inputRecordProfile.toString)
+        if (inputRecordProfile == 0) inputRecordProfile = inputRecordProfile
         val gamma = inputRecordProfile / recordsReadProfile.toDouble
         logInfo("GAMMA " + gamma.toString)
         var inputRecord = 0.0
