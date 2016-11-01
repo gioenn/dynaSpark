@@ -222,24 +222,21 @@ class DAGScheduler(
         val parentsIds = stageJson.fields("parentsIds").convertTo[List[Int]]
 
         // FILTERING FACTOR
-        var beta = 1.0
-        if (recordsWriteProfile == 0L) {
-          beta = recordsReadProfile.toDouble / inputRecordProfile
-        } else {
-          var inputRecord = parentsIds.foldLeft(0L) {
-            (agg, x) => agg + appJson.asJsObject.fields(x.toString).asJsObject.fields("recordswrite").convertTo[Long] +
-              appJson.asJsObject.fields(x.toString).asJsObject.fields("shufflerecordswrite").convertTo[Long]
-          }
-          if (inputRecord == 0L) {
-            inputRecord = parentsIds.foldLeft(0L) {
-              (agg, x) => agg + appJson.asJsObject.fields(x.toString).asJsObject.fields("recordsread").convertTo[Long] +
-                appJson.asJsObject.fields(x.toString).asJsObject.fields("shufflerecordsread").convertTo[Long]
-            }
-          }
-          logInfo(inputRecord.toString)
-          beta = recordsWriteProfile.toDouble / inputRecord
-        }
+        val beta = recordsWriteProfile.toDouble / recordsReadProfile.toDouble
         logInfo("BETA " + beta.toString)
+        var inputRecordProfile = parentsIds.foldLeft(0L) {
+          (agg, x) => agg + appJson.asJsObject.fields(x.toString).asJsObject.fields("recordswrite").convertTo[Long] +
+            appJson.asJsObject.fields(x.toString).asJsObject.fields("shufflerecordswrite").convertTo[Long]
+        }
+        if (inputRecordProfile == 0L) {
+          inputRecordProfile = parentsIds.foldLeft(0L) {
+            (agg, x) => agg + appJson.asJsObject.fields(x.toString).asJsObject.fields("recordsread").convertTo[Long] +
+              appJson.asJsObject.fields(x.toString).asJsObject.fields("shufflerecordsread").convertTo[Long]
+          }
+        }
+        logInfo(inputRecordProfile.toString)
+        val gamma = inputRecordProfile / recordsReadProfile.toDouble
+        logInfo("GAMMA " + gamma.toString)
         var inputRecord = 0.0
         if (id == "0") {
           val recordForTask = (inputRecordApp.toDouble / numTaskApp) * beta
@@ -253,7 +250,7 @@ class DAGScheduler(
               (agg, x) => agg + inputMap(x.toString)
             }
           }
-          inputRecord = inputRecord * numTaskApp
+          inputRecord = inputRecord * numTaskApp * gamma
         }
 
         controller.NOMINAL_RATE_RECORD_S = stageJson.fields("nominalrate").convertTo[Double]
@@ -272,7 +269,7 @@ class DAGScheduler(
         if (recordsWriteProfile == 0L) {
           outputMap(id) = 0
         } else {
-          outputMap(id) = (inputRecord / numTaskApp) * beta
+          outputMap(id) = (inputRecord * beta) / numTaskApp
         }
         logInfo(inputMap.toString())
         logInfo(outputMap.toString())
