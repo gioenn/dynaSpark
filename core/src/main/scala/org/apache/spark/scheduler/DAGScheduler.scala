@@ -235,19 +235,19 @@ class DAGScheduler(
           }
         }
         if (inputRecordProfile == 0) inputRecordProfile = inputRecordProfileApp
-        logInfo(inputRecordProfile.toString)
+        logInfo("INPUT RECORD PROFILE: " + inputRecordProfile.toString)
         val gamma = inputRecordProfile / recordsReadProfile.toDouble
         logInfo("GAMMA " + gamma.toString)
         var inputRecord = parentsIds.foldLeft(0.0) {
           (agg, x) => agg + outputMap(x.toString)
         }
-        if (inputRecord == 0L) {
+        if (inputRecord == 0.0) {
           inputRecord = parentsIds.foldLeft(0.0) {
             (agg, x) => agg + inputMap(x.toString)
           }
         }
-        if (inputRecord == 0) inputRecord = inputRecordApp / numTaskApp
-
+        if (inputRecord == 0.0) inputRecord = inputRecordApp / numTaskApp
+        logInfo("INPUT RECORD: " + inputRecord.toString)
         controller.NOMINAL_RATE_RECORD_S = stageJson.fields("nominalrate").convertTo[Double]
 
         // COMPUTE DEADLINE
