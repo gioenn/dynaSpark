@@ -272,8 +272,12 @@ class DAGScheduler(
         totalDuration -= duration
         stageJsonIds = stageJsonIds.filter(x => x != id)
 
+        if (inputRecord == (inputRecordApp / numTaskApp)) {
+          inputRecord = (inputRecord / gamma) * numTaskApp
+        } else {
+          inputRecord = inputRecord * numTaskApp
+        }
         // COMPUTE CORE AND CHECK FEASIBILITY
-        inputRecord = inputRecord * numTaskApp
         val coreStage = controller.computeCoreStage(deadlineStage, inputRecord.toLong)
         maxRequestedCore = math.max(coreStage, maxRequestedCore)
         val coreForExecutor = controller.computeCoreForExecutors(coreStage, false)
