@@ -247,7 +247,6 @@ class DAGScheduler(
           }
         }
         if (inputRecord == 0) inputRecord = inputRecordApp / numTaskApp
-        inputRecord = (inputRecord / gamma) * numTaskApp
 
         controller.NOMINAL_RATE_RECORD_S = stageJson.fields("nominalrate").convertTo[Double]
 
@@ -260,12 +259,12 @@ class DAGScheduler(
         if (recordsReadProfile == numTaskApp) {
           inputMap(id) = numTaskApp
         } else {
-          inputMap(id) = inputRecord / numTaskApp
+          inputMap(id) = inputRecord / gamma
         }
         if (recordsWriteProfile == 0L) {
           outputMap(id) = 0
         } else {
-          outputMap(id) = (inputRecord * beta) / numTaskApp
+          outputMap(id) = (inputRecord / gamma) * beta
         }
         logInfo(inputMap.toString())
         logInfo(outputMap.toString())
@@ -274,6 +273,10 @@ class DAGScheduler(
         stageJsonIds = stageJsonIds.filter(x => x != id)
 
         // COMPUTE CORE AND CHECK FEASIBILITY
+        if (inputRecord != numTaskApp) inputRecord = (inputRecord / gamma) * numTaskApp
+        else {
+          inputRecord = inputRecord * numTaskApp
+        }
         val coreStage = controller.computeCoreStage(deadlineStage, inputRecord.toLong)
         maxRequestedCore = math.max(coreStage, maxRequestedCore)
         val coreForExecutor = controller.computeCoreForExecutors(coreStage, false)
