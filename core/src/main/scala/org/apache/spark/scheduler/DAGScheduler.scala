@@ -234,25 +234,19 @@ class DAGScheduler(
               appJson.asJsObject.fields(x.toString).asJsObject.fields("shufflerecordsread").convertTo[Long]
           }
         }
-        logInfo(inputRecordProfile.toString)
         if (inputRecordProfile == 0) inputRecordProfile = inputRecordApp
+        logInfo(inputRecordProfile.toString)
         val gamma = inputRecordProfile / recordsReadProfile.toDouble
         logInfo("GAMMA " + gamma.toString)
-        var inputRecord = 0.0
-        if (id == "0") {
-          val recordForTask = (inputRecordApp.toDouble / numTaskApp) * beta
-          inputRecord = recordForTask * numTaskApp
-        } else {
-          inputRecord = parentsIds.foldLeft(0.0) {
-            (agg, x) => agg + outputMap(x.toString)
-          }
-          if (inputRecord == 0L) {
-            inputRecord = parentsIds.foldLeft(0.0) {
-              (agg, x) => agg + inputMap(x.toString)
-            }
-          }
-          inputRecord = (inputRecord / gamma) * numTaskApp
+        var inputRecord = parentsIds.foldLeft(0.0) {
+          (agg, x) => agg + outputMap(x.toString)
         }
+        if (inputRecord == 0L) {
+          inputRecord = parentsIds.foldLeft(0.0) {
+            (agg, x) => agg + inputMap(x.toString)
+          }
+        }
+        inputRecord = (inputRecord / gamma) * numTaskApp
 
         controller.NOMINAL_RATE_RECORD_S = stageJson.fields("nominalrate").convertTo[Double]
 
