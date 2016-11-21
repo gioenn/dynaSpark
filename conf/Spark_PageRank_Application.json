@@ -395,7 +395,7 @@
         "duration": 66775,
         "genstage": false,
         "name": "saveAsTextFile at pagerankApp.scala:72",
-        "nominalrate": 25059348.618494943,
+        "nominalrate": 31154250.850925323,
         "numtask": 1000,
         "parentsIds": [
             5,
