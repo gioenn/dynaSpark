@@ -57,8 +57,10 @@ object GraphGenerators extends Logging {
       sc: SparkContext, numVertices: Int, numEParts: Int = 0, mu: Double = 4.0,
       sigma: Double = 1.3, seed: Long = -1): Graph[Long, Int] = {
 
+    logInfo("[GRAPH CREATION] V: %d MU: %d".format(numVertices, mu))
+    
     val evalNumEParts = if (numEParts == 0) sc.defaultParallelism else numEParts
-
+    
     // Enable deterministic seeding
     val seedRand = if (seed == -1) new Random() else new Random(seed)
     val seed1 = seedRand.nextInt()
@@ -71,6 +73,11 @@ object GraphGenerators extends Logging {
     val edges = vertices.flatMap { case (src, degree) =>
       generateRandomEdges(src.toInt, degree.toInt, numVertices, seed = (seed2 ^ src))
     }
+
+    val totalV = vertices.count()
+    val totalE = edges.count()
+    
+    logInfo("[GRAPH CREATION] Created %d vertices and %d edges".format(totalV, totalE))
 
     Graph(vertices, edges, 0)
   }
