@@ -74,11 +74,6 @@ object GraphGenerators extends Logging {
       generateRandomEdges(src.toInt, degree.toInt, numVertices, seed = (seed2 ^ src))
     }
 
-    val totalV = vertices.count()
-    val totalE = edges.count()
-    
-    logInfo("[GRAPH CREATION] Created %d vertices and %d edges".format(totalV, totalE))
-
     Graph(vertices, edges, 0)
   }
 
