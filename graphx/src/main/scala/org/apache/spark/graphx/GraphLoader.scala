@@ -92,6 +92,8 @@ object GraphLoader extends Logging {
       Iterator((pid, builder.toEdgePartition))
     }.persist(edgeStorageLevel).setName("GraphLoader.edgeListFile - edges (%s)".format(path))
     
+    edges.count()
+    
     logInfo("It took %d ms to load the edges".format(System.currentTimeMillis - startTime))
 
     val graph=GraphImpl.fromEdgePartitions(edges, defaultVertexAttr = 1, edgeStorageLevel = edgeStorageLevel,
