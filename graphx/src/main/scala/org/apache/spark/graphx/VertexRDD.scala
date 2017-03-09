@@ -359,6 +359,9 @@ object VertexRDD {
     System.out.println("[GRAPH CREATION] createRoutingTables 1 count: "+vid2pid.count())
 
     val numEdgePartitions = edges.partitions.length
+    
+    System.out.println("[GRAPH CREATION] numEdges partition count: "+numEdgePartitions)
+
     val res = vid2pid.partitionBy(vertexPartitioner).mapPartitions(
       iter => Iterator(RoutingTablePartition.fromMsgs(numEdgePartitions, iter)),
       preservesPartitioning = true)
