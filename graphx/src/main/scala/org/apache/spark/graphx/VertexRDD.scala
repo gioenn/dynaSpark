@@ -356,17 +356,10 @@ object VertexRDD {
     val vid2pid = edges.partitionsRDD.mapPartitions(_.flatMap(
       Function.tupled(RoutingTablePartition.edgePartitionToMsgs)))
       .setName("VertexRDD.createRoutingTables - vid2pid (aggregation)")
-    System.out.println("[GRAPH CREATION] createRoutingTables 1 count: "+vid2pid.count())
 
     val numEdgePartitions = edges.partitions.length
-    
-    System.out.println("[GRAPH CREATION] numEdges partition count: "+numEdgePartitions)
-
-    val res = vid2pid.partitionBy(vertexPartitioner).mapPartitions(
+    vid2pid.partitionBy(vertexPartitioner).mapPartitions(
       iter => Iterator(RoutingTablePartition.fromMsgs(numEdgePartitions, iter)),
       preservesPartitioning = true)
-    //System.out.println("[GRAPH CREATION] createRoutingTables 2 count: "+res.count())
- 
-     res
   }
 }
