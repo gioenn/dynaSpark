@@ -97,10 +97,10 @@ object GraphLoader extends Logging {
     val graph=GraphImpl.fromEdgePartitions(edges, defaultVertexAttr = 1, edgeStorageLevel = edgeStorageLevel,
       vertexStorageLevel = vertexStorageLevel)
      
-    val totalV = graph.vertices.count()
-    val totalE = graph.edges.count()
+   // val totalV = graph.vertices.count()
+    //val totalE = graph.edges.count()
     
-    logInfo("[GRAPH CREATION] Created %d vertices and %d edges".format(totalV, totalE))
+    //logInfo("[GRAPH CREATION] Created %d vertices and %d edges".format(totalV, totalE))
      
     graph
   } // end of edgeListFile

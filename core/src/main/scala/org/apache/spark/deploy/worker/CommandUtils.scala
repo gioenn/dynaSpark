@@ -42,8 +42,8 @@ object CommandUtils extends Logging {
                            command: Command,
                            securityMgr: SecurityManager,
                            memory: Int,
-                           cpuperiod: String,
-                           cpuquota: String,
+                           cpuperiod: Long,
+                           cpuquota: Long,
                            sparkHome: String,
                            substituteArguments: String => String,
                            classPaths: Seq[String] = Seq[String](),
@@ -59,7 +59,7 @@ object CommandUtils extends Logging {
     builder
   }
 
-  private def buildCommandSeq(command: Command, memory: Int, cpuperiod: String, cpuquota: String, sparkHome: String): Seq[String] = {
+  private def buildCommandSeq(command: Command, memory: Int, cpuperiod: Long, cpuquota: Long, sparkHome: String): Seq[String] = {
     // SPARK-698: do not call the run.cmd script, as process.destroy()
     // fails to kill a process tree on Windows
     val cmd = new WorkerCommandBuilder(sparkHome, memory, command).buildCommand()
