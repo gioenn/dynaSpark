@@ -1,4 +1,14 @@
-# Apache Spark
+# xSpark
+
+xSpark (Extended Spark) is a research project started at Politecnico di Milano in 2016. It aims to add functionalities for managing the quality of service (QoS) of Spark applications. 
+
+With xSpark users can control Spark applications' duration by specifying a **deadline**. xSpark will dynamically allocate resources (cores) to meet the desired duration.
+
+xSpark is based on a novel _container- and stage-based architecture_ where executors are containerized using docker containers and dedicated to a single stage. Moreover xSpark uses a _centralized heuristic_ that computes local deadline for each stage and distributed _control theoretical planners_ for allocating in a fine-grained fashion cpu-time to each executor. 
+
+In the experiments xSpark was able to meet deadlines with an error equals to less than 1%.
+
+## Apache Spark
 
 Spark is a fast and general cluster computing system for Big Data. It provides
 high-level APIs in Scala, Java, Python, and R, and an optimized engine that
@@ -10,14 +20,14 @@ and Spark Streaming for stream processing.
 <http://spark.apache.org/>
 
 
-## Online Documentation
+### Online Documentation
 
 You can find the latest Spark documentation, including a programming
 guide, on the [project web page](http://spark.apache.org/documentation.html)
 and [project wiki](https://cwiki.apache.org/confluence/display/SPARK).
 This README file only contains basic setup instructions.
 
-## Building Spark
+### Building Spark
 
 Spark is built using [Apache Maven](http://maven.apache.org/).
 To build Spark and its example programs, run:
@@ -32,7 +42,7 @@ More detailed documentation is available from the project site, at
 For developing Spark using an IDE, see [Eclipse](https://cwiki.apache.org/confluence/display/SPARK/Useful+Developer+Tools#UsefulDeveloperTools-Eclipse)
 and [IntelliJ](https://cwiki.apache.org/confluence/display/SPARK/Useful+Developer+Tools#UsefulDeveloperTools-IntelliJ).
 
-## Interactive Scala Shell
+### Interactive Scala Shell
 
 The easiest way to start using Spark is through the Scala shell:
 
@@ -42,7 +52,7 @@ Try the following command, which should return 1000:
 
     scala> sc.parallelize(1 to 1000).count()
 
-## Interactive Python Shell
+### Interactive Python Shell
 
 Alternatively, if you prefer Python, you can use the Python shell:
 
@@ -52,7 +62,7 @@ And run the following command, which should also return 1000:
 
     >>> sc.parallelize(range(1000)).count()
 
-## Example Programs
+### Example Programs
 
 Spark also comes with several sample programs in the `examples` directory.
 To run one of them, use `./bin/run-example <class> [params]`. For example:
@@ -72,7 +82,7 @@ package. For instance:
 
 Many of the example programs print usage help if no params are given.
 
-## Running Tests
+### Running Tests
 
 Testing first requires [building Spark](#building-spark). Once Spark is built, tests
 can be run using:
@@ -82,7 +92,7 @@ can be run using:
 Please see the guidance on how to
 [run tests for a module, or individual tests](https://cwiki.apache.org/confluence/display/SPARK/Useful+Developer+Tools).
 
-## A Note About Hadoop Versions
+### A Note About Hadoop Versions
 
 Spark uses the Hadoop core library to talk to HDFS and other Hadoop-supported
 storage systems. Because the protocols have changed in different versions of
@@ -93,7 +103,7 @@ Please refer to the build documentation at
 for detailed guidance on building for a particular distribution of Hadoop, including
 building for particular Hive and Hive Thriftserver distributions.
 
-## Configuration
+### Configuration
 
 Please refer to the [Configuration Guide](http://spark.apache.org/docs/latest/configuration.html)
 in the online documentation for an overview on how to configure Spark.
