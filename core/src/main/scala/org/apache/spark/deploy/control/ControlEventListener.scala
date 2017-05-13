@@ -35,53 +35,47 @@ import org.apache.spark.ui.jobs.UIData._
   * class, since the UI thread and the EventBus loop may otherwise be reading and
   * updating the internal data structures concurrently.
   */
-class ControlEventListener(conf: SparkConf) extends JobProgressListener with Logging {
-
-  // TODO: check usage of pendingStages, activeStages, stageIdToData,
-  // stageIdToInfo, stageIdToActiveJobIds
+class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) with Logging {
 
   // Application:
   var totaldurationremaining = -1L
   var totalStageRemaining = -1L
 
-  
+  // Data from spark-defaults.conf
   val ALPHA: Double = conf.get("spark.control.alpha").toDouble
   val DEADLINE: Int = conf.get("spark.control.deadline").toInt
   var executorNeeded: Int = conf.get("spark.control.maxexecutor").toInt
   var coreForVM: Int = conf.get("spark.control.coreforvm").toInt
   val coreMin: Double = conf.getDouble("spark.control.coremin", 0.0)
-  val BETA : Double = conf.get("spark.control.beta").toDouble
-  
+  val BETA: Double = conf.get("spark.control.beta").toDouble
+
   // Master
   def master: String = conf.get("spark.master")
   def appid: String = conf.get("spark.app.id")
 
   // Jobs:
-  val jobIdToController = new HashMap[Int, ControllerJob]
+  val jobIdToController = new HashMap[JobId, ControllerJob]
 
   // Stages:
-  val activePendingStages = new HashMap[Int, StageInfo]
-
-  val stageIdToDeadline = new HashMap[Int, Long]
-  val stageIdToCore = new HashMap[Int, Int]
-  val stageIdToDuration = new HashMap[Int, Long]
-  val stageIdToNumRecords = new HashMap[Int, Long]
-  val stageIdToParentsIds = new HashMap[Int, List[Int]]
-
-  var firstStageId: Int = -1
-  var lastStageId: Int = -1
-  var stageIdsToComputeNominalRecord = scala.collection.mutable.Set[Int]()
-
-  var parallelStages = new HashMap[Int, ListBuffer[Int]]
+  val activePendingStages = new HashMap[StageId, StageInfo]
+  val stageIdToDeadline = new HashMap[StageId, Long]
+  val stageIdToCore = new HashMap[StageId, Int]
+  val stageIdToDuration = new HashMap[StageId, Long]
+  val stageIdToNumRecords = new HashMap[StageId, Long]
+  val stageIdToParentsIds = new HashMap[StageId, List[StageId]]
+  var firstStageId: StageId = -1
+  var lastStageId: StageId = -1
+  var stageIdsToComputeNominalRecord = scala.collection.mutable.Set[StageId]()
+  var parallelStages = new HashMap[StageId, ListBuffer[StageId]]
 
   // Executor
-  var executorAvailable = Set[String]()
-  var executorBinded = Set[String]()
-  var execIdToStageId = new HashMap[String, Long].withDefaultValue(0)
-  var stageIdToExecId = new HashMap[Int, Set[String]].withDefaultValue(Set())
-  var executorIdToInfo = new HashMap[String, ExecutorInfo]
+  var executorAvailable = Set[ExecutorId]()
+  var executorBinded = Set[ExecutorId]()
+  var execIdToStageId = new HashMap[ExecutorId, Long].withDefaultValue(0)
+  var stageIdToExecId = new HashMap[Int, Set[ExecutorId]].withDefaultValue(Set())
+  var executorIdToInfo = new HashMap[ExecutorId, ExecutorInfo]
   var executorNeededIndexAvaiable = List[Int]()
-  var executorNeededPendingStages = new HashMap[Int, Int]
+  var executorNeededPendingStages = new HashMap[StageId, Int]
   var deadlineApp: Long = 0
 
 
@@ -163,7 +157,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener with Log
     }
     val stage = stageCompleted.stageInfo
     totaldurationremaining -= stageIdToDuration(stage.stageId)
-    
+
     stageIdToInfo(stage.stageId) = stage
     val stageData = stageIdToData.getOrElseUpdate((stage.stageId, stage.attemptId), {
       logWarning("Stage completed for unknown stage " + stage.stageId)
@@ -266,8 +260,8 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener with Log
     }
   }
 
-  def average[T]( ts: Iterable[T] )( implicit num: Numeric[T] ): Double = {
-    num.toDouble( ts.sum ) / ts.size
+  def average[T](ts: Iterable[T])(implicit num: Numeric[T]): Double = {
+    num.toDouble(ts.sum) / ts.size
   }
 
   override def onStageWeightSubmitted
@@ -275,10 +269,13 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener with Log
     val stage = stageSubmitted.stageInfo
     val genstage = if (firstStageId != -1) 1 else 0
     stageIdToParentsIds(stage.stageId) = stageSubmitted.parentsIds
-    
-    if (totaldurationremaining == -1L) totaldurationremaining = stageSubmitted.totalduration
-    if (totalStageRemaining == -1L) totalStageRemaining = stageSubmitted.stageIds.size - 1 + genstage
 
+    if (totaldurationremaining == -1L) {
+      totaldurationremaining = stageSubmitted.totalduration
+    }
+    if (totalStageRemaining == -1L) {
+      totalStageRemaining = stageSubmitted.stageIds.size - 1 + genstage
+    }
     stageIdToDuration(stage.stageId) = stageSubmitted.duration
 
     val stageWeight = computeWeightStage(stage.stageId)
@@ -305,9 +302,9 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener with Log
         new ControllerJob(conf, deadlineApp))
       jobIdToController(jobId.head) = controller
       var start = stage.submissionTime.get
-//      if (activeStages.nonEmpty) {
-//        start = start + activeStages.map(x => stageIdToDeadline(x._1)).min
-//      }
+      //      if (activeStages.nonEmpty) {
+      //        start = start + activeStages.map(x => stageIdToDeadline(x._1)).min
+      //      }
       val deadlineStage = controller.computeDeadlineStage(stageWeight, start, ALPHA, DEADLINE)
       stageIdToDeadline(stage.stageId) = deadlineStage
       logInfo("NOMINAL RATE PASSED = " + stageSubmitted.nominalrate.toString)
@@ -547,19 +544,19 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener with Log
     executorAvailable -= executorAssigned.executorId
     executorBinded += executorAssigned.executorId
   }
-  
-  private def computeWeightStage(stageId: Int): Double = synchronized {
-    
+
+  private def computeWeightStage(stageId: StageId): Double = synchronized {
+
     val w1: Double = totalStageRemaining
     val w2: Double = (totaldurationremaining.toDouble / stageIdToDuration(stageId)) - 1.0
-    val weight = (w1*BETA) + (w2*(1.0 - BETA))
-    
-    logInfo("STAGE ID " + stageId +" [WEIGHT] W1: "+w1+" W2: "+w2+" W: " + weight+" with BETA: "+BETA)
-      
+    val weight = (w1 * BETA) + (w2 * (1.0 - BETA))
+
+    logInfo("STAGE ID " + stageId + " [WEIGHT] W1: " + w1 + " W2: " + w2 + " W: " + weight + " with BETA: " + BETA)
+
     return weight;
-    
+
   }
-  
+
 }
 
 
