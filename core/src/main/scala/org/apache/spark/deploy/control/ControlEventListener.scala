@@ -18,12 +18,12 @@
 package org.apache.spark.deploy.control
 
 import scala.collection.mutable.{HashMap, HashSet, ListBuffer}
-
 import org.apache.spark._
 import org.apache.spark.executor.TaskMetrics
 import org.apache.spark.internal.Logging
 import org.apache.spark.scheduler._
 import org.apache.spark.scheduler.cluster.ExecutorInfo
+import org.apache.spark.ui.jobs.JobProgressListener
 import org.apache.spark.ui.jobs.UIData._
 
 /**
@@ -35,11 +35,12 @@ import org.apache.spark.ui.jobs.UIData._
   * class, since the UI thread and the EventBus loop may otherwise be reading and
   * updating the internal data structures concurrently.
   */
-class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
+class ControlEventListener(conf: SparkConf) extends JobProgressListener with Logging {
+
+  // TODO: check usage of pendingStages, activeStages, stageIdToData,
+  // stageIdToInfo, stageIdToActiveJobIds
 
   // Application:
-  @volatile var startTime = -1L
-  @volatile var endTime = -1L
   var totaldurationremaining = -1L
   var totalStageRemaining = -1L
 
@@ -49,29 +50,17 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
   var executorNeeded: Int = conf.get("spark.control.maxexecutor").toInt
   var coreForVM: Int = conf.get("spark.control.coreforvm").toInt
   val coreMin: Double = conf.getDouble("spark.control.coremin", 0.0)
-
   val BETA : Double = conf.get("spark.control.beta").toDouble
   
   // Master
   def master: String = conf.get("spark.master")
-
   def appid: String = conf.get("spark.app.id")
 
   // Jobs:
-  val activeJobs = new HashMap[Int, JobUIData]
-  val jobIdToData = new HashMap[Int, JobUIData]
   val jobIdToController = new HashMap[Int, ControllerJob]
 
   // Stages:
-  val pendingStages = new HashMap[Int, StageInfo]
-  val activeStages = new HashMap[Int, StageInfo]
   val activePendingStages = new HashMap[Int, StageInfo]
-  val completedStages = ListBuffer[StageInfo]()
-  val skippedStages = ListBuffer[StageInfo]()
-  val failedStages = ListBuffer[StageInfo]()
-  val stageIdToData = new HashMap[(Int, Int), StageUIData]
-  val stageIdToInfo = new HashMap[Int, StageInfo]
-  val stageIdToActiveJobIds = new HashMap[Int, HashSet[Int]]
 
   val stageIdToDeadline = new HashMap[Int, Long]
   val stageIdToCore = new HashMap[Int, Int]
@@ -411,31 +400,6 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
 
   }
 
-  override def onTaskStart(taskStart: SparkListenerTaskStart): Unit = synchronized {
-    val taskInfo = taskStart.taskInfo
-    if (taskInfo != null) {
-      val metrics = TaskMetrics.empty
-      val stageData = stageIdToData.getOrElseUpdate((taskStart.stageId, taskStart.stageAttemptId), {
-        logWarning("Task start for unknown stage " + taskStart.stageId)
-        new StageUIData
-      })
-      stageData.numActiveTasks += 1
-      stageData.taskData.put(taskInfo.taskId, TaskUIData(taskInfo, Some(metrics)))
-    }
-    for (
-      activeJobsDependentOnStage <- stageIdToActiveJobIds.get(taskStart.stageId);
-      jobId <- activeJobsDependentOnStage;
-      jobData <- jobIdToData.get(jobId)
-    ) {
-      jobData.numActiveTasks += 1
-    }
-  }
-
-  override def onTaskGettingResult(taskGettingResult: SparkListenerTaskGettingResult) {
-    // Do nothing: because we don't do a deep copy of the TaskInfo, the TaskInfo in
-    // stageToTaskInfos already has the updated status.
-  }
-
   override def onTaskEnd(taskEnd: SparkListenerTaskEnd): Unit = synchronized {
     val info = taskEnd.taskInfo
     // If stage attempt id is -1, it means the DAGScheduler had no idea which attempt this task
@@ -502,107 +466,6 @@ class ControlEventListener(conf: SparkConf) extends SparkListener with Logging {
         }
       }
     }
-  }
-
-  /**
-    * Upon receiving new metrics for a task, updates the per-stage and per-executor-per-stage
-    * aggregate metrics by calculating deltas between the currently recorded metrics and the new
-    * metrics.
-    */
-  def updateAggregateMetrics(
-                              stageData: StageUIData,
-                              execId: String,
-                              taskMetrics: TaskMetrics,
-                              oldMetrics: Option[TaskMetricsUIData]) {
-    val execSummary = stageData.executorSummary.getOrElseUpdate(execId, new ExecutorSummary)
-
-    val shuffleWriteDelta =
-      taskMetrics.shuffleWriteMetrics.bytesWritten -
-        oldMetrics.map(_.shuffleWriteMetrics.bytesWritten).getOrElse(0L)
-    stageData.shuffleWriteBytes += shuffleWriteDelta
-    execSummary.shuffleWrite += shuffleWriteDelta
-
-    val shuffleWriteRecordsDelta =
-      taskMetrics.shuffleWriteMetrics.recordsWritten -
-        oldMetrics.map(_.shuffleWriteMetrics.recordsWritten).getOrElse(0L)
-    stageData.shuffleWriteRecords += shuffleWriteRecordsDelta
-    execSummary.shuffleWriteRecords += shuffleWriteRecordsDelta
-
-    val shuffleReadDelta =
-      taskMetrics.shuffleReadMetrics.totalBytesRead -
-        oldMetrics.map(_.shuffleReadMetrics.totalBytesRead).getOrElse(0L)
-    stageData.shuffleReadTotalBytes += shuffleReadDelta
-    execSummary.shuffleRead += shuffleReadDelta
-
-    val shuffleReadRecordsDelta =
-      taskMetrics.shuffleReadMetrics.recordsRead -
-        oldMetrics.map(_.shuffleReadMetrics.recordsRead).getOrElse(0L)
-    stageData.shuffleReadRecords += shuffleReadRecordsDelta
-    execSummary.shuffleReadRecords += shuffleReadRecordsDelta
-
-    val inputBytesDelta =
-      taskMetrics.inputMetrics.bytesRead -
-        oldMetrics.map(_.inputMetrics.bytesRead).getOrElse(0L)
-    stageData.inputBytes += inputBytesDelta
-    execSummary.inputBytes += inputBytesDelta
-
-    val inputRecordsDelta =
-      taskMetrics.inputMetrics.recordsRead -
-        oldMetrics.map(_.inputMetrics.recordsRead).getOrElse(0L)
-    stageData.inputRecords += inputRecordsDelta
-    execSummary.inputRecords += inputRecordsDelta
-
-    val outputBytesDelta =
-      taskMetrics.outputMetrics.bytesWritten -
-        oldMetrics.map(_.outputMetrics.bytesWritten).getOrElse(0L)
-    stageData.outputBytes += outputBytesDelta
-    execSummary.outputBytes += outputBytesDelta
-
-    val outputRecordsDelta =
-      taskMetrics.outputMetrics.recordsWritten -
-        oldMetrics.map(_.outputMetrics.recordsWritten).getOrElse(0L)
-    stageData.outputRecords += outputRecordsDelta
-    execSummary.outputRecords += outputRecordsDelta
-
-    val diskSpillDelta =
-      taskMetrics.diskBytesSpilled - oldMetrics.map(_.diskBytesSpilled).getOrElse(0L)
-    stageData.diskBytesSpilled += diskSpillDelta
-    execSummary.diskBytesSpilled += diskSpillDelta
-
-    val memorySpillDelta =
-      taskMetrics.memoryBytesSpilled - oldMetrics.map(_.memoryBytesSpilled).getOrElse(0L)
-    stageData.memoryBytesSpilled += memorySpillDelta
-    execSummary.memoryBytesSpilled += memorySpillDelta
-
-    val timeDelta =
-      taskMetrics.executorRunTime - oldMetrics.map(_.executorRunTime).getOrElse(0L)
-    stageData.executorRunTime += timeDelta
-  }
-
-  override def onExecutorMetricsUpdate(executorMetricsUpdate: SparkListenerExecutorMetricsUpdate) {
-    for ((taskId, sid, sAttempt, accumUpdates) <- executorMetricsUpdate.accumUpdates) {
-      val stageData = stageIdToData.getOrElseUpdate((sid, sAttempt), {
-        logWarning("Metrics update for task in unknown stage " + sid)
-        new StageUIData
-      })
-      val taskData = stageData.taskData.get(taskId)
-      val metrics = TaskMetrics.fromAccumulatorInfos(accumUpdates)
-      taskData.foreach { t =>
-        if (!t.taskInfo.finished) {
-          updateAggregateMetrics(stageData, executorMetricsUpdate.execId, metrics, t.metrics)
-          // Overwrite task metrics
-          t.updateTaskMetrics(Some(metrics))
-        }
-      }
-    }
-  }
-
-  override def onApplicationStart(appStarted: SparkListenerApplicationStart) {
-    startTime = appStarted.time
-  }
-
-  override def onApplicationEnd(appEnded: SparkListenerApplicationEnd) {
-    endTime = appEnded.time
   }
 
   /**
