@@ -29,7 +29,7 @@ import scala.collection.mutable.{HashMap, ListBuffer}
 
 
 class ControllerJob(conf: SparkConf, appDeadlineJobMillisecond: Long) extends Logging {
-  
+  val coreForVM: Int = conf.getInt("spark.control.coreforvm", 8)
   val securityMgr = new SecurityManager(conf)
   val rpcEnv = RpcEnv.create("ControllEnv", "localhost", 6666, conf, securityMgr, clientMode = true)
   val controllerEndpoint = rpcEnv.setupEndpoint("ControllJob",

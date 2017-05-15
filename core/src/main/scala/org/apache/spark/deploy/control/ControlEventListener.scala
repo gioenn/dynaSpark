@@ -326,7 +326,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
         stage.stageId)
       stageIdToDeadline(stage.stageId) = deadlineStage
       logInfo("NOMINAL RATE PASSED = " + stageSubmitted.nominalrate.toString)
-      controller.NOMINAL_RATE_RECORD_S = stageSubmitted.nominalrate
+      heuristic.NOMINAL_RATE_RECORD_S = stageSubmitted.nominalrate
       if (stageSubmitted.nominalrate > 0.0) {
         // FIND RECORD IN INPUT
         logInfo("PARENTS IDS: " + stageSubmitted.parentsIds.toString)
