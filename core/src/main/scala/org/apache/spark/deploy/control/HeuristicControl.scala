@@ -59,25 +59,7 @@ class HeuristicControl(conf: SparkConf) extends HeuristicBase(conf) with Logging
       ))
       List(-1)
     } else {
-      numExecutor = numMaxExecutor
-      var remainingTasks = totalTasksStage.toInt
-      var z = numExecutor
-      var taskPerExecutor = new ListBuffer[Int]()
-      while (remainingTasks > 0 && z > 0) {
-        val a = math.floor(remainingTasks / z).toInt
-        remainingTasks -= a
-        z -= 1
-        taskPerExecutor += a
-      }
-      val taskForExecutor = scala.collection.mutable.IndexedSeq(taskPerExecutor: _*)
-      var j = taskForExecutor.size - 1
-      while (remainingTasks > 0 && j >= 0) {
-        taskForExecutor(j) += 1
-        remainingTasks -= 1
-        j -= 1
-        if (j < 0) j = taskForExecutor.size - 1
-      }
-      taskForExecutor.toList
+      super.computeTaskForExecutors(coresToBeAllocated, totalTasksStage, last)
     }
   }
 

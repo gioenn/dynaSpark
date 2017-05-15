@@ -28,29 +28,6 @@ class HeuristicFixed(conf: SparkConf) extends HeuristicBase(conf) with Logging {
     (1 to numMaxExecutor).map { x => stageToCoresConf(stageId) }
   }
 
-
-  override def computeTaskForExecutors(coresToBeAllocated: Double, totalTasksStage: Int, last: Boolean): List[Int] = {
-    numExecutor = numMaxExecutor
-    var remainingTasks = totalTasksStage.toInt
-    var z = numExecutor
-    var taskPerExecutor = new ListBuffer[Int]()
-    while (remainingTasks > 0 && z > 0) {
-      val a = math.floor(remainingTasks / z).toInt
-      remainingTasks -= a
-      z -= 1
-      taskPerExecutor += a
-    }
-    val taskForExecutor = scala.collection.mutable.IndexedSeq(taskPerExecutor: _*)
-    var j = taskForExecutor.size - 1
-    while (remainingTasks > 0 && j >= 0) {
-      taskForExecutor(j) += 1
-      remainingTasks -= 1
-      j -= 1
-      if (j < 0) j = taskForExecutor.size - 1
-    }
-    taskForExecutor.toList
-  }
-
   override def computeDeadlineStage(startTime: Long,
                                     appDeadlineJobMilliseconds: Long,
                                     totalStageRemaining: Long,
