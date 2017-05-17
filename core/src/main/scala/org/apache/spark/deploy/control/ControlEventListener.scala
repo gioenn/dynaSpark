@@ -66,7 +66,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
   var firstStageId: StageId = -1
   var lastStageId: StageId = -1
   var stageIdsToComputeNominalRecord = scala.collection.mutable.Set[StageId]()
-  var parallelStages = new HashMap[StageId, ListBuffer[StageId]]
+//  var parallelStages = new HashMap[StageId, ListBuffer[StageId]]
 
   // Executor
   var executorAvailable = Set[ExecutorId]()
@@ -574,9 +574,9 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
   //
   //  }
 
-  def average[T](ts: Iterable[T])(implicit num: Numeric[T]): Double = {
-    num.toDouble(ts.sum) / ts.size
-  }
+//  def average[T](ts: Iterable[T])(implicit num: Numeric[T]): Double = {
+//    num.toDouble(ts.sum) / ts.size
+//  }
 
 }
 
