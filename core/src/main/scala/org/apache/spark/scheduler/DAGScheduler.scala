@@ -194,7 +194,7 @@ class DAGScheduler(
       fields("inputrecord").convertTo[Long]
 
     // MAX REQUESTED CORE FOR BETTER NUM MAX EXECUTOR
-    var maxRequestedCore = 0
+    var maxRequestedCore = 0D
 
     // INPUT / OUTPUT Normalized by numtask
     val inputMap: HashMap[String, Double] = new HashMap[String, Double]
@@ -220,6 +220,7 @@ class DAGScheduler(
         val recordsWriteProfile = stageJson.fields("recordswrite").convertTo[Long] +
           stageJson.fields("shufflerecordswrite").convertTo[Long]
         val parentsIds = stageJson.fields("parentsIds").convertTo[List[Int]]
+        val stageId = id.toInt
 
         // FILTERING FACTOR
         val beta = recordsWriteProfile.toDouble / recordsReadProfile.toDouble
@@ -248,12 +249,12 @@ class DAGScheduler(
         }
         if (inputRecord == 0.0) inputRecord = inputRecordApp / numTaskApp
         logInfo("INPUT RECORD: " + inputRecord.toString)
-        controller.NOMINAL_RATE_RECORD_S = stageJson.fields("nominalrate").convertTo[Double]
+        controller.heuristic.NOMINAL_RATE_RECORD_S = stageJson.fields("nominalrate").convertTo[Double]
 
         // COMPUTE DEADLINE
         val duration = stageJson.fields("duration").convertTo[Double]
         val weight = (totalDuration / duration) - 1
-        val deadlineStage = controller.computeDeadlineStage(weight, currentTime, alpha, deadline)
+        val deadlineStage = controller.heuristic.computeDeadlineStageWeightGiven(currentTime, deadline, weight, stageId)
 
         // UPDATE RECORD AND APP STATE
         if (recordsReadProfile == numTaskApp) {
@@ -278,18 +279,18 @@ class DAGScheduler(
           inputRecord = inputRecord * numTaskApp
         }
         // COMPUTE CORE AND CHECK FEASIBILITY
-        val coreStage = controller.computeCoreStage(deadlineStage, inputRecord.toLong)
+        val coreStage = controller.heuristic.computeCoreStage(deadlineStage, inputRecord.toLong, stageId)
         maxRequestedCore = math.max(coreStage, maxRequestedCore)
-        val coreForExecutor = controller.computeCoreForExecutors(coreStage, false)
+        val coreForExecutor = controller.heuristic.computeCoreForExecutors(coreStage, stageId, false)
         if (coreForExecutor == IndexedSeq(-1)) {
-          controller.numMaxExecutor = math.ceil(coreStage.toDouble /
+          controller.heuristic.numMaxExecutor = math.ceil(coreStage.toDouble /
             controller.coreForVM.toDouble).toInt
           feasibility = false
         }
       }
     })
     // SUGGEST MAX EXECUTOR
-    if (maxRequestedCore < (0.8 * controller.coreForVM * controller.numMaxExecutor)) {
+    if (maxRequestedCore < (0.8 * controller.coreForVM * controller.heuristic.numMaxExecutor)) {
       logInfo("TOTAL CORE >> CORE NEEDED: REDUCE MAX EXECUTOR TO " +
         math.ceil(maxRequestedCore / controller.coreForVM))
     }
