@@ -36,8 +36,6 @@ class ControllerJob(conf: SparkConf, appDeadlineJobMillisecond: Long) extends Lo
     new ControllerJob(rpcEnv, "ControllEnv", "ControllJob", conf, securityMgr))
   // rpcEnv.awaitTermination()
 
-  val heuristic: HeuristicBase = if (conf.contains("spark.control.stagecores") && conf.contains("spark.control.stagedeadlines"))
-    new HeuristicFixed(conf) else new HeuristicControl(conf)
 
   def stop(): Unit = {
     rpcEnv.stop(controllerEndpoint)
