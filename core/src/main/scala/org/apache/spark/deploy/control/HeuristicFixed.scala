@@ -9,11 +9,11 @@ import scala.collection.mutable.ListBuffer
   * Created by Simone Ripamonti on 13/05/2017.
   */
 class HeuristicFixed(conf: SparkConf) extends HeuristicBase(conf) with Logging {
-
+  val stagesToFix: List[Int] = conf.get("spark.control.stage").replace("[", "").replace("]","").split(',').toList.map(_.trim).map(_.toInt)
   val stageCores: List[Double] = conf.get("spark.control.stagecores").replace("[", "").replace("]", "").split(',').toList.map(_.trim).map(_.toDouble)
   val stageDeadlines: List[Long] = conf.get("spark.control.stagedeadlines").replace("[", "").replace("]", "").split(',').toList.map(_.trim).map(_.toLong)
-  val stageToCoresConf = ((0 until stageCores.length) zip stageCores).toMap
-  val stageToDeadlinesConf = ((0 until stageDeadlines.length) zip stageDeadlines).toMap
+  val stageToCoresConf = (stagesToFix zip stageCores).toMap
+  val stageToDeadlinesConf = (stagesToFix zip stageDeadlines).toMap
 
 
   override def computeCores(coresToBeAllocated: Double,
