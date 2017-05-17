@@ -264,10 +264,6 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
     }
   }
 
-  def average[T](ts: Iterable[T])(implicit num: Numeric[T]): Double = {
-    num.toDouble(ts.sum) / ts.size
-  }
-
   override def onStageWeightSubmitted
   (stageSubmitted: SparkStageWeightSubmitted): Unit = synchronized {
     val stage = stageSubmitted.stageInfo
@@ -577,6 +573,10 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
   //    return weight;
   //
   //  }
+
+  def average[T](ts: Iterable[T])(implicit num: Numeric[T]): Double = {
+    num.toDouble(ts.sum) / ts.size
+  }
 
 }
 

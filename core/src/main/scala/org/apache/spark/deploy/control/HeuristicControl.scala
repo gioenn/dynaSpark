@@ -86,17 +86,6 @@ class HeuristicControl(conf: SparkConf) extends HeuristicBase(conf) with Logging
   }
 
 
-  private def computeWeightStage(stageId: Int, totalStageRemaining: Long, totalDurationRemaining: Long, stageDuration : Long): Double = synchronized {
-
-    val w1: Double = totalStageRemaining
-    val w2: Double = (totalDurationRemaining.toDouble / stageDuration) - 1.0
-    val weight = (w1 * BETA) + (w2 * (1.0 - BETA))
-
-    logInfo("STAGE ID " + stageId + " [WEIGHT] W1: " + w1 + " W2: " + w2 + " W: " + weight + " with BETA: " + BETA)
-
-    return weight;
-
-  }
 
   override def computeCoreStage(deadlineStage: Long = 0L, numRecord: Long = 0L, stageId: Int = 0, firstStage : Boolean = false, lastStage: Boolean = false): Double = {
     logInfo("NumRecords: " + numRecord.toString +
@@ -122,6 +111,19 @@ class HeuristicControl(conf: SparkConf) extends HeuristicBase(conf) with Logging
       logInfo("New Last Stage Nominal Rate: " + NOMINAL_RATE_RECORD_S.toString)
       computeCoreStage(deadlineStage, numRecord)
     }
+  }
+
+
+  private def computeWeightStage(stageId: Int, totalStageRemaining: Long, totalDurationRemaining: Long, stageDuration : Long): Double = synchronized {
+
+    val w1: Double = totalStageRemaining
+    val w2: Double = (totalDurationRemaining.toDouble / stageDuration) - 1.0
+    val weight = (w1 * BETA) + (w2 * (1.0 - BETA))
+
+    logInfo("STAGE ID " + stageId + " [WEIGHT] W1: " + w1 + " W2: " + w2 + " W: " + weight + " with BETA: " + BETA)
+
+    return weight;
+
   }
 
 }
