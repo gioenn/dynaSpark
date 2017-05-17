@@ -3,6 +3,7 @@ package org.apache.spark.deploy.control
 import org.apache.spark.SparkConf
 import org.apache.spark.internal.Logging
 import org.apache.spark.scheduler.StageInfo
+import spray.json.JsValue
 
 import scala.collection.mutable.ListBuffer
 
@@ -71,4 +72,6 @@ abstract class HeuristicBase(conf: SparkConf) extends Logging{
     logInfo("NOMINAL RECORD/S STAGE ID " + stage.stageId + " : " + NOMINAL_RATE_RECORD_S)
     conf.set("spark.control.nominalrate", NOMINAL_RATE_RECORD_S.toString)
   }
+
+  def checkDeadline(appJson: JsValue) : Boolean
 }

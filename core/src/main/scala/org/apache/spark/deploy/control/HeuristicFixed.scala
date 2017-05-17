@@ -2,6 +2,7 @@ package org.apache.spark.deploy.control
 
 import org.apache.spark.SparkConf
 import org.apache.spark.internal.Logging
+import spray.json.JsValue
 
 import scala.collection.mutable.ListBuffer
 
@@ -48,4 +49,6 @@ class HeuristicFixed(conf: SparkConf) extends HeuristicBase(conf) with Logging {
   override def computeDeadlineStageWeightGiven(startTime: Long, appDeadlineJobMilliseconds: Long, weight: Double, stageId: Int, firstStage: Boolean): Long = {
     stageToDeadlinesConf (stageId)
   }
+
+  override def checkDeadline(appJson: JsValue): Boolean = true
 }
