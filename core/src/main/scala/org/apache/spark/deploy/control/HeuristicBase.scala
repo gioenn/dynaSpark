@@ -55,6 +55,13 @@ abstract class HeuristicBase(conf: SparkConf) extends Logging{
                            stageId : Int,
                            firstStage : Boolean = false): Long
 
+  def computeDeadlineStageWeightGiven(startTime: Long,
+                                      appDeadlineJobMilliseconds: Long,
+                                      weight: Double,
+                                      stageId: Int,
+                                      firstStage: Boolean = false
+                                      ): Long
+
   def computeCoreStage(deadlineStage: Long = 0L, numRecord: Long = 0L, stageId : Int, firstStage : Boolean = false, lastStage: Boolean = false): Double
 
   def computeNominalRecord(stage: StageInfo, duration: Long, recordsRead: Double): Unit = {

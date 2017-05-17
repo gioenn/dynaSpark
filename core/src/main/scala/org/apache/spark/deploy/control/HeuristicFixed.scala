@@ -44,4 +44,8 @@ class HeuristicFixed(conf: SparkConf) extends HeuristicBase(conf) with Logging {
   override def computeCoreStage(deadlineStage: Long = 0L, numRecord: Long = 0L, stageId : Int, firstStage : Boolean = false, lastStage: Boolean = false): Double = {
     stageToCoresConf(stageId)
   }
+
+  override def computeDeadlineStageWeightGiven(startTime: Long, appDeadlineJobMilliseconds: Long, weight: Double, stageId: Int, firstStage: Boolean): Long = {
+    stageToDeadlinesConf (stageId)
+  }
 }
