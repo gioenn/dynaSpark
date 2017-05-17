@@ -10,6 +10,9 @@ import scala.collection.mutable.ListBuffer
   * Created by Simone Ripamonti on 13/05/2017.
   */
 class HeuristicControl(conf: SparkConf) extends HeuristicBase(conf) with Logging {
+
+  logInfo("USING CONTROLLED CORE/DEADLINE ALLOCATION")
+
   val coreMin: Double = conf.getDouble("spark.control.coremin", 0.0)
   val coreForVM: Int = conf.getInt("spark.control.coreforvm", 8)
   val OVERSCALE: Int = conf.getInt("spark.control.overscale", 2)
