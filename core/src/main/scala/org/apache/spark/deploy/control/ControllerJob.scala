@@ -212,7 +212,4 @@ class ControllerJob(conf: SparkConf, appDeadlineJobMillisecond: Long) extends Lo
     extends ThreadSafeRpcEndpoint with Logging {
   }
 
-  def getAppDeadline : Long = {
-    appDeadlineJobMillisecond
-  }
 }

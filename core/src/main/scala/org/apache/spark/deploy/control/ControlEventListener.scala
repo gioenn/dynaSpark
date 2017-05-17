@@ -235,7 +235,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
       val controller = jobIdToController(stageIdToActiveJobIds(stageId).head)
 
       val newDeadline = heuristic.computeDeadlineStage(System.currentTimeMillis(),
-        controller.getAppDeadline,
+        deadlineApp,
         totalStageRemaining,
         totaldurationremaining,
         stageIdToDeadline(stageId),
@@ -288,7 +288,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
         System.currentTimeMillis() + (ALPHA * DEADLINE).toLong)
 
       stageIdToDeadline(stage.stageId) = heuristic.computeDeadlineStage(stage.submissionTime.get,
-        controller.getAppDeadline,
+        deadlineApp,
         totalStageRemaining,
         totaldurationremaining,
         stageIdToDeadline(stage.stageId),
@@ -315,7 +315,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
       //        start = start + activeStages.map(x => stageIdToDeadline(x._1)).min
       //      }
       val deadlineStage = heuristic.computeDeadlineStage(start,
-        controller.getAppDeadline,
+        deadlineApp,
         totalStageRemaining,
         totaldurationremaining,
         stageIdToDeadline(stage.stageId),
@@ -494,7 +494,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
       val controller = jobIdToController(stageIdToActiveJobIds(stageId).head)
 
       val newDeadline = heuristic.computeDeadlineStage(System.currentTimeMillis(),
-        controller.getAppDeadline,
+        deadlineApp,
         totalStageRemaining,
         totaldurationremaining,
         stageIdToDeadline(stageId),
