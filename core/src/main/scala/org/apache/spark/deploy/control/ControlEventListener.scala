@@ -291,16 +291,15 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
         deadlineApp,
         totalStageRemaining,
         totaldurationremaining,
-        stageIdToDeadline(stage.stageId),
+        stageIdToDuration(stage.stageId),
         stage.stageId,
         firstStage = true)
 
-      //      if (completedStages.nonEmpty) {
-      //        stageIdToCore(stage.stageId) = controller.computeCoreFirstStage(completedStages.toList.head)
-      //      } else {
-      //        stageIdToCore(stage.stageId) = controller.computeCoreFirstStage(stage)
-      //      }
-      stageIdToCore(stage.stageId) = heuristic.computeCoreStage(stageId = stage.stageId, firstStage = true)
+      if (completedStages.nonEmpty) {
+        stageIdToCore(stage.stageId) = heuristic.computeCoreStage(stageId = completedStages.toList.head.stageId, firstStage = true)
+      } else {
+        stageIdToCore(stage.stageId) = heuristic.computeCoreStage(stageId = stage.stageId, firstStage = true)
+      }
 
       jobIdToController(jobId.head) = controller
       logInfo(jobIdToController.toString())
@@ -318,7 +317,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
         deadlineApp,
         totalStageRemaining,
         totaldurationremaining,
-        stageIdToDeadline(stage.stageId),
+        stageIdToDuration(stage.stageId),
         stage.stageId)
       stageIdToDeadline(stage.stageId) = deadlineStage
       logInfo("NOMINAL RATE PASSED = " + stageSubmitted.nominalrate.toString)
@@ -339,8 +338,8 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
           stageIdToNumRecords(stage.stageId) = numRecord
           if (numRecord != 0) {
             stageIdToCore(stage.stageId) = heuristic.computeCoreStage(deadlineStage,
-                                                                      numRecord,
-            stage.stageId)
+              numRecord,
+              stage.stageId)
 
           } else {
             logError("STAGEID: " + stage.stageId + " NUM RECORD == 0")
@@ -497,14 +496,14 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
         deadlineApp,
         totalStageRemaining,
         totaldurationremaining,
-        stageIdToDeadline(stageId),
+        stageIdToDuration(stageId),
         stageId)
       stageIdToDeadline(stageId) = newDeadline
       val numRecord = stageIdToNumRecords.getOrElse(stageId, 0)
       if (numRecord != 0) {
         stageIdToCore(stageId) = heuristic.computeCoreStage(newDeadline,
-                                                            numRecord.asInstanceOf[Number].longValue,
-                                                            stageId)
+          numRecord.asInstanceOf[Number].longValue,
+          stageId)
       } else {
         stageIdToCore(stageId) = heuristic.computeCoreStage(stageId = stageId, firstStage = true)
       }
