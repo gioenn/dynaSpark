@@ -78,7 +78,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
   var executorNeededPendingStages = new HashMap[StageId, Int]
   var deadlineApp: Long = 0
 
-  val heuristic: HeuristicBase = if (conf.contains("spark.control.stagecores") && conf.contains("spark.control.stagedeadlines") && conf.contains("sprk.control.stages"))
+  val heuristic: HeuristicBase = if (conf.contains("spark.control.stagecores") && conf.contains("spark.control.stagedeadlines") && conf.contains("spark.control.stage"))
     new HeuristicFixed(conf) else new HeuristicControl(conf)
 
   override def onJobStart(jobStart: SparkListenerJobStart): Unit = synchronized {

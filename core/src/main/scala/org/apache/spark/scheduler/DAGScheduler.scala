@@ -170,7 +170,7 @@ class DAGScheduler(
     io.Source.fromFile(jsonFile).mkString.parseJson
   } else null
 
-  val heuristic: HeuristicBase = if (sc.conf.contains("spark.control.stagecores") && sc.conf.contains("spark.control.stagedeadlines") && sc.conf.contains("sprk.control.stage2"))
+  val heuristic: HeuristicBase = if (sc.conf.contains("spark.control.stagecores") && sc.conf.contains("spark.control.stagedeadlines") && sc.conf.contains("spark.control.stage"))
     new HeuristicFixed(sc.conf) else new HeuristicControl(sc.conf)
 
   /**
