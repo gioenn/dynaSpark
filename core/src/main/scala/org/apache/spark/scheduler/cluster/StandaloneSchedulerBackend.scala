@@ -34,7 +34,7 @@ import org.apache.spark.util.Utils
  * A [[SchedulerBackend]] implementation for Spark's standalone cluster manager.
  */
 private[spark] class StandaloneSchedulerBackend(
-    scheduler: TaskSchedulerImpl,
+    scheduler: ControlTaskSchedulerImpl,
     sc: SparkContext,
     masters: Array[String])
   extends CoarseGrainedSchedulerBackend(scheduler, sc.env.rpcEnv)

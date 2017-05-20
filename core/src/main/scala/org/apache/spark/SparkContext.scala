@@ -496,7 +496,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     val (sched, ts) = SparkContext.createTaskScheduler(this, master, deployMode)
     _schedulerBackend = sched
     _taskScheduler = ts
-    _dagScheduler = new DAGScheduler(this)
+    _dagScheduler = new ControlDAGScheduler(this)
     _heartbeatReceiver.ask[Boolean](TaskSchedulerIsSet)
 
     // start TaskScheduler after taskScheduler sets DAGScheduler reference in DAGScheduler's
@@ -2482,7 +2482,7 @@ object SparkContext extends Logging {
         (backend, scheduler)
 
       case SPARK_REGEX(sparkUrl) =>
-        val scheduler = new TaskSchedulerImpl(sc)
+        val scheduler = new ControlTaskSchedulerImpl(sc)
         val masterUrls = sparkUrl.split(",").map("spark://" + _)
         val backend = new StandaloneSchedulerBackend(scheduler, sc, masterUrls)
         scheduler.initialize(backend)
@@ -2497,7 +2497,7 @@ object SparkContext extends Logging {
               memoryPerSlaveInt, sc.executorMemory))
         }
 
-        val scheduler = new TaskSchedulerImpl(sc)
+        val scheduler = new ControlTaskSchedulerImpl(sc)
         val localCluster = new LocalSparkCluster(
           numSlaves.toInt, coresPerSlave.toInt, memoryPerSlaveInt, sc.conf)
         val masterUrls = localCluster.start()
@@ -2510,7 +2510,7 @@ object SparkContext extends Logging {
 
       case MESOS_REGEX(mesosUrl) =>
         MesosNativeLibrary.load()
-        val scheduler = new TaskSchedulerImpl(sc)
+        val scheduler = new ControlTaskSchedulerImpl(sc)
         val coarseGrained = sc.conf.getBoolean("spark.mesos.coarse", defaultValue = true)
         val backend = if (coarseGrained) {
           new MesosCoarseGrainedSchedulerBackend(scheduler, sc, mesosUrl, sc.env.securityManager)
