@@ -45,8 +45,6 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
   val ALPHA: Double = conf.get("spark.control.alpha").toDouble
   val DEADLINE: Int = conf.get("spark.control.deadline").toInt
   var executorNeeded: Int = conf.get("spark.control.maxexecutor").toInt
-  var coreForVM: Int = conf.get("spark.control.coreforvm").toInt
-  val BETA: Double = conf.get("spark.control.beta").toDouble
 
   // Master
   def master: String = conf.get("spark.master")
@@ -560,22 +558,6 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
     executorAvailable -= executorAssigned.executorId
     executorBinded += executorAssigned.executorId
   }
-
-  //  private def computeWeightStage(stageId: StageId): Double = synchronized {
-  //
-  //    val w1: Double = totalStageRemaining
-  //    val w2: Double = (totaldurationremaining.toDouble / stageIdToDuration(stageId)) - 1.0
-  //    val weight = (w1 * BETA) + (w2 * (1.0 - BETA))
-  //
-  //    logInfo("STAGE ID " + stageId + " [WEIGHT] W1: " + w1 + " W2: " + w2 + " W: " + weight + " with BETA: " + BETA)
-  //
-  //    return weight;
-  //
-  //  }
-
-//  def average[T](ts: Iterable[T])(implicit num: Numeric[T]): Double = {
-//    num.toDouble(ts.sum) / ts.size
-//  }
 
 }
 
