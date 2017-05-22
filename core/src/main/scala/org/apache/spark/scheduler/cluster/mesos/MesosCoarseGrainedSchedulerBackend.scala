@@ -25,14 +25,12 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.{Buffer, HashMap, HashSet}
 import scala.concurrent.Future
-
 import org.apache.mesos.Protos.{TaskInfo => MesosTaskInfo, _}
-
 import org.apache.spark.{SecurityManager, SparkContext, SparkException, TaskState}
 import org.apache.spark.network.netty.SparkTransportConf
 import org.apache.spark.network.shuffle.mesos.MesosExternalShuffleClient
 import org.apache.spark.rpc.RpcEndpointAddress
-import org.apache.spark.scheduler.{SlaveLost, TaskSchedulerImpl}
+import org.apache.spark.scheduler.{ControlTaskSchedulerImpl, SlaveLost, TaskSchedulerImpl}
 import org.apache.spark.scheduler.cluster.CoarseGrainedSchedulerBackend
 import org.apache.spark.util.Utils
 
@@ -47,7 +45,7 @@ import org.apache.spark.util.Utils
  * but it seems hard to remove this.
  */
 private[spark] class MesosCoarseGrainedSchedulerBackend(
-    scheduler: TaskSchedulerImpl,
+    scheduler: ControlTaskSchedulerImpl,
     sc: SparkContext,
     master: String,
     securityManager: SecurityManager)
