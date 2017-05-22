@@ -161,7 +161,17 @@ class DAGScheduler(
 
   private[scheduler] val activeJobs = new HashSet[ActiveJob]
 
+  val stageIdToWeight = new HashMap[Int, Int]
 
+  val jsonFile = sys.env.getOrElse("SPARK_HOME", ".") + "/conf/" +
+    sc.appName.replaceAll("[^a-zA-Z0-9.-]", "_") + ".json"
+
+  val appJson = if (Files.exists(Paths.get(jsonFile))) {
+    io.Source.fromFile(jsonFile).mkString.parseJson
+  } else null
+
+  val heuristic: HeuristicBase = if (sc.conf.contains("spark.control.stagecores") && sc.conf.contains("spark.control.stagedeadlines") && sc.conf.contains("spark.control.stage"))
+    new HeuristicFixed(sc.conf) else new HeuristicControl(sc.conf)
 
   /**
    * Contains the locations that each RDD's partitions are cached on.  This map's keys are RDD ids
@@ -195,6 +205,12 @@ class DAGScheduler(
   private[scheduler] val eventProcessLoop = new DAGSchedulerEventProcessLoop(this)
   taskScheduler.setDAGScheduler(this)
 
+  if (appJson != null && sc.conf.getBoolean("spark.control.checkdeadline", false)) {
+    logInfo("LOADED JSON FOR APP: " + jsonFile)
+    if (!heuristic.checkDeadline(appJson)) {
+      stop()
+    }
+  }
 
   /**
    * Called by the TaskSetManager to report task's starting.
@@ -382,7 +398,14 @@ class DAGScheduler(
     stage
   }
 
-
+  private def setWeight(node: Stage): Unit = {
+    node.parents.foreach { parent =>
+      val w1 = stageIdToWeight.getOrElse(node.id, 0) + 1
+      val w2 = stageIdToWeight.getOrElse(parent.id, 0)
+      stageIdToWeight(parent.id) = math.max(w1, w2)
+      this.setWeight(parent)
+      }
+  }
 
   /**
    * Get or create the list of parent stages for a given RDD.  The new Stages will be created with
@@ -847,17 +870,21 @@ class DAGScheduler(
   }
 
   private[scheduler] def handleJobSubmitted(jobId: Int,
-                                            finalRDD: RDD[_],
-                                            func: (TaskContext, Iterator[_]) => _,
-                                            partitions: Array[Int],
-                                            callSite: CallSite,
-                                            listener: JobListener,
-                                            properties: Properties) {
+      finalRDD: RDD[_],
+      func: (TaskContext, Iterator[_]) => _,
+      partitions: Array[Int],
+      callSite: CallSite,
+      listener: JobListener,
+      properties: Properties) {
     var finalStage: ResultStage = null
     try {
       // New stage creation may throw an exception if, for example, jobs are run on a
       // HadoopRDD whose underlying HDFS files have been deleted.
       finalStage = newResultStage(finalRDD, func, partitions, jobId, callSite)
+      stageIdToWeight.clear()
+      stageIdToWeight(finalStage.id) = 0
+      setWeight(finalStage)
+      logInfo(s"MapStageIdToWeight of JobID $jobId \n $stageIdToWeight")
     } catch {
       case e: Exception =>
         logWarning("Creating new stage failed due to exception - job: " + jobId, e)
@@ -1062,13 +1089,40 @@ class DAGScheduler(
         return
     }
 
-    if (tasks.size > 0) {
+    if (tasks.nonEmpty) {
       logInfo("Submitting " + tasks.size + " missing tasks from " + stage + " (" + stage.rdd + ")")
       stage.pendingPartitions ++= tasks.map(_.partitionId)
       logDebug("New pending partitions: " + stage.pendingPartitions)
       taskScheduler.submitTasks(new TaskSet(
         tasks.toArray, stage.id, stage.latestInfo.attemptId, jobId, properties))
       stage.latestInfo.submissionTime = Some(clock.getTimeMillis())
+      if (appJson != null) {
+        val stageJson = appJson.asJsObject.fields(stage.id.toString)
+        val totalduration = appJson.asJsObject.fields("0").asJsObject.fields("totalduration").convertTo[Long]
+        val duration = stageJson.asJsObject.fields("duration").convertTo[Long]
+        val weight = stageJson.asJsObject.fields("weight").convertTo[Long]
+        val stageJsonIds = appJson.asJsObject.fields.keys.toList.filter(id =>
+          appJson.asJsObject.fields(id).asJsObject.fields("nominalrate").convertTo[Double] != 0.0)
+        listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties,
+          weight,
+          duration,
+          totalduration,
+          stageJson.asJsObject.fields("parentsIds").convertTo[List[Int]],
+          stageJson.asJsObject.fields("nominalrate").convertTo[Double],
+          stageJson.asJsObject.fields("genstage").convertTo[Boolean],
+          stageJsonIds))
+      }
+      else {
+        logError("NO JSON FOR APP: " + jsonFile)
+        listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties,
+          1,
+          1,
+          1000,
+          List(),
+          0.0,
+          true,
+          List()))
+      }
     } else {
       // Because we posted SparkListenerStageSubmitted earlier, we should mark
       // the stage as completed here in case there are no tasks to run
