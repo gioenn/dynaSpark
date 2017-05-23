@@ -47,7 +47,7 @@ import DefaultJsonProtocol._
 import scala.io
 import java.nio.file.{Files, Paths}
 
-import org.apache.spark.deploy.control.ControllerJob
+import org.apache.spark.deploy.control._
 
 
 /**
@@ -170,131 +170,14 @@ class DAGScheduler(
     io.Source.fromFile(jsonFile).mkString.parseJson
   } else null
 
-  def average[T](ts: Iterable[T])(implicit num: Numeric[T]): Double = {
-    num.toDouble(ts.sum) / ts.size
-  }
-
-  def checkDeadline(): Boolean = {
-    var feasibility = true
-    val deadline = sc.conf.get("spark.control.deadline").toInt
-    val alpha = sc.conf.get("spark.control.alpha").toDouble
-    val numTaskApp = sc.conf.get("spark.control.numtask").toLong
-    val inputRecordApp = sc.conf.getLong("spark.control.inputrecord", 0)
-    val appDeadline = System.currentTimeMillis() + (alpha * deadline).toLong
-    val controller: ControllerJob = new ControllerJob(sc.conf, appDeadline)
-
-    // APP STATE PROGRESS VAR
-    var currentTime = System.currentTimeMillis()
-    var totalDuration = appJson.asJsObject.fields("0").asJsObject.
-      fields("totalduration").convertTo[Double]
-    var stageJsonIds = appJson.asJsObject.fields.keys.toList.filter(id =>
-      appJson.asJsObject.fields(id).asJsObject.fields("nominalrate").convertTo[Double] != 0.0)
-
-    val inputRecordProfileApp = appJson.asJsObject.fields("0").asJsObject.
-      fields("inputrecord").convertTo[Long]
-
-    // MAX REQUESTED CORE FOR BETTER NUM MAX EXECUTOR
-    var maxRequestedCore = 0
-
-    // INPUT / OUTPUT Normalized by numtask
-    val inputMap: HashMap[String, Double] = new HashMap[String, Double]
-    val outputMap: HashMap[String, Double] = new HashMap[String, Double]
-
-
-    // FOR EACH STAGE CHECK CORE NEEDED AND UPDATE VALUES
-    appJson.asJsObject.fields.keys.toList.
-      sortWith((x, y) => x.toInt < y.toInt).foreach(id => {
-      // STAGE JSON
-      val stageJson = appJson.asJsObject.fields(id).asJsObject
-      logInfo("SID " + id + " " + stageJson.prettyPrint)
-      // IF GENSTAGE OUTPUT IS INPUTRECORD TO GENERATE
-      if (stageJson.fields("genstage").convertTo[Boolean]) {
-        outputMap(id) = inputRecordApp / numTaskApp
-        val duration = stageJson.fields("duration").convertTo[Double]
-        totalDuration -= duration
-
-      } else if (!stageJson.fields("skipped").convertTo[Boolean]) {
-        val numTaskProfile = stageJson.fields("numtask").convertTo[Long]
-        val recordsReadProfile = stageJson.fields("recordsread").convertTo[Long] +
-          stageJson.fields("shufflerecordsread").convertTo[Long]
-        val recordsWriteProfile = stageJson.fields("recordswrite").convertTo[Long] +
-          stageJson.fields("shufflerecordswrite").convertTo[Long]
-        val parentsIds = stageJson.fields("parentsIds").convertTo[List[Int]]
-
-        // FILTERING FACTOR
-        val beta = recordsWriteProfile.toDouble / recordsReadProfile.toDouble
-        logInfo("BETA " + beta.toString)
-        var inputRecordProfile = parentsIds.foldLeft(0L) {
-          (agg, x) => agg + appJson.asJsObject.fields(x.toString).asJsObject.fields("recordswrite").convertTo[Long] +
-            appJson.asJsObject.fields(x.toString).asJsObject.fields("shufflerecordswrite").convertTo[Long]
-        }
-        if (inputRecordProfile == 0L) {
-          inputRecordProfile = parentsIds.foldLeft(0L) {
-            (agg, x) => agg + appJson.asJsObject.fields(x.toString).asJsObject.fields("recordsread").convertTo[Long] +
-              appJson.asJsObject.fields(x.toString).asJsObject.fields("shufflerecordsread").convertTo[Long]
-          }
-        }
-        if (inputRecordProfile == 0) inputRecordProfile = inputRecordProfileApp
-        logInfo("INPUT RECORD PROFILE: " + inputRecordProfile.toString)
-        val gamma = inputRecordProfile / recordsReadProfile.toDouble
-        logInfo("GAMMA " + gamma.toString)
-        var inputRecord = parentsIds.foldLeft(0.0) {
-          (agg, x) => agg + outputMap(x.toString)
-        }
-        if (inputRecord == 0.0) {
-          inputRecord = parentsIds.foldLeft(0.0) {
-            (agg, x) => agg + inputMap(x.toString)
-          }
-        }
-        if (inputRecord == 0.0) inputRecord = inputRecordApp / numTaskApp
-        logInfo("INPUT RECORD: " + inputRecord.toString)
-        controller.NOMINAL_RATE_RECORD_S = stageJson.fields("nominalrate").convertTo[Double]
-
-        // COMPUTE DEADLINE
-        val duration = stageJson.fields("duration").convertTo[Double]
-        val weight = (totalDuration / duration) - 1
-        val deadlineStage = controller.computeDeadlineStage(weight, currentTime, alpha, deadline)
-
-        // UPDATE RECORD AND APP STATE
-        if (recordsReadProfile == numTaskApp) {
-          inputMap(id) = numTaskApp
-        } else {
-          inputMap(id) = inputRecord / gamma
-        }
-        if (recordsWriteProfile == 0L) {
-          outputMap(id) = 0
-        } else {
-          outputMap(id) = (inputRecord / gamma) * beta
-        }
-        logInfo(inputMap.toString())
-        logInfo(outputMap.toString())
-        currentTime += deadlineStage
-        totalDuration -= duration
-        stageJsonIds = stageJsonIds.filter(x => x != id)
-
-        if (inputRecord == (inputRecordApp / numTaskApp)) {
-          inputRecord = (inputRecord / gamma) * numTaskApp
-        } else {
-          inputRecord = inputRecord * numTaskApp
-        }
-        // COMPUTE CORE AND CHECK FEASIBILITY
-        val coreStage = controller.computeCoreStage(deadlineStage, inputRecord.toLong)
-        maxRequestedCore = math.max(coreStage, maxRequestedCore)
-        val coreForExecutor = controller.computeCoreForExecutors(coreStage, false)
-        if (coreForExecutor == IndexedSeq(-1)) {
-          controller.numMaxExecutor = math.ceil(coreStage.toDouble /
-            controller.coreForVM.toDouble).toInt
-          feasibility = false
-        }
-      }
-    })
-    // SUGGEST MAX EXECUTOR
-    if (maxRequestedCore < (0.8 * controller.coreForVM * controller.numMaxExecutor)) {
-      logInfo("TOTAL CORE >> CORE NEEDED: REDUCE MAX EXECUTOR TO " +
-        math.ceil(maxRequestedCore / controller.coreForVM))
-    }
-    feasibility
-  }
+  val heuristicType = sc.conf.getInt("spark.control.heuristic", 0)
+  val heuristic: HeuristicBase =
+    if (heuristicType == 1 && sc.conf.contains("spark.control.stagecores") && sc.conf.contains("spark.control.stagedeadlines") && sc.conf.contains("spark.control.stage"))
+      new HeuristicFixed(sc.conf)
+    else if (heuristicType == 2)
+      new HeuristicControlUnlimited(sc.conf)
+    else
+      new HeuristicControl(sc.conf)
 
   /**
    * Contains the locations that each RDD's partitions are cached on.  This map's keys are RDD ids
@@ -330,7 +213,7 @@ class DAGScheduler(
 
   if (appJson != null && sc.conf.getBoolean("spark.control.checkdeadline", false)) {
     logInfo("LOADED JSON FOR APP: " + jsonFile)
-    if (!checkDeadline()) {
+    if (!heuristic.checkDeadline(appJson)) {
       stop()
     }
   }
