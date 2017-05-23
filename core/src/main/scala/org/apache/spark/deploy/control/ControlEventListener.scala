@@ -64,7 +64,6 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
   var firstStageId: StageId = -1
   var lastStageId: StageId = -1
   var stageIdsToComputeNominalRecord = scala.collection.mutable.Set[StageId]()
-//  var parallelStages = new HashMap[StageId, ListBuffer[StageId]]
 
   // Executor
   var executorAvailable = Set[ExecutorId]()
@@ -76,8 +75,15 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
   var executorNeededPendingStages = new HashMap[StageId, Int]
   var deadlineApp: Long = 0
 
-  val heuristic: HeuristicBase = if (conf.contains("spark.control.stagecores") && conf.contains("spark.control.stagedeadlines") && conf.contains("spark.control.stage"))
-    new HeuristicFixed(conf) else new HeuristicControl(conf)
+  val heuristicType = conf.getInt("spark.control.heuristic", 0)
+  val heuristic: HeuristicBase =
+    if (heuristicType == 1 && conf.contains("spark.control.stagecores") && conf.contains("spark.control.stagedeadlines") && conf.contains("spark.control.stage"))
+      new HeuristicFixed(conf)
+    else if (heuristicType == 2)
+      new HeuristicControlUnlimited(conf)
+    else
+      new HeuristicControl(conf)
+
 
   override def onJobStart(jobStart: SparkListenerJobStart): Unit = synchronized {
     val jobGroup = for (
