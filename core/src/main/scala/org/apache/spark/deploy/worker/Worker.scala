@@ -166,6 +166,8 @@ private[deploy] class Worker(
   def coresFree: Int = cores - coresUsed
   def memoryFree: Int = memory - memoryUsed
 
+  val pollon: ControllerPollon = new ControllerPollon(0, cores)
+
   private def createWorkDir() {
     workDir = Option(workDirPath).map(new File(_)).getOrElse(new File(sparkHome, "work"))
     try {
@@ -470,7 +472,7 @@ private[deploy] class Worker(
           val cpuquota = math.ceil(cores * CPU_PERIOD).toLong
           val driverUrl = appDesc.command.arguments(1)
           logInfo("CREATING PROXY FOR DRIVER: " + driverUrl)
-          val controllerProxy = new ControllerProxy(rpcEnv, driverUrl, execId)
+          val controllerProxy = new ControllerProxy(rpcEnv, driverUrl, execId, pollon)
           controllerProxy.start()
           execIdToProxy(execId.toString) = controllerProxy
           logInfo("PROXY ADDRESS:" + controllerProxy.getAddress)
