@@ -41,6 +41,8 @@ import org.apache.spark.rpc._
 import org.apache.spark.scheduler.cluster.CoarseGrainedClusterMessages._
 import org.apache.spark.util.{ThreadUtils, Utils}
 
+import scala.collection.mutable
+
 private[deploy] class Worker(
     override val rpcEnv: RpcEnv,
     webUiPort: Int,
@@ -52,6 +54,8 @@ private[deploy] class Worker(
     val conf: SparkConf,
     val securityMgr: SecurityManager)
   extends ThreadSafeRpcEndpoint with Logging {
+
+  type ApplicationId = String
 
   private val host = rpcEnv.address.host
   private val port = rpcEnv.address.port
@@ -165,6 +169,12 @@ private[deploy] class Worker(
 
   def coresFree: Int = cores - coresUsed
   def memoryFree: Int = memory - memoryUsed
+
+  val applicationIdToCoresUsed = new mutable.HashMap[ApplicationId, Int]().withDefaultValue(0)
+  val applicationIdToMemoryUsed = new mutable.HashMap[ApplicationId, Int]().withDefaultValue(0)
+
+  def coresFree(applicationId: ApplicationId): Int = cores - applicationIdToCoresUsed(applicationId)
+  def memoryFree(applicationId: ApplicationId): Int = memory - applicationIdToMemoryUsed(applicationId)
 
   val pollon: ControllerPollon = new ControllerPollon(0, cores)
 
@@ -472,7 +482,7 @@ private[deploy] class Worker(
           val cpuquota = math.ceil(cores * CPU_PERIOD).toLong
           val driverUrl = appDesc.command.arguments(1)
           logInfo("CREATING PROXY FOR DRIVER: " + driverUrl)
-          val controllerProxy = new ControllerProxy(rpcEnv, driverUrl, execId, pollon)
+          val controllerProxy = new ControllerProxy(rpcEnv, driverUrl, execId, appId, pollon)
           controllerProxy.start()
           execIdToProxy(execId.toString) = controllerProxy
           logInfo("PROXY ADDRESS:" + controllerProxy.getAddress)
@@ -501,7 +511,9 @@ private[deploy] class Worker(
           executors(appId + "/" + execId) = manager
           manager.start()
           coresUsed += cores_
+          applicationIdToCoresUsed(appId) = applicationIdToCoresUsed(appId) + cores_
           memoryUsed += memory_
+          applicationIdToMemoryUsed(appId) = applicationIdToMemoryUsed(appId) + memory_
           sendToMaster(ExecutorStateChanged(appId, execId, manager.state, None, None))
           // scalastyle:on line.size.limit
         } catch {
@@ -580,8 +592,8 @@ private[deploy] class Worker(
 
 
     case InitControllerExecutor
-      (executorId, stageId, coreMin, coreMax, tasks, deadline, core) =>
-      execIdToProxy(executorId).proxyEndpoint.send(Bind(executorId, stageId.toInt))
+      (appId, executorId, stageId, coreMin, coreMax, tasks, deadline, core) =>
+      execIdToProxy(executorId).proxyEndpoint.send(Bind(appId, executorId, stageId.toInt))
       execIdToStageId(executorId) = stageId.toInt
       val controllerExecutor = new ControllerExecutor(
         conf, appId, executorId, deadline, coreMin, coreMax, tasks, core)
@@ -593,13 +605,13 @@ private[deploy] class Worker(
       execIdToProxy(executorId).controllerExecutor = controllerExecutor
       controllerExecutor.start()
 
-    case BindWithTasks(executorId, stageId, tasks) =>
-      execIdToProxy(executorId).proxyEndpoint.send(Bind(executorId, stageId))
+    case BindWithTasks(applicationId, executorId, stageId, tasks) =>
+      execIdToProxy(executorId).proxyEndpoint.send(Bind(applicationId, executorId, stageId))
       execIdToProxy(executorId).totalTask = tasks
 
-    case UnBind(executorId, stageId) =>
+    case UnBind(applicationId, executorId, stageId) =>
       if (execIdToStageId.getOrElse(executorId, -1) == stageId) {
-        execIdToProxy(executorId).proxyEndpoint.send(UnBind(executorId, stageId))
+        execIdToProxy(executorId).proxyEndpoint.send(UnBind(applicationId, executorId, stageId))
         execIdToProxy(executorId).totalTask = 0
       }
 
@@ -768,7 +780,9 @@ private[deploy] class Worker(
           finishedExecutors(fullId) = executor
           trimFinishedExecutorsIfNecessary()
           coresUsed -= executor.cores
+          applicationIdToCoresUsed(appId) = applicationIdToCoresUsed(appId) - executor.cores
           memoryUsed -= executor.memory
+          applicationIdToMemoryUsed(appId) = applicationIdToMemoryUsed(appId) - executor.memory
           coresAllocated -= fullId
         case None =>
           logInfo("Unknown Executor " + fullId + " finished with state " + state +

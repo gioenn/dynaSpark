@@ -43,10 +43,16 @@ private[spark] class WorkerInfo(
 
   @transient var lastHeartbeat: Long = _
 
+  val applicationIdToCoresUsed = new mutable.HashMap[String, Int]().withDefaultValue(0)
+  val applicationIdToMemoryUsed = new mutable.HashMap[String, Int]().withDefaultValue(0)
+
   init()
 
   def coresFree: Int = cores - coresUsed
   def memoryFree: Int = memory - memoryUsed
+
+  def coresFree(applicationId: String): Int = cores - applicationIdToCoresUsed(applicationId)
+  def memoryFree(applicationId: String): Int = memory - applicationIdToMemoryUsed(applicationId)
 
   private def readObject(in: java.io.ObjectInputStream): Unit = Utils.tryOrIOException {
     in.defaultReadObject()
@@ -71,6 +77,8 @@ private[spark] class WorkerInfo(
     executors(exec.fullId) = exec
     coresUsed += exec.cores
     memoryUsed += exec.memory
+    applicationIdToCoresUsed(exec.application.id) = applicationIdToCoresUsed(exec.application.id) + exec.cores
+    applicationIdToMemoryUsed(exec.application.id) = applicationIdToMemoryUsed(exec.application.id) + exec.memory
   }
 
   def removeExecutor(exec: ExecutorDesc) {
@@ -78,6 +86,8 @@ private[spark] class WorkerInfo(
       executors -= exec.fullId
       coresUsed -= exec.cores
       memoryUsed -= exec.memory
+      applicationIdToCoresUsed(exec.application.id) = applicationIdToCoresUsed(exec.application.id) - exec.cores
+      applicationIdToMemoryUsed(exec.application.id) = applicationIdToMemoryUsed(exec.application.id) - exec.memory
     }
   }
 
@@ -85,6 +95,8 @@ private[spark] class WorkerInfo(
     if (executors.contains(exec.fullId)) {
       coresUsed += exec.cores - executors(exec.fullId).cores
       memoryUsed += exec.memory - executors(exec.fullId).memory
+      applicationIdToCoresUsed(exec.application.id) = applicationIdToCoresUsed(exec.application.id) + exec.cores - executors(exec.fullId).cores
+      applicationIdToMemoryUsed(exec.application.id) = applicationIdToMemoryUsed(exec.application.id) + exec.memory - executors(exec.fullId).memory
       executors(exec.fullId) = exec
     }
   }

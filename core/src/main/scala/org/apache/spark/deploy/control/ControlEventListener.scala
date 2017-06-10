@@ -49,7 +49,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
   // Master
   def master: String = conf.get("spark.master")
 
-  def appid: String = conf.get("spark.app.id")
+  def appId: String = conf.get("spark.app.id")
 
   // Jobs:
   val jobIdToController = new HashMap[JobId, ControllerJob]
@@ -159,7 +159,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
     for (execid <- stageIdToExecId(stageCompleted.stageInfo.stageId)) {
       val workerUrl = "spark://Worker@" +
         executorIdToInfo(execid).executorHost + ":9999"
-      controller.unbind(workerUrl, execid, stageCompleted.stageInfo.stageId)
+      controller.unBind(workerUrl, appId, execid, stageCompleted.stageInfo.stageId)
     }
     val stage = stageCompleted.stageInfo
     totaldurationremaining -= stageIdToDuration(stage.stageId)
@@ -364,10 +364,10 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
       // ASK MASTER NEEDED EXECUTORS
       val coreForExecutors = heuristic.computeCoreForExecutors(stageIdToCore(stage.stageId), stage.stageId, lastStage)
 
-      controller.askMasterNeededExecutors(master, firstStageId, coreForExecutors, appid)
+      controller.askMasterNeededExecutors(master, firstStageId, coreForExecutors, appId)
       executorNeeded = coreForExecutors.size
       if (coreForExecutors.contains(-1)) {
-        controller.kill(master, appid, executorAvailable.toSeq)
+        controller.kill(master, appId, executorAvailable.toSeq)
       }
 
     }
@@ -545,9 +545,10 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
       val taskForExecutorId = heuristic.computeTaskForExecutors(stageIdToCore(stageId), stageIdToInfo(stageId).numTasks, lastStage)(index)
       val (coreMin, coreMax, coreToStart) = heuristic.computeCores(stageIdToCore(stageId), index, stageId, lastStage)
 
-      controller.scaleExecutor(workerUrl, appid, executorAssigned.executorId, coreToStart)
+      controller.scaleExecutor(workerUrl, appId, executorAssigned.executorId, coreToStart)
       controller.initControllerExecutor(
         workerUrl,
+        appId,
         executorAssigned.executorId,
         stageId,
         coreMin = coreMin,
@@ -559,7 +560,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
       val taskForExecutorId = heuristic.computeTaskForExecutors(stageIdToCore(stageId),
         stageIdToInfo(stageId).numTasks, lastStage)(index)
       controller.scaleExecutor(workerUrl, "", executorAssigned.executorId, controller.coreForVM)
-      controller.bindwithtasks(workerUrl, executorAssigned.executorId, stageId, taskForExecutorId)
+      controller.bindWithTasks(workerUrl, appId, executorAssigned.executorId, stageId, taskForExecutorId)
     }
     executorAvailable -= executorAssigned.executorId
     executorBinded += executorAssigned.executorId

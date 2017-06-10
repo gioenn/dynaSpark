@@ -30,7 +30,7 @@ import scala.util.{Failure, Success}
   * Created by Matteo on 21/07/2016.
   */
 class ControllerProxy
-(rpcEnvWorker: RpcEnv, val driverUrl: String, val execId: Int, val pollon: ControllerPollon) {
+(rpcEnvWorker: RpcEnv, val driverUrl: String, val execId: Int, val appId: String, val pollon: ControllerPollon) {
 
   var proxyEndpoint: RpcEndpointRef = _
   val ENDPOINT_NAME: String =
@@ -111,7 +111,7 @@ class ControllerProxy
         if ((TaskState.LOST == state) || (TaskState.FAILED == state)
           || (TaskState.KILLED == state)) {
           taskFailed += 1
-          driver.get.send(Bind(execId.toString, executorStageId))
+          driver.get.send(Bind(appId, execId.toString, executorStageId))
           this.synchronized {
             if (!pollonKnowsMe) {
               pollon.increaseActiveExecutors()
@@ -137,7 +137,7 @@ class ControllerProxy
           taskLaunched += 1
           if (taskFailed > 0) taskFailed -= 1
           if (taskLaunched == totalTask) {
-            driver.get.send(UnBind(execId.toString, executorStageId))
+            driver.get.send(UnBind(appId, execId.toString, executorStageId))
           }
 
         }
@@ -147,9 +147,9 @@ class ControllerProxy
         executorRefMap(executorIdToAddress(execId.toString).host).send(StopExecutor)
         if (controllerExecutor != null) controllerExecutor.stop()
 
-      case Bind(executorId, stageId) =>
+      case Bind(applicationId, executorId, stageId) =>
         logInfo("Received Binding EID " + executorId + " SID " + stageId.toString)
-        driver.get.send(Bind(executorId, stageId))
+        driver.get.send(Bind(applicationId, executorId, stageId))
         executorStageId = stageId
         this.synchronized {
           if (!pollonKnowsMe) {
@@ -160,8 +160,8 @@ class ControllerProxy
         taskCompleted = 0
         taskLaunched = 0
 
-      case UnBind(executorId, stageId) =>
-        driver.get.send(UnBind(executorId, stageId))
+      case UnBind(applicationId, executorId, stageId) =>
+        driver.get.send(UnBind(applicationId, executorId, stageId))
         if (controllerExecutor != null) controllerExecutor.stop()
         executorStageId = -1
         this.synchronized {

@@ -46,34 +46,34 @@ class ControllerJob(conf: SparkConf, appDeadlineJobMillisecond: Long) extends Lo
     workerEndpoint.send(ScaleExecutor(appId, executorId, core))
   }
 
-  def bindwithtasks(
-                     workerUrl: String, executorId: String, stageId: Long, tasks: Int): Unit = {
+  def bindWithTasks(
+                     workerUrl: String, applicationId: String, executorId: String, stageId: Long, tasks: Int): Unit = {
     if (tasks > 0) {
       val workerEndpoint = rpcEnv.setupEndpointRefByURI(workerUrl)
-      workerEndpoint.send(BindWithTasks(
+      workerEndpoint.send(BindWithTasks(applicationId,
         executorId, stageId.toInt, tasks))
-      logInfo("SEND BIND TO WORKER EID %s, SID %s WITH TASKS %d".format
-      (executorId, stageId, tasks))
+      logInfo("SEND BIND TO WORKER EID %s, SID %s WITH TASKS %d APP %s".format
+      (executorId, stageId, tasks, applicationId))
     }
   }
 
-  def unbind(workerUrl: String, executorId: String, stageId: Long): Unit = {
+  def unBind(workerUrl: String, applicationId: String, executorId: String, stageId: Long): Unit = {
     val workerEndpoint = rpcEnv.setupEndpointRefByURI(workerUrl)
-    workerEndpoint.send(UnBind(executorId, stageId.toInt))
-    logInfo("SEND UNBIND TO WORKER EID %s, SID %s".format
-    (executorId, stageId))
+    workerEndpoint.send(UnBind(applicationId, executorId, stageId.toInt))
+    logInfo("SEND UNBIND TO WORKER EID %s, SID %s APP %s".format
+    (executorId, stageId, applicationId))
   }
 
-  def initControllerExecutor(workerUrl: String, executorId: String,
+  def initControllerExecutor(workerUrl: String, applicationId: String, executorId: String,
                              stageId: Long, coreMin: Double, coreMax: Double,
                              deadline: Long, core: Double, tasksForExecutor: Int): Unit =
     synchronized {
       if (tasksForExecutor > 0) {
         val workerEndpoint = rpcEnv.setupEndpointRefByURI(workerUrl)
-        workerEndpoint.send(InitControllerExecutor(
+        workerEndpoint.send(InitControllerExecutor( applicationId,
           executorId, stageId, coreMin, coreMax, tasksForExecutor, deadline, core))
-        logInfo("SEND INIT TO EXECUTOR CONTROLLER EID %s, SID %s, TASK %s, DL %s, C %s".format
-        (executorId, stageId, tasksForExecutor, deadline, core))
+        logInfo("SEND INIT TO EXECUTOR CONTROLLER EID %s, SID %s, TASK %s, DL %s, C %s, APP %s".format
+        (executorId, stageId, tasksForExecutor, deadline, core, applicationId))
       }
     }
 

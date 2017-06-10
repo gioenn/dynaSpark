@@ -32,12 +32,12 @@ private[spark] object CoarseGrainedClusterMessages {
 
   case object RetrieveLastAllocatedExecutorId extends CoarseGrainedClusterMessage
 
-  case class Bind(executorId: String, stageId: Int) extends CoarseGrainedClusterMessage
+  case class Bind(applicationId: String, executorId: String, stageId: Int) extends CoarseGrainedClusterMessage
 
-  case class BindWithTasks(executorId: String, stageId: Int, tasks: Int)
+  case class BindWithTasks(applicationId: String, executorId: String, stageId: Int, tasks: Int)
     extends CoarseGrainedClusterMessage
 
-  case class UnBind(executorId: String, stageId: Int) extends CoarseGrainedClusterMessage
+  case class UnBind(applicationId: String, executorId: String, stageId: Int) extends CoarseGrainedClusterMessage
 
   case class ScaleExecutor(appId: String, execId: String, cores: Double)
     extends CoarseGrainedClusterMessage
@@ -47,7 +47,7 @@ private[spark] object CoarseGrainedClusterMessages {
 
   // ControllerJob to ControllerExecutor (Worker)
   case class InitControllerExecutor
-  (executorId: String, stageId: Long,
+  (applicationId: String, executorId: String, stageId: Long,
    coreMin: Double, coreMax: Double, tasks: Int, deadline: Long, core: Double)
   extends CoarseGrainedClusterMessage
 

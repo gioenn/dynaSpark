@@ -139,7 +139,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
       case ExecutorFinishedTask(executorId, stageId) =>
         scheduler.unbind(executorId, stageId)
 
-      case UnBind(executorId, stageId) =>
+      case UnBind(applicationId, executorId, stageId) =>
         scheduler.unbind(executorId, stageId)
 
       case ReviveOffers =>
@@ -154,7 +154,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
             logWarning(s"Attempted to kill task $taskId for unknown executor $executorId.")
         }
 
-      case Bind(executorId, stageId) =>
+      case Bind(applicationId, executorId, stageId) =>
         scheduler.bind(executorId, stageId)
         makeOffers(executorId)
 
