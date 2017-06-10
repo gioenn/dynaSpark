@@ -83,7 +83,7 @@ class ControllerExecutor
     }
     else {
       val csi = csiOld + K * (Ts.toDouble / Ti) * (SP - (completedTasks / tasks))
-      cs = math.min(coreMax.toDouble, csp + csi)
+      cs = math.max(coreMin.toDouble, csp + csi)
     }
 
     cs = worker.pollon.fix_cores(executorId, cs)

@@ -8,17 +8,18 @@ import scala.collection.mutable
   * Created by Simone Ripamonti on 07/06/2017.
   */
 class ControllerPollon(var activeExecutors: Int, val maximumCores: Int) extends Logging{
+  type ApplicationId = String
   type ExecutorId = String
   type Cores = Double
   logInfo("MAX CORES "+maximumCores)
-  private var desiredCores = new mutable.HashMap[ExecutorId, Cores]()
-  private var correctedCores = new mutable.HashMap[ExecutorId, Cores]()
+  private var desiredCores = new mutable.HashMap[(ApplicationId,ExecutorId), Cores]()
+  private var correctedCores = new mutable.HashMap[(ApplicationId,ExecutorId), Cores]()
 
-  def fix_cores(executorId: ExecutorId, cores: Cores): Cores = {
+  def fix_cores(applicationId: ApplicationId, executorId: ExecutorId, cores: Cores): Cores = {
     desiredCores.synchronized {
       logInfo("fix_cores("+executorId+","+cores+")")
       // add your desired number of cores
-      desiredCores += (executorId -> cores)
+      desiredCores += ((applicationId, executorId) -> cores)
       logInfo("desiredCores size "+desiredCores.size+", activeExecutors "+activeExecutors)
       // check if all requests have been collected
       if (desiredCores.keySet.size == activeExecutors) {
@@ -32,7 +33,7 @@ class ControllerPollon(var activeExecutors: Int, val maximumCores: Int) extends 
     }
 
     // obtain corrected cores
-    correctedCores(executorId)
+    correctedCores((applicationId, executorId))
   }
 
   def increaseActiveExecutors(): Unit = {
@@ -61,7 +62,7 @@ class ControllerPollon(var activeExecutors: Int, val maximumCores: Int) extends 
     // scale requested cores if needed
     if (totalCoresRequested > maximumCores) {
       logInfo("REQUESTED CORES "+totalCoresRequested+" > MAX CORES "+maximumCores)
-      correctedCores = new mutable.HashMap[ExecutorId, Cores]()
+      correctedCores = new mutable.HashMap[(ApplicationId,ExecutorId), Cores]()
       val tempCorrectedCores = desiredCores.mapValues(requestedCores => (maximumCores / totalCoresRequested) * requestedCores)
       tempCorrectedCores.foreach(cc => correctedCores+=cc)
     } else {
@@ -72,6 +73,6 @@ class ControllerPollon(var activeExecutors: Int, val maximumCores: Int) extends 
       + " CORRECTED: " + correctedCores.values.toList)
 
     desiredCores.notifyAll()
-    desiredCores = new mutable.HashMap[ExecutorId, Cores]()
+    desiredCores = new mutable.HashMap[(ApplicationId,ExecutorId), Cores]()
   }
 }
