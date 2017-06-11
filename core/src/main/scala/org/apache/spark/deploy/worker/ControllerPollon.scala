@@ -17,17 +17,13 @@ class ControllerPollon(var activeExecutors: Int, val maximumCores: Int) extends 
 
   def fix_cores(applicationId: ApplicationId, executorId: ExecutorId, cores: Cores): Cores = {
     desiredCores.synchronized {
-      logInfo("fix_cores("+executorId+","+cores+")")
       // add your desired number of cores
       desiredCores += ((applicationId, executorId) -> cores)
-      logInfo("desiredCores size "+desiredCores.size+", activeExecutors "+activeExecutors)
       // check if all requests have been collected
       if (desiredCores.keySet.size == activeExecutors) {
-        logInfo("computing correctedCores")
         computeCorrectedCores()
       } else {
         // wait for others to send core requests
-        logInfo("waiting for others")
         desiredCores.wait()
       }
     }
@@ -48,8 +44,8 @@ class ControllerPollon(var activeExecutors: Int, val maximumCores: Int) extends 
 
   def decreaseActiveExecutors(): Unit = {
     desiredCores.synchronized {
-      logInfo("ACTIVE EXECUTORS DECREASED: "+activeExecutors)
       activeExecutors -= 1
+      logInfo("ACTIVE EXECUTORS DECREASED: "+activeExecutors)
       if (desiredCores.keySet.size == activeExecutors) {
         computeCorrectedCores()
       }

@@ -91,8 +91,8 @@ class ControllerProxy
         if (state == TaskState.FINISHED) {
           if (controllerExecutor != null) controllerExecutor.completedTasks += 1
           taskCompleted += 1
-          logDebug("EID: %s, Completed: %d, Launched: %d, Total: %d".format(executorId,
-            taskCompleted, taskLaunched, totalTask))
+          logDebug("EID: %s, Completed: %d, Launched: %d, Total: %d, appId: %s".format(executorId,
+            taskCompleted, taskLaunched, totalTask, appId))
           if (taskCompleted == totalTask) {
             driver.get.send(ExecutorFinishedTask(executorId, executorStageId))
             taskCompleted = 0
@@ -148,7 +148,7 @@ class ControllerProxy
         if (controllerExecutor != null) controllerExecutor.stop()
 
       case Bind(applicationId, executorId, stageId) =>
-        logInfo("Received Binding EID " + executorId + " SID " + stageId.toString)
+        logInfo("Received Binding EID " + executorId + " SID " + stageId.toString + " appId " + applicationId)
         driver.get.send(Bind(applicationId, executorId, stageId))
         executorStageId = stageId
         this.synchronized {
