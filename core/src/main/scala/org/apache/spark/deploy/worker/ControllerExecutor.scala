@@ -59,9 +59,9 @@ class ControllerExecutor
       } else {
         nextCore = nextAllocation()
       }
-      logInfo("SP Updated: " + SP.toString)
-      logInfo("Real: " + (completedTasks / tasks).toString)
-      logInfo("CoreToAllocate: " + nextCore.toString)
+      logInfo("SP Updated: " + SP.toString+ " ApplicationId: "+applicationId)
+      logInfo("Real: " + (completedTasks / tasks).toString+ " ApplicationId: "+applicationId)
+      logInfo("CoreToAllocate: " + nextCore.toString + " ApplicationId: "+applicationId)
 
       if (nextCore != oldCore) {
         oldCore = nextCore

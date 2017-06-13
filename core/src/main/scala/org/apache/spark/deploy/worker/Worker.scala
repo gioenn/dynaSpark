@@ -597,7 +597,7 @@ private[deploy] class Worker(
       execIdToStageId(executorId) = stageId.toInt
       val controllerExecutor = new ControllerExecutor(
         conf, appId, executorId, deadline, coreMin, coreMax, tasks, core)
-      logInfo("Created ControllerExecutor: %s , %d , %d , %d , %f, %s".format
+      logInfo("Created ControllerExecutor: %s , %d , %d , %d , %f , %s".format
       (executorId, stageId, deadline, tasks, core, appId))
       executorIdToController(executorId) = controllerExecutor
       controllerExecutor.worker = this
