@@ -456,6 +456,7 @@ private[spark] class TaskSchedulerImpl(
   }
 
   def bind(executorId: String, stageId: Int): Unit = {
+    logInfo("Asked to bind "+executorId+ " to stage "+stageId+", previous stage "+execIdToTaskSet(executorId))
     if (execIdToTaskSet(executorId) == -1) {
       logInfo("BINDING EXECUTOR ID: %s TO STAGEID %d".format(executorId, stageId))
       execIdToTaskSet(executorId) = stageId
@@ -463,6 +464,7 @@ private[spark] class TaskSchedulerImpl(
   }
 
   def unbind(executorId: String, stageId: Int): Unit = {
+    logInfo("Asked to unbind "+executorId+ " from stage "+stageId+", previous stage "+execIdToTaskSet(executorId))
     if (execIdToTaskSet(executorId) == stageId) {
       logInfo("UNBINDING EXECUTOR ID: %s FROM SID: %d".format(executorId, stageId))
       execIdToTaskSet(executorId) = -1

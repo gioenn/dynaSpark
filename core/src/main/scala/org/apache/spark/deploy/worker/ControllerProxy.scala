@@ -145,6 +145,12 @@ class ControllerProxy
       case StopExecutor =>
         logInfo("Asked to terminate Executor")
         executorRefMap(executorIdToAddress(execId.toString).host).send(StopExecutor)
+        this.synchronized {
+          if (pollonKnowsMe) {
+            pollon.decreaseActiveExecutors()
+            pollonKnowsMe = false
+          }
+        }
         if (controllerExecutor != null) controllerExecutor.stop()
 
       case Bind(applicationId, executorId, stageId) =>
@@ -162,14 +168,15 @@ class ControllerProxy
 
       case UnBind(applicationId, executorId, stageId) =>
         driver.get.send(UnBind(applicationId, executorId, stageId))
-        if (controllerExecutor != null) controllerExecutor.stop()
-        executorStageId = -1
         this.synchronized {
           if (pollonKnowsMe) {
             pollon.decreaseActiveExecutors()
             pollonKnowsMe = false
           }
         }
+        if (controllerExecutor != null) controllerExecutor.stop()
+        executorStageId = -1
+
 
       case ExecutorScaled(timestamp, executorId, cores, newFreeCores) =>
         ControllerProxy.this.synchronized {

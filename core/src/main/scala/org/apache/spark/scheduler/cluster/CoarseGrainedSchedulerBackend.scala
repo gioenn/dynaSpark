@@ -137,9 +137,11 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
         }
 
       case ExecutorFinishedTask(executorId, stageId) =>
+        logInfo("Received ExecutorFinishedTask "+executorId+" stage "+stageId)
         scheduler.unbind(executorId, stageId)
 
       case UnBind(applicationId, executorId, stageId) =>
+        logInfo("Received unbind "+applicationId+"/"+executorId+" stage "+stageId)
         scheduler.unbind(executorId, stageId)
 
       case ReviveOffers =>
@@ -155,6 +157,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
         }
 
       case Bind(applicationId, executorId, stageId) =>
+        logInfo("Received bind "+applicationId+"/"+executorId+" stage "+stageId)
         scheduler.bind(executorId, stageId)
         makeOffers(executorId)
 
