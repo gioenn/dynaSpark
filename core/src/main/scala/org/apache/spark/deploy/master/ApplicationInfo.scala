@@ -47,8 +47,6 @@ private[spark] class ApplicationInfo(
   // application will this be set to a finite value. This is used for dynamic allocation.
   @transient private[master] var executorLimit: Int = _
 
-  @transient private var nextExecutorId: Int = _
-
   init()
 
   private def readObject(in: java.io.ObjectInputStream): Unit = Utils.tryOrIOException {
@@ -62,7 +60,6 @@ private[spark] class ApplicationInfo(
     coresGranted = 0
     endTime = -1L
     appSource = new ApplicationSource(this)
-    nextExecutorId = 0
     removedExecutors = new ArrayBuffer[ExecutorDesc]
     executorLimit = desc.initialExecutorLimit.getOrElse(Integer.MAX_VALUE)
   }
@@ -70,11 +67,11 @@ private[spark] class ApplicationInfo(
   private def newExecutorId(useID: Option[Int] = None): Int = {
     useID match {
       case Some(id) =>
-        nextExecutorId = math.max(nextExecutorId, id + 1)
+        ApplicationInfo.nextExecutorId = math.max(ApplicationInfo.nextExecutorId, id + 1)
         id
       case None =>
-        val id = nextExecutorId
-        nextExecutorId += 1
+        val id = ApplicationInfo.nextExecutorId
+        ApplicationInfo.nextExecutorId += 1
         id
     }
   }
@@ -134,4 +131,7 @@ private[spark] class ApplicationInfo(
       System.currentTimeMillis() - startTime
     }
   }
+}
+private[spark] object ApplicationInfo{
+  var nextExecutorId = 0
 }
