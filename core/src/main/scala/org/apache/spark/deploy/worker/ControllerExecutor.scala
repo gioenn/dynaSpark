@@ -41,56 +41,43 @@ class ControllerExecutor
   var SP: Double = 0.0
   var completedTasks: Double = 0.0
   var cs: Double = 0.0
+  var csp: Double = 0
 
   val timer = new Timer()
   var oldCore = core
 
-  def function2TimerTask(f: () => Unit): TimerTask = new TimerTask {
-    def run() = f()
-  }
-
-  def start(): Unit = {
-    def timerTask() = {
-      if (SP < 1.0) SP += Ts.toDouble / deadline.toDouble
-      var nextCore: Double = coreMin
-      if (SP >= 1.0) {
-        SP = 1.0
-        nextCore = coreMax
-      } else {
-        nextCore = nextAllocation()
-      }
-      logInfo("SP Updated: " + SP.toString+ " ApplicationId: "+applicationId)
-      logInfo("Real: " + (completedTasks / tasks).toString+ " ApplicationId: "+applicationId)
-      logInfo("CoreToAllocate: " + nextCore.toString + " ApplicationId: "+applicationId)
-
-      if (nextCore != oldCore) {
-        oldCore = nextCore
-        worker.onScaleExecutor(applicationId, executorId, nextCore)
-      }
-
-    }
-    timer.scheduleAtFixedRate(function2TimerTask(timerTask), Ts, Ts)
-  }
-
-  def stop(): Unit = {
-    timer.cancel()
-  }
-
-  def nextAllocation(statx: Int = 3): Double = {
-    val csp = K * (SP - (completedTasks / tasks))
-    if (statx != 3) {
-      cs = coreMin
-    }
-    else {
-      val csi = csiOld + K * (Ts.toDouble / Ti) * (SP - (completedTasks / tasks))
-      cs = math.max(coreMin.toDouble, csp + csi)
-    }
-
-    cs = worker.pollon.fix_cores(applicationId, executorId, cs)
-
-    cs = math.ceil(cs / CQ) * CQ
-    csiOld = cs - csp
+  def nextAllocation(): Double = {
+    csp = K * (SP - (completedTasks / tasks))
+    val csi = csiOld + K * (Ts.toDouble / Ti) * (SP - (completedTasks / tasks))
+    cs = math.max(coreMin.toDouble, csp + csi)
     cs
   }
 
+  def computeDesiredCore(): Double = {
+    if (SP < 1.0) SP += Ts.toDouble / deadline.toDouble
+    var nextCore: Double = coreMin
+    if (SP >= 1.0) {
+      SP = 1.0
+      nextCore = coreMax
+    } else {
+      nextCore = nextAllocation()
+    }
+    nextCore
+  }
+
+  def applyNextCore(nextCore: Double) = {
+    // log updates
+    logInfo("SP Updated: " + SP.toString+ " ApplicationId: "+applicationId)
+    logInfo("Real: " + (completedTasks / tasks).toString+ " ApplicationId: "+applicationId)
+    logInfo("CoreToAllocate: " + nextCore.toString + " ApplicationId: "+applicationId)
+    // match core quantum
+    cs = math.ceil(nextCore / CQ) * CQ
+    // store old value
+    csiOld = cs - csp
+    // scale executor
+    if (nextCore != oldCore) {
+      oldCore = nextCore
+      worker.onScaleExecutor(applicationId, executorId, nextCore)
+    }
+  }
 }

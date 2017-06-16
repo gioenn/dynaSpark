@@ -47,9 +47,6 @@ class ControllerProxy
 
   var executorStageId: Int = -1
 
-  var pollonKnowsMe: Boolean = false
-
-
   def start() {
     proxyEndpoint = rpcEnv.setupEndpoint(ENDPOINT_NAME, createProxyEndpoint(driverUrl))
   }
@@ -99,25 +96,14 @@ class ControllerProxy
             taskLaunched = 0
             totalTask = 0
             executorStageId = -1
-            this.synchronized {
-              if (pollonKnowsMe) {
-                pollon.decreaseActiveExecutors()
-                pollonKnowsMe = false
-              }
-            }
-            if (controllerExecutor != null) controllerExecutor.stop()
+            pollon.unregisterExecutor(appId, executorId)
           }
         }
         if ((TaskState.LOST == state) || (TaskState.FAILED == state)
           || (TaskState.KILLED == state)) {
           taskFailed += 1
           driver.get.send(Bind(appId, execId.toString, executorStageId))
-          this.synchronized {
-            if (!pollonKnowsMe) {
-              pollon.increaseActiveExecutors()
-              pollonKnowsMe = true
-            }
-          }
+          pollon.registerExecutor(appId, executorId, controllerExecutor)
         }
         driver.get.send(StatusUpdate(executorId, taskId, state, data))
 
@@ -145,36 +131,19 @@ class ControllerProxy
       case StopExecutor =>
         logInfo("Asked to terminate Executor")
         executorRefMap(executorIdToAddress(execId.toString).host).send(StopExecutor)
-        this.synchronized {
-          if (pollonKnowsMe) {
-            pollon.decreaseActiveExecutors()
-            pollonKnowsMe = false
-          }
-        }
-        if (controllerExecutor != null) controllerExecutor.stop()
+        pollon.unregisterExecutor(appId, execId.toString)
 
       case Bind(applicationId, executorId, stageId) =>
         logInfo("Received Binding EID " + executorId + " SID " + stageId.toString + " appId " + applicationId)
         driver.get.send(Bind(applicationId, executorId, stageId))
         executorStageId = stageId
-        this.synchronized {
-          if (!pollonKnowsMe) {
-            pollon.increaseActiveExecutors()
-            pollonKnowsMe = true
-          }
-        }
+        pollon.registerExecutor(appId, executorId, controllerExecutor)
         taskCompleted = 0
         taskLaunched = 0
 
       case UnBind(applicationId, executorId, stageId) =>
         driver.get.send(UnBind(applicationId, executorId, stageId))
-        this.synchronized {
-          if (pollonKnowsMe) {
-            pollon.decreaseActiveExecutors()
-            pollonKnowsMe = false
-          }
-        }
-        if (controllerExecutor != null) controllerExecutor.stop()
+        pollon.unregisterExecutor(appId, executorId)
         executorStageId = -1
 
 

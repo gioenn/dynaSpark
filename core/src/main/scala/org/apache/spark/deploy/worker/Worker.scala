@@ -215,6 +215,10 @@ private[deploy] class Worker(
     metricsSystem.start()
     // Attach the worker metrics servlet handler to the web ui after the metrics system is started.
     metricsSystem.getServletHandlers.foreach(webUi.attachHandler)
+
+    // starting pollon
+    logInfo("Starting ControllerPollon")
+    pollon.start()
   }
 
   private def changeMaster(masterRef: RpcEndpointRef, uiUrl: String) {
@@ -603,7 +607,6 @@ private[deploy] class Worker(
       controllerExecutor.worker = this
       execIdToProxy(executorId).totalTask = tasks
       execIdToProxy(executorId).controllerExecutor = controllerExecutor
-      controllerExecutor.start()
 
     case BindWithTasks(applicationId, executorId, stageId, tasks) =>
       execIdToProxy(executorId).proxyEndpoint.send(Bind(applicationId, executorId, stageId))

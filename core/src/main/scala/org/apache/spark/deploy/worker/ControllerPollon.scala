@@ -1,5 +1,7 @@
 package org.apache.spark.deploy.worker
 
+import java.util.{Timer, TimerTask}
+
 import org.apache.spark.internal.Logging
 
 import scala.collection.mutable
@@ -7,68 +9,67 @@ import scala.collection.mutable
 /**
   * Created by Simone Ripamonti on 07/06/2017.
   */
-class ControllerPollon(var activeExecutors: Int, val maximumCores: Int) extends Logging{
+class ControllerPollon(val maximumCores: Int, val Ts: Long) extends Logging {
   type ApplicationId = String
   type ExecutorId = String
   type Cores = Double
-  logInfo("MAX CORES "+maximumCores)
-  private var desiredCores = new mutable.HashMap[(ApplicationId,ExecutorId), Cores]()
-  private var correctedCores = new mutable.HashMap[(ApplicationId,ExecutorId), Cores]()
+  logInfo("Max cores allocable: " + maximumCores + ", TSample: " + Ts)
+  private val timer = new Timer()
+  private var desiredCores = new mutable.HashMap[(ApplicationId, ExecutorId), Cores]()
+  private var correctedCores = new mutable.HashMap[(ApplicationId, ExecutorId), Cores]()
+  private var activeExecutors = new mutable.HashMap[(ApplicationId, ExecutorId), ControllerExecutor]()
 
-  def fix_cores(applicationId: ApplicationId, executorId: ExecutorId, cores: Cores): Cores = {
-    desiredCores.synchronized {
-      // add your desired number of cores
-      desiredCores += ((applicationId, executorId) -> cores)
-      // check if all requests have been collected
-      if (desiredCores.keySet.size == activeExecutors) {
-        computeCorrectedCores()
-      } else {
-        // wait for others to send core requests
-        desiredCores.wait()
+  def function2TimerTask(f: () => Unit): TimerTask = new TimerTask {
+    def run() = f()
+  }
+
+  def start(): Unit = {
+    def timerTask() = {
+      activeExecutors.synchronized {
+        if (activeExecutors.size > 0) {
+          desiredCores = new mutable.HashMap[(ApplicationId, ExecutorId), Cores]()
+          // obtain desired cores from all registered executors
+          activeExecutors.foreach { case (id, controllerExecutor) =>
+            desiredCores += ((id, controllerExecutor.computeDesiredCore()))
+          }
+
+          // correct desired cores
+          val totalRequestedCores = desiredCores.values.sum
+          if (totalRequestedCores > maximumCores) {
+            correctedCores = new mutable.HashMap[(ApplicationId, ExecutorId), Cores]()
+            desiredCores.foreach { case (id, cores) =>
+              correctedCores += ((id, (maximumCores / totalRequestedCores) * cores))
+            }
+          } else {
+            correctedCores = desiredCores
+          }
+
+          // apply desired cores
+          activeExecutors.foreach { case (id, controllerExecutor) =>
+            controllerExecutor.applyNextCore(correctedCores(id))
+          }
+        }
       }
     }
 
-    // obtain corrected cores
-    correctedCores((applicationId, executorId))
+    timer.scheduleAtFixedRate(function2TimerTask(timerTask), Ts, Ts)
   }
 
-  def increaseActiveExecutors(): Unit = {
-    desiredCores.synchronized {
-      activeExecutors += 1
-      logInfo("ACTIVE EXECUTORS INCREASED: "+activeExecutors)
-      if (desiredCores.keySet.size == activeExecutors) {
-        computeCorrectedCores()
-      }
+  def stop(): Unit = {
+    timer.cancel()
+  }
+
+  def registerExecutor(applicationId: ApplicationId, executorId: ExecutorId, controllerExecutor: ControllerExecutor) = {
+    activeExecutors.synchronized {
+      logInfo("Registering new executor "+applicationId+"/"+executorId)
+      activeExecutors += (((applicationId, executorId), controllerExecutor))
     }
   }
 
-  def decreaseActiveExecutors(): Unit = {
-    desiredCores.synchronized {
-      activeExecutors -= 1
-      logInfo("ACTIVE EXECUTORS DECREASED: "+activeExecutors)
-      if (desiredCores.keySet.size == activeExecutors) {
-        computeCorrectedCores()
-      }
+  def unregisterExecutor(applicationId: ApplicationId, executorId: ExecutorId) = {
+    activeExecutors.synchronized {
+      logInfo("Unregistering executor "+applicationId+"/"+executorId)
+      activeExecutors -= ((applicationId, executorId))
     }
-  }
-
-  private def computeCorrectedCores(): Unit = {
-    val totalCoresRequested = desiredCores.values.sum
-
-    // scale requested cores if needed
-    if (totalCoresRequested > maximumCores) {
-      logInfo("REQUESTED CORES "+totalCoresRequested+" > MAX CORES "+maximumCores)
-      correctedCores = new mutable.HashMap[(ApplicationId,ExecutorId), Cores]()
-      val tempCorrectedCores = desiredCores.mapValues(requestedCores => (maximumCores / totalCoresRequested) * requestedCores)
-      tempCorrectedCores.foreach(cc => correctedCores+=cc)
-    } else {
-      correctedCores = desiredCores
-    }
-    logInfo("REQUESTED CORES: " + desiredCores.values.toList
-      + " TOTAL: " + totalCoresRequested
-      + " CORRECTED: " + correctedCores.values.toList)
-
-    desiredCores.notifyAll()
-    desiredCores = new mutable.HashMap[(ApplicationId,ExecutorId), Cores]()
   }
 }
