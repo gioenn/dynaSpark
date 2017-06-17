@@ -103,7 +103,9 @@ class ControllerProxy
           || (TaskState.KILLED == state)) {
           taskFailed += 1
           driver.get.send(Bind(appId, execId.toString, executorStageId))
-          pollon.registerExecutor(appId, executorId, controllerExecutor)
+          if (controllerExecutor != null) {
+            pollon.registerExecutor(appId, executorId, controllerExecutor)
+          }
         }
         driver.get.send(StatusUpdate(executorId, taskId, state, data))
 
@@ -137,7 +139,9 @@ class ControllerProxy
         logInfo("Received Binding EID " + executorId + " SID " + stageId.toString + " appId " + applicationId)
         driver.get.send(Bind(applicationId, executorId, stageId))
         executorStageId = stageId
-        pollon.registerExecutor(appId, executorId, controllerExecutor)
+        if(controllerExecutor!=null){
+          pollon.registerExecutor(appId, executorId, controllerExecutor)
+        }
         taskCompleted = 0
         taskLaunched = 0
 

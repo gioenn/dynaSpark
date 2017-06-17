@@ -61,15 +61,15 @@ class ControllerPollon(val maximumCores: Int, val Ts: Long) extends Logging {
 
   def registerExecutor(applicationId: ApplicationId, executorId: ExecutorId, controllerExecutor: ControllerExecutor) = {
     activeExecutors.synchronized {
-      logInfo("Registering new executor "+applicationId+"/"+executorId)
       activeExecutors += (((applicationId, executorId), controllerExecutor))
+      logInfo("Registering new executor "+applicationId+"/"+executorId+", total executors "+activeExecutors.size)
     }
   }
 
   def unregisterExecutor(applicationId: ApplicationId, executorId: ExecutorId) = {
     activeExecutors.synchronized {
-      logInfo("Unregistering executor "+applicationId+"/"+executorId)
       activeExecutors -= ((applicationId, executorId))
+      logInfo("Unregistering executor "+applicationId+"/"+executorId+", total executors "+activeExecutors.size)
     }
   }
 }

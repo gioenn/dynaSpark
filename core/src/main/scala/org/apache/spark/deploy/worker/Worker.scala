@@ -607,6 +607,7 @@ private[deploy] class Worker(
       controllerExecutor.worker = this
       execIdToProxy(executorId).totalTask = tasks
       execIdToProxy(executorId).controllerExecutor = controllerExecutor
+      pollon.registerExecutor(appId, executorId, controllerExecutor)
 
     case BindWithTasks(applicationId, executorId, stageId, tasks) =>
       execIdToProxy(executorId).proxyEndpoint.send(Bind(applicationId, executorId, stageId))
