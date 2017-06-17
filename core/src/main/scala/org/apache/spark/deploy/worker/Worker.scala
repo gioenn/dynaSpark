@@ -132,6 +132,8 @@ private[deploy] class Worker(
   val executorIdToController = new HashMap[String, ControllerExecutor]
   val execIdToStageId = new HashMap[String, Int]
   val CPU_PERIOD = conf.getLong("spark.control.cpuperiod", 100000)
+  val Ts: Long = conf.get("spark.control.tsample").toLong
+
 
   val retainedExecutors = conf.getInt("spark.worker.ui.retainedExecutors",
     WorkerWebUI.DEFAULT_RETAINED_EXECUTORS)
@@ -176,7 +178,7 @@ private[deploy] class Worker(
   def coresFree(applicationId: ApplicationId): Int = cores - applicationIdToCoresUsed(applicationId)
   def memoryFree(applicationId: ApplicationId): Int = memory - applicationIdToMemoryUsed(applicationId)
 
-  val pollon: ControllerPollon = new ControllerPollon(0, cores)
+  val pollon: ControllerPollon = new ControllerPollon(cores, Ts)
 
   private def createWorkDir() {
     workDir = Option(workDirPath).map(new File(_)).getOrElse(new File(sparkHome, "work"))
