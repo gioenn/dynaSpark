@@ -550,6 +550,7 @@ private[deploy] class Worker(
         executors.get(fullId) match {
           case Some(executor) =>
             logInfo("Asked to kill executor " + fullId)
+            pollon.unregisterExecutor(appId, execId.toString)
             executor.kill()
             val exitCode = Seq("docker", "stop", appId + "." + execId).!
             execIdToProxy(execId.toString).stop()
