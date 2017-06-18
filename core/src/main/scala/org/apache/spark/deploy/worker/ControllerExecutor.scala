@@ -75,9 +75,9 @@ class ControllerExecutor
     // store old value
     csiOld = cs - csp
     // scale executor
-    if (nextCore != oldCore) {
-      oldCore = nextCore
-      worker.onScaleExecutor(applicationId, executorId, nextCore)
+    if (cs != oldCore) {
+      oldCore = cs
+      worker.onScaleExecutor(applicationId, executorId, cs)
     }
   }
 }
