@@ -48,7 +48,7 @@ class ControllerPollon(val maximumCores: Int, val Ts: Long) extends Logging {
 
           // apply desired cores
           activeExecutors.foreach { case (id, controllerExecutor) =>
-            controllerExecutor.applyNextCore(correctedCores(id))
+            controllerExecutor.applyNextCore(correctedCores(id), desiredCores(id))
           }
         }
       }

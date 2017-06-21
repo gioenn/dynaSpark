@@ -65,11 +65,11 @@ class ControllerExecutor
     nextCore
   }
 
-  def applyNextCore(nextCore: Double) = {
+  def applyNextCore(nextCore: Double, requestedCore: Double) = {
     // log updates
     logInfo("SP Updated: " + SP.toString+ " ApplicationId: "+applicationId)
     logInfo("Real: " + (completedTasks / tasks).toString+ " ApplicationId: "+applicationId)
-    logInfo("CoreToAllocate: " + nextCore.toString + " ApplicationId: "+applicationId)
+    logInfo("CoreToAllocate: " + nextCore.toString + " RequestedCore: " + requestedCore.toString +" ApplicationId: "+applicationId)
     // match core quantum
     cs = math.ceil(nextCore / CQ) * CQ
     // store old value
