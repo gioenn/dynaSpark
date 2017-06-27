@@ -40,7 +40,6 @@ class ControllerExecutor
   var csiOld: Double = core.toDouble
   var SP: Double = 0.0
   var completedTasks: Double = 0.0
-  var cs: Double = 0.0
   var csp: Double = 0
 
   val timer = new Timer()
@@ -49,7 +48,7 @@ class ControllerExecutor
   def nextAllocation(): Double = {
     csp = K * (SP - (completedTasks / tasks))
     val csi = csiOld + K * (Ts.toDouble / Ti) * (SP - (completedTasks / tasks))
-    cs = math.max(coreMin.toDouble, csp + csi)
+    val cs = math.max(coreMin.toDouble, csp + csi)
     cs
   }
 
@@ -67,11 +66,12 @@ class ControllerExecutor
 
   def applyNextCore(nextCore: Double, requestedCore: Double) = {
     // log updates
+    logInfo("DEBUG: csiOld="+csiOld+" csp="+csp)
     logInfo("SP Updated: " + SP.toString+ " ApplicationId: "+applicationId)
     logInfo("Real: " + (completedTasks / tasks).toString+ " ApplicationId: "+applicationId)
     logInfo("CoreToAllocate: " + nextCore.toString + " RequestedCore: " + requestedCore.toString +" ApplicationId: "+applicationId)
     // match core quantum
-    cs = math.ceil(nextCore / CQ) * CQ
+    val cs = math.ceil(nextCore / CQ) * CQ
     // store old value
     csiOld = cs - csp
     // scale executor
