@@ -497,7 +497,7 @@ private[deploy] class Worker(
           Worker.changeDriverToProxy(appDesc.command, execIdToProxy(execId.toString).getAddress))
           logInfo(appDescProxed.command.toString)
           val offheapMemory = if (conf.getBoolean("spark.memory.offHeap.enabled", false)){
-            conf.getInt("spark.memory.offHeap.size", 0)/1000000
+            conf.getSizeAsBytes("spark.memory.offHeap.size", 0)/1000000
           }else{
             0
           }
@@ -507,7 +507,7 @@ private[deploy] class Worker(
             appDescProxed.copy(command = Worker.maybeUpdateSSLSettings(appDescProxed.command, conf)),
             cores_,
             memory_,
-            offheapMemory,
+            offheapMemory.toInt,
             CPU_PERIOD,
             cpuquota,
             self,
@@ -569,7 +569,7 @@ private[deploy] class Worker(
     case LaunchDriver(driverId, driverDesc) =>
       logInfo(s"Asked to launch driver $driverId")
       val offheapMemory = if (conf.getBoolean("spark.memory.offHeap.enabled", false)){
-        conf.getInt("spark.memory.offHeap.size", 0)/1000000
+        conf.getSizeAsBytes("spark.memory.offHeap.size", 0)/1000000
       }else{
         0
       }
@@ -577,7 +577,7 @@ private[deploy] class Worker(
         conf,
         driverId,
         workDir,
-        offheapMemory,
+        offheapMemory.toInt,
         cores,
         sparkHome,
         driverDesc.copy(command = Worker.maybeUpdateSSLSettings(driverDesc.command, conf)),
