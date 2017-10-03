@@ -179,7 +179,15 @@ private[deploy] class Worker(
   def coresFree(applicationId: ApplicationId): Int = cores - applicationIdToCoresUsed(applicationId)
   def memoryFree(applicationId: ApplicationId): Int = memory - applicationIdToMemoryUsed(applicationId)
 
-  val pollon: ControllerPollon = new ControllerPollon(cores, Ts)
+  val pollonType = conf.get("spark.control.pollon", "proportional").toLowerCase
+  val pollon: ControllerPollonAbstract = pollonType match {
+    case "edf_pure" => new ControllerPollonPureEDF(cores, Ts)
+    case "edf_proportional" => new ControllerPollonProportionalEDF(cores, Ts)
+    case "speed" => new ControllerPollonSpeed(cores, Ts, conf.getLong("spark.control.avgnominalrate", 1000))
+    case "mixed_speed_edf" => new ControllerPollonMixedSpeedEDF(cores, Ts, conf.getLong("spark.control.avgnominalrate", 1000))
+    // default is proportional
+    case _ => new ControllerPollonProportional(cores, Ts)
+  }
 
   private def createWorkDir() {
     workDir = Option(workDirPath).map(new File(_)).getOrElse(new File(sparkHome, "work"))

@@ -30,7 +30,7 @@ import scala.util.{Failure, Success}
   * Created by Matteo on 21/07/2016.
   */
 class ControllerProxy
-(rpcEnvWorker: RpcEnv, val driverUrl: String, val execId: Int, val appId: String, val pollon: ControllerPollon) {
+(rpcEnvWorker: RpcEnv, val driverUrl: String, val execId: Int, val appId: String, val pollon: ControllerPollonAbstract) {
 
   var proxyEndpoint: RpcEndpointRef = _
   val ENDPOINT_NAME: String =
