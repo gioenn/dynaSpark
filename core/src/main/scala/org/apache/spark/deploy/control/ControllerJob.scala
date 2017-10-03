@@ -66,12 +66,12 @@ class ControllerJob(conf: SparkConf, appDeadlineJobMillisecond: Long) extends Lo
 
   def initControllerExecutor(workerUrl: String, applicationId: String, executorId: String,
                              stageId: Long, coreMin: Double, coreMax: Double,
-                             deadline: Long, core: Double, tasksForExecutor: Int): Unit =
+                             deadline: Long, core: Double, tasksForExecutor: Int, deadlineAppTimestamp: Long, nominalRateApp: Double): Unit =
     synchronized {
       if (tasksForExecutor > 0) {
         val workerEndpoint = rpcEnv.setupEndpointRefByURI(workerUrl)
         workerEndpoint.send(InitControllerExecutor( applicationId,
-          executorId, stageId, coreMin, coreMax, tasksForExecutor, deadline, core))
+          executorId, stageId, coreMin, coreMax, tasksForExecutor, deadline, core, deadlineAppTimestamp, nominalRateApp))
         logInfo("SEND INIT TO EXECUTOR CONTROLLER EID %s, SID %s, TASK %s, DL %s, C %s, APP %s".format
         (executorId, stageId, tasksForExecutor, deadline, core, applicationId))
       }

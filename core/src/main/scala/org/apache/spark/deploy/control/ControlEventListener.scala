@@ -540,6 +540,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
     val index = executorNeededIndexAvaiable.last
     executorNeededIndexAvaiable = executorNeededIndexAvaiable.dropRight(1)
     val lastStage = stageId == lastStageId
+    val nominalRateApp = conf.getDouble("spark.control.nominalrateapp", conf.getDouble("spark.control.avgnominalrateapp", 1000))
     if (stageId != firstStageId && !stageIdsToComputeNominalRecord.contains(stageId)) {
 
       val taskForExecutorId = heuristic.computeTaskForExecutors(stageIdToCore(stageId), stageIdToInfo(stageId).numTasks, lastStage)(index)
@@ -555,7 +556,9 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
         coreMax,
         stageIdToDeadline(stageId),
         coreToStart,
-        taskForExecutorId)
+        taskForExecutorId,
+        deadlineApp,
+        nominalRateApp)
     } else {
       val taskForExecutorId = heuristic.computeTaskForExecutors(stageIdToCore(stageId),
         stageIdToInfo(stageId).numTasks, lastStage)(index)

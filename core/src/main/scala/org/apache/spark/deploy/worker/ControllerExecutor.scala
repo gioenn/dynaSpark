@@ -27,7 +27,7 @@ import org.apache.spark.internal.Logging
   */
 class ControllerExecutor
 (conf: SparkConf, applicationId: String, executorId: String, deadline: Long,
- coreMin: Double, coreMax: Double, _tasks: Int, core: Double) extends Logging {
+ coreMin: Double, coreMax: Double, _tasks: Int, core: Double, val deadlineAppTimestamp: Long, val nominalRateApp: Double) extends Logging {
 
   val K: Double = conf.get("spark.control.k").toDouble
   val Ts: Long = conf.get("spark.control.tsample").toLong
@@ -42,7 +42,6 @@ class ControllerExecutor
   var completedTasks: Double = 0.0
   var csp: Double = 0
 
-  val timer = new Timer()
   var oldCore = core
 
   def nextAllocation(): Double = {
@@ -66,10 +65,9 @@ class ControllerExecutor
 
   def applyNextCore(nextCore: Double, requestedCore: Double) = {
     // log updates
-    logInfo("DEBUG: csiOld="+csiOld+" csp="+csp)
-    logInfo("SP Updated: " + SP.toString+ " ApplicationId: "+applicationId)
-    logInfo("Real: " + (completedTasks / tasks).toString+ " ApplicationId: "+applicationId)
-    logInfo("CoreToAllocate: " + nextCore.toString + " RequestedCore: " + requestedCore.toString +" ApplicationId: "+applicationId)
+    logInfo("SP Updated: " + SP.toString + " ApplicationId: " + applicationId)
+    logInfo("Real: " + (completedTasks / tasks).toString + " ApplicationId: " + applicationId)
+    logInfo("CoreToAllocate: " + nextCore.toString + " RequestedCore: " + requestedCore.toString + " ApplicationId: " + applicationId)
     // match core quantum
     val cs = math.ceil(nextCore / CQ) * CQ
     // store old value
