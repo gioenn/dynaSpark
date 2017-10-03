@@ -216,6 +216,7 @@ class DAGScheduler(
     if (!heuristic.checkDeadline(appJson)) {
       stop()
     }
+    heuristic.loadConfigValues(appJson)
   }
 
   /**

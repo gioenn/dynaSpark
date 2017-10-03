@@ -3,14 +3,15 @@ package org.apache.spark.deploy.control
 import org.apache.spark.SparkConf
 import org.apache.spark.internal.Logging
 import org.apache.spark.scheduler.StageInfo
-import spray.json.JsValue
+import spray.json._
+import DefaultJsonProtocol._
 
 import scala.collection.mutable.ListBuffer
 
 /**
   * Created by Simone Ripamonti on 13/05/2017.
   */
-abstract class HeuristicBase(conf: SparkConf) extends Logging{
+abstract class HeuristicBase(conf: SparkConf) extends Logging {
 
   var NOMINAL_RATE_RECORD_S: Double = conf.getDouble("spark.control.nominalrate", 1000.0)
   var numMaxExecutor: Int = conf.getInt("spark.control.maxexecutor", 4)
@@ -19,8 +20,8 @@ abstract class HeuristicBase(conf: SparkConf) extends Logging{
 
   def computeCores(coresToBeAllocated: Double,
                    executorIndex: Int,
-                   stageId : Int,
-                   last: Boolean) : (Double, Double, Double)
+                   stageId: Int,
+                   last: Boolean): (Double, Double, Double)
 
   def computeCoreForExecutors(coresToBeAllocated: Double, stageId: Int, last: Boolean): IndexedSeq[Double]
 
@@ -53,17 +54,17 @@ abstract class HeuristicBase(conf: SparkConf) extends Logging{
                            totalStageRemaining: Long,
                            totalDurationRemaining: Long,
                            stageDuration: Long,
-                           stageId : Int,
-                           firstStage : Boolean = false): Long
+                           stageId: Int,
+                           firstStage: Boolean = false): Long
 
   def computeDeadlineStageWeightGiven(startTime: Long,
                                       appDeadlineJobMilliseconds: Long,
                                       weight: Double,
                                       stageId: Int,
                                       firstStage: Boolean = false
-                                      ): Long
+                                     ): Long
 
-  def computeCoreStage(deadlineStage: Long = 0L, numRecord: Long = 0L, stageId : Int, firstStage : Boolean = false, lastStage: Boolean = false): Double
+  def computeCoreStage(deadlineStage: Long = 0L, numRecord: Long = 0L, stageId: Int, firstStage: Boolean = false, lastStage: Boolean = false): Double
 
   def computeNominalRecord(stage: StageInfo, duration: Long, recordsRead: Double): Unit = {
     // val duration = (stage.completionTime.get - stage.submissionTime.get) / 1000.0
@@ -73,5 +74,29 @@ abstract class HeuristicBase(conf: SparkConf) extends Logging{
     conf.set("spark.control.nominalrate", NOMINAL_RATE_RECORD_S.toString)
   }
 
-  def checkDeadline(appJson: JsValue) : Boolean
+  def checkDeadline(appJson: JsValue): Boolean
+
+  /**
+    * Calculates the average nominal rate of the application, using stage weights
+    *
+    * @param appJson
+    */
+  def loadConfigValues(appJson: JsValue): Unit = {
+    var weightSum: Double = 0
+    var weightedNominalRateSum: Double = 0
+
+    appJson.asJsObject.fields.keys.toList.foreach(id => {
+      val stageJson = appJson.asJsObject.fields(id).asJsObject
+      if (!stageJson.fields("skipped").convertTo[Boolean]) {
+        val nominalRate = stageJson.fields("nominalrate").convertTo[Double]
+        val weight = stageJson.fields("weight").convertTo[Double]
+        weightSum += weight
+        weightedNominalRateSum += nominalRate * weight
+      }
+    })
+
+    val weightedNominalRate = weightedNominalRateSum / weightSum
+    conf.set("spark.control.nominalrateapp", weightedNominalRate.toString)
+  }
+
 }
