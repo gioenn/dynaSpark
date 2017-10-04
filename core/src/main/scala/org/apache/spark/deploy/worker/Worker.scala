@@ -479,6 +479,13 @@ private[deploy] class Worker(
         try {
           logInfo("Asked to launch executor %s/%d for %s".format(appId, execId, appDesc.name))
 
+          // todo: resize other executors
+          val offHeapMemory: Long = (memoryFree - memory_) / (executors.size - finishedExecutors.size + 1)
+          logInfo("Resizing memory before launching new executor, there will be " + (executors.size - finishedExecutors.size + 1) + " executors and " + (memoryFree - memory_) + " bytes of free memory")
+          execIdToProxy.foreach { case (id, proxy) =>
+            proxy.proxyEndpoint.send(ResizeOffHeapMemory(offHeapMemory))
+          }
+
           // Create the executor's working directory
           val executorDir = new File(workDir, appId + "/" + execId)
           if (!executorDir.mkdirs()) {
@@ -572,6 +579,14 @@ private[deploy] class Worker(
             val exitCode = Seq("docker", "stop", appId + "." + execId).!
             execIdToProxy(execId.toString).stop()
             execIdToProxy.remove(execId.toString)
+
+            // todo: resize other executors
+            val offHeapMemory: Long = (memoryFree) / (executors.size - finishedExecutors.size)
+            logInfo("Resizing memory after executor has been removed, there are " + (executors.size - finishedExecutors.size) + " executors and " + memoryFree + " bytes of free memory")
+            execIdToProxy.foreach { case (id, proxy) =>
+              proxy.proxyEndpoint.send(ResizeOffHeapMemory(offHeapMemory))
+            }
+
           case None =>
             logInfo("Asked to kill unknown executor " + fullId)
         }

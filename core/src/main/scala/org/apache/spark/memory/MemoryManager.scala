@@ -230,4 +230,8 @@ private[spark] abstract class MemoryManager(
       case MemoryMode.OFF_HEAP => MemoryAllocator.UNSAFE
     }
   }
+
+  def resizeOffHeapMemory(newSize: Long): Unit = {
+    return
+  }
 }

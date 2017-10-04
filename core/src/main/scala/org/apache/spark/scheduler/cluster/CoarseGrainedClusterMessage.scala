@@ -63,6 +63,8 @@ private[spark] object CoarseGrainedClusterMessages {
   // Driver to executors
   case class LaunchTask(taskId: Long, data: SerializableBuffer) extends CoarseGrainedClusterMessage
 
+  case class ResizeOffHeapMemory(newSize: Long) extends CoarseGrainedClusterMessage
+
   case class KillTask(taskId: Long, executor: String, interruptThread: Boolean)
     extends CoarseGrainedClusterMessage
 

@@ -156,6 +156,11 @@ class ControllerProxy
           logInfo("CORES: %f, RUNNING: %d, DELTA: %d".format(
             cores, taskLaunched - taskCompleted, deltaFreeCore))
         }
+
+      case ResizeOffHeapMemory(newSize) =>
+        executorIdToAddress.foreach{case (id, address) =>
+          executorRefMap(address.host).send(ResizeOffHeapMemory(newSize))
+        }
     }
 
     override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {

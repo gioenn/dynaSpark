@@ -123,6 +123,10 @@ private[spark] class CoarseGrainedExecutorBackend(
           executor.stop()
         }
       }.start()
+
+    case ResizeOffHeapMemory(newSize) =>
+      logInfo("Asked to resize offheap memory to "+newSize+" bytes")
+      env.memoryManager.resizeOffHeapMemory(newSize)
   }
 
   override def onDisconnected(remoteAddress: RpcAddress): Unit = {

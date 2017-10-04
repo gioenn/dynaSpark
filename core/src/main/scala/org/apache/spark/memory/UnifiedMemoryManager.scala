@@ -58,7 +58,7 @@ private[spark] class UnifiedMemoryManager private[memory] (
   private def assertInvariants(): Unit = {
     assert(onHeapExecutionMemoryPool.poolSize + onHeapStorageMemoryPool.poolSize == maxHeapMemory)
     assert(
-      offHeapExecutionMemoryPool.poolSize + offHeapStorageMemoryPool.poolSize == maxOffHeapMemory)
+      offHeapExecutionMemoryPool.poolSize + offHeapStorageMemoryPool.poolSize == currentMaxOffHeapMemory)
   }
 
   assertInvariants()
@@ -92,7 +92,7 @@ private[spark] class UnifiedMemoryManager private[memory] (
         offHeapExecutionMemoryPool,
         offHeapStorageMemoryPool,
         offHeapStorageMemory,
-        maxOffHeapMemory)
+        currentMaxOffHeapMemory)
     }
 
     /**
@@ -156,7 +156,7 @@ private[spark] class UnifiedMemoryManager private[memory] (
       case MemoryMode.OFF_HEAP => (
         offHeapExecutionMemoryPool,
         offHeapStorageMemoryPool,
-        maxOffHeapMemory)
+        currentMaxOffHeapMemory)
     }
     if (numBytes > maxMemory) {
       // Fail fast if the block simply won't fit
@@ -180,6 +180,47 @@ private[spark] class UnifiedMemoryManager private[memory] (
       memoryMode: MemoryMode): Boolean = synchronized {
     acquireStorageMemory(blockId, numBytes, memoryMode)
   }
+
+
+  private var currentMaxOffHeapMemory = maxOffHeapMemory
+
+  /**
+    * Resizes the offheap pools so that the total memory is updated to the given value
+    * @param newSize total memory of offheap pools
+    */
+  override def resizeOffHeapMemory(newSize: Long): Unit = {
+    if (maxOffHeapMemory == 0) {
+      // nothing to do if we are not using off heap memory :)
+      return
+    }
+    val delta = currentMaxOffHeapMemory - newSize
+    if (delta > 0) {
+      // try to prevent disk swapping by resizing pools
+      acquireStorageMemoryBeforeResizing(delta)
+      // do the swapping if necessary
+      offHeapStorageMemoryPool.freeSpaceToShrinkPool(delta)
+      // decrement pool size
+      offHeapStorageMemoryPool.decrementPoolSize(delta)
+      currentMaxOffHeapMemory = newSize
+    } else if (delta < 0) {
+      // increment pool size
+      offHeapStorageMemoryPool.incrementPoolSize(math.abs(delta))
+      currentMaxOffHeapMemory = newSize
+    }
+  }
+
+  /**
+    * Borrows memory from the execution pool for the storage pool
+    * @param numBytes memory to borrow
+    */
+  private def acquireStorageMemoryBeforeResizing(numBytes: Long) = synchronized {
+    if (numBytes > offHeapStorageMemoryPool.memoryFree) {
+      val memoryBorrowedFromExecution = Math.min(offHeapExecutionMemoryPool.memoryFree, numBytes)
+      offHeapExecutionMemoryPool.decrementPoolSize(memoryBorrowedFromExecution)
+      offHeapStorageMemoryPool.incrementPoolSize(memoryBorrowedFromExecution)
+    }
+  }
+
 }
 
 object UnifiedMemoryManager {
