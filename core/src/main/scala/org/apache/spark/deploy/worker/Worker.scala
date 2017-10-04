@@ -479,9 +479,9 @@ private[deploy] class Worker(
         try {
           logInfo("Asked to launch executor %s/%d for %s".format(appId, execId, appDesc.name))
 
-          // todo: resize other executors
-          val offHeapMemory: Long = (memoryFree - memory_) / (executors.size - finishedExecutors.size + 1)
-          logInfo("Resizing memory before launching new executor, there will be " + (executors.size - finishedExecutors.size + 1) + " executors and " + (memoryFree - memory_) + " bytes of free memory")
+          // todo: resize other executor
+          val offHeapMemory: Long = (memoryFree - memory_) / (execIdToProxy.size + 1)
+          logInfo("Resizing memory: now ("+(execIdToProxy.size)+", "+memoryFree+"), next ("+(execIdToProxy.size + 1)+", "+(memoryFree - memory_)+")")
           execIdToProxy.foreach { case (id, proxy) =>
             proxy.proxyEndpoint.send(ResizeOffHeapMemory(offHeapMemory))
           }
@@ -581,10 +581,12 @@ private[deploy] class Worker(
             execIdToProxy.remove(execId.toString)
 
             // todo: resize other executors
-            val offHeapMemory: Long = (memoryFree) / (executors.size - finishedExecutors.size)
-            logInfo("Resizing memory after executor has been removed, there are " + (executors.size - finishedExecutors.size) + " executors and " + memoryFree + " bytes of free memory")
-            execIdToProxy.foreach { case (id, proxy) =>
-              proxy.proxyEndpoint.send(ResizeOffHeapMemory(offHeapMemory))
+            if (execIdToProxy.size > 0) {
+              val offHeapMemory: Long = memoryFree.toLong / execIdToProxy.size
+              logInfo("Resizing memory: now ("+(execIdToProxy.size)+", "+memoryFree+")")
+              execIdToProxy.foreach { case (id, proxy) =>
+                proxy.proxyEndpoint.send(ResizeOffHeapMemory(offHeapMemory))
+              }
             }
 
           case None =>
