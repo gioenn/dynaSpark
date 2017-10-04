@@ -61,6 +61,8 @@ private[spark] class UnifiedMemoryManager private[memory] (
       offHeapExecutionMemoryPool.poolSize + offHeapStorageMemoryPool.poolSize == currentMaxOffHeapMemory)
   }
 
+  private var currentMaxOffHeapMemory = maxOffHeapMemory
+
   assertInvariants()
 
   override def maxOnHeapStorageMemory: Long = synchronized {
@@ -180,9 +182,6 @@ private[spark] class UnifiedMemoryManager private[memory] (
       memoryMode: MemoryMode): Boolean = synchronized {
     acquireStorageMemory(blockId, numBytes, memoryMode)
   }
-
-
-  private var currentMaxOffHeapMemory = maxOffHeapMemory
 
   /**
     * Resizes the offheap pools so that the total memory is updated to the given value
