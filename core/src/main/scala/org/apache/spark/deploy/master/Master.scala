@@ -653,7 +653,7 @@ private[deploy] class Master(
       val coresPerExecutor: Option[Int] = app.desc.coresPerExecutor
       // Filter out workers that don't have enough resources to launch an executor
       val usableWorkers = workers.toArray.filter(_.state == WorkerState.ALIVE)
-        .filter(worker => worker.memoryFree(app.id) >= app.desc.memoryPerExecutorMB &&
+        .filter(worker => worker.memoryFree >= app.desc.memoryPerExecutorMB &&
           worker.coresFree(app.id) >= coresPerExecutor.getOrElse(1))
         .sortBy(_.coresFree).reverse
       val assignedCores = scheduleExecutorsOnWorkers(app, usableWorkers, spreadOutApps)
