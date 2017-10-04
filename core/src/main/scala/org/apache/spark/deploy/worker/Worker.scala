@@ -480,10 +480,11 @@ private[deploy] class Worker(
           logInfo("Asked to launch executor %s/%d for %s".format(appId, execId, appDesc.name))
 
           // todo: resize other executor
+          // note: calculated in mega bytes
           val offHeapMemory: Long = (memoryFree - memory_) / (execIdToProxy.size + 1)
           logInfo("Resizing memory: now ("+(execIdToProxy.size)+", "+memoryFree+"), next ("+(execIdToProxy.size + 1)+", "+(memoryFree - memory_)+")")
           execIdToProxy.foreach { case (id, proxy) =>
-            proxy.proxyEndpoint.send(ResizeOffHeapMemory(offHeapMemory))
+            proxy.proxyEndpoint.send(ResizeOffHeapMemory(offHeapMemory*1000000))
           }
 
           // Create the executor's working directory
@@ -527,7 +528,7 @@ private[deploy] class Worker(
             appDescProxed.copy(command = Worker.maybeUpdateSSLSettings(appDescProxed.command, conf)),
             cores_,
             memory_,
-            offheapMemory.toInt,
+            offHeapMemoryForDocker.toInt,
             CPU_PERIOD,
             cpuquota,
             self,
@@ -584,10 +585,10 @@ private[deploy] class Worker(
 
             // todo: resize other executors
             if (execIdToProxy.size > 0) {
-              val offHeapMemory: Long = memoryFree.toLong / execIdToProxy.size
-              logInfo("Resizing memory: now ("+(execIdToProxy.size)+", "+memoryFree+")")
+              val offHeapMemory: Long = (memoryFree.toLong + executor.memory) / execIdToProxy.size
+              logInfo("Resizing memory: now ("+(execIdToProxy.size)+", "+(memoryFree.toLong + executor.memory)+")")
               execIdToProxy.foreach { case (id, proxy) =>
-                proxy.proxyEndpoint.send(ResizeOffHeapMemory(offHeapMemory))
+                proxy.proxyEndpoint.send(ResizeOffHeapMemory(offHeapMemory*1000000))
               }
             }
 

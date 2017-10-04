@@ -188,6 +188,7 @@ private[spark] class UnifiedMemoryManager private[memory] (
     * @param newSize total memory of offheap pools
     */
   override def resizeOffHeapMemory(newSize: Long): Unit = {
+    logInfo("Resizing offheap memory to "+newSize+" from "+currentMaxOffHeapMemory)
     if (maxOffHeapMemory == 0) {
       // nothing to do if we are not using off heap memory :)
       return
