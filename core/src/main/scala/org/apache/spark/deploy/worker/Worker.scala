@@ -516,8 +516,8 @@ private[deploy] class Worker(
             Worker.changeDriverToProxy(appDesc.command, execIdToProxy(execId.toString).getAddress))
           logInfo(appDescProxed.command.toString)
           // update value with the one calculated earlier
+          conf.set("spark.memory.offHeap.size", (offHeapMemory*1000000).toString)
           val offHeapMemoryForDocker = if (conf.getBoolean("spark.memory.offHeap.enabled", false)) {
-            conf.set("spark.memory.offHeap.size", (offHeapMemory*1000000).toString)
             offHeapMemory
           } else {
             0
