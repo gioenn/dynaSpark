@@ -83,6 +83,7 @@ private[deploy] class DriverRunner(
         try {
           val driverDir = createWorkingDirectory()
           val localJarFilename = downloadUserJar(driverDir)
+          val dockerImage: String = conf.get("spark.docker.image")
 
           def substituteVariables(argument: String): String = argument match {
             case "{{WORKER_URL}}" => workerUrl
@@ -92,7 +93,7 @@ private[deploy] class DriverRunner(
 
           // TODO: If we add ability to submit multiple jars they should also be added here
           val builder = CommandUtils.buildProcessBuilder(driverDesc.command, securityManager,
-            driverDesc.mem, offheapMemory, 100000, 50000, sparkHome.getAbsolutePath, substituteVariables)
+            driverDesc.mem, offheapMemory, 100000, 50000, sparkHome.getAbsolutePath, substituteVariables, dockerImage = dockerImage)
           launchDriver(builder, driverDir, driverDesc.supervise)
         }
         catch {

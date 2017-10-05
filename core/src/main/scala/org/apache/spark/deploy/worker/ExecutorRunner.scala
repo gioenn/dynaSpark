@@ -144,9 +144,11 @@ private[deploy] class ExecutorRunner(
    */
   private def fetchAndRunExecutor() {
     try {
+      val dockerImage: String = conf.get("spark.docker.image")
+
       // Launch the process
       val builder = CommandUtils.buildProcessBuilder(appDesc.command, new SecurityManager(conf),
-        memory, memoryOffheap, cpuperiod, cpuquota, sparkHome.getAbsolutePath, substituteVariables)
+        memory, memoryOffheap, cpuperiod, cpuquota, sparkHome.getAbsolutePath, substituteVariables, dockerImage = dockerImage)
       val command = builder.command()
       val formattedCommand = command.asScala.mkString("\"", "\" \"", "\"")
       logInfo(s"Launch command: $formattedCommand")

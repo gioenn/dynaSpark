@@ -48,10 +48,12 @@ object CommandUtils extends Logging {
                            sparkHome: String,
                            substituteArguments: String => String,
                            classPaths: Seq[String] = Seq[String](),
-                           env: Map[String, String] = sys.env): ProcessBuilder = {
+                           env: Map[String, String] = sys.env,
+                           dockerImage: String = "elfolink/spark:2.0"
+                         ): ProcessBuilder = {
     val localCommand = buildLocalCommand(
       command, securityMgr, substituteArguments, classPaths, env)
-    val commandSeq = buildCommandSeq(localCommand, memory, offheapMemory, cpuperiod, cpuquota, sparkHome)
+    val commandSeq = buildCommandSeq(localCommand, memory, offheapMemory, cpuperiod, cpuquota, sparkHome, dockerImage)
     val builder = new ProcessBuilder(commandSeq: _*)
     val environment = builder.environment()
     for ((key, value) <- localCommand.environment) {
@@ -60,7 +62,7 @@ object CommandUtils extends Logging {
     builder
   }
 
-  private def buildCommandSeq(command: Command, memory: Int, offheapMemory: Int, cpuperiod: Long, cpuquota: Long, sparkHome: String): Seq[String] = {
+  private def buildCommandSeq(command: Command, memory: Int, offheapMemory: Int, cpuperiod: Long, cpuquota: Long, sparkHome: String, dockerImage: String): Seq[String] = {
     // SPARK-698: do not call the run.cmd script, as process.destroy()
     // fails to kill a process tree on Windows
     val cmd = new WorkerCommandBuilder(sparkHome, memory, command).buildCommand()
@@ -69,7 +71,7 @@ object CommandUtils extends Logging {
     val docker_cmd = Seq("docker", "run", "-P", "--net=host", "-v", "/tmp:/tmp", "-v", "/usr/local/spark/conf:/usr/local/spark/conf")
     val docker_resource = Seq("-m", s"${memory + offheapMemory + 10240 }m", s"--cpu-period=${cpuperiod}", s"--cpu-quota=${cpuquota}")
     val docker_name = Seq("--name=" + app_id + "." + executor_id)
-    val docker_image_name = Seq("elfolink/spark:2.0")
+    val docker_image_name = Seq(dockerImage)
     docker_cmd ++ docker_resource ++ docker_name ++ docker_image_name ++ cmd.asScala ++ Seq(command.mainClass) ++ command.arguments
   }
 
