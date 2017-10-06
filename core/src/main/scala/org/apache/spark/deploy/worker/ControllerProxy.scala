@@ -47,6 +47,8 @@ class ControllerProxy
 
   var executorStageId: Int = -1
 
+  var offheapBytes: Long = 0
+
   def start() {
     proxyEndpoint = rpcEnv.setupEndpoint(ENDPOINT_NAME, createProxyEndpoint(driverUrl))
   }
@@ -193,7 +195,14 @@ class ControllerProxy
 
       case RetrieveSparkProps =>
         val sparkProperties = driver.get.askWithRetry[Seq[(String, String)]](RetrieveSparkProps)
-        context.reply(sparkProperties)
+        val sparkPropertiesUpdated = sparkProperties.map{case (prop, value) =>
+          if (prop == "spark.memory.offHeap.size"){
+            (prop, offheapBytes.toString)
+          } else {
+            (prop, value)
+          }
+      }
+        context.reply(sparkPropertiesUpdated)
     }
   }
 

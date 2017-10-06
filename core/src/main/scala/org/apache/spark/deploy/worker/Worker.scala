@@ -508,6 +508,7 @@ private[deploy] class Worker(
           val driverUrl = appDesc.command.arguments(1)
           logInfo("CREATING PROXY FOR DRIVER: " + driverUrl)
           val controllerProxy = new ControllerProxy(rpcEnv, driverUrl, execId, appId, pollon)
+          controllerProxy.offheapBytes = offHeapMemory*1000000
           controllerProxy.start()
           execIdToProxy(execId.toString) = controllerProxy
           logInfo("PROXY ADDRESS:" + controllerProxy.getAddress)
@@ -547,7 +548,7 @@ private[deploy] class Worker(
           applicationIdToCoresUsed(appId) = applicationIdToCoresUsed(appId) + cores_
           memoryUsed += memory_
           applicationIdToMemoryUsed(appId) = applicationIdToMemoryUsed(appId) + memory_
-          controllerProxy.proxyEndpoint.send(ResizeOffHeapMemory(offHeapMemory*1000000))
+//          controllerProxy.proxyEndpoint.send(ResizeOffHeapMemory(offHeapMemory*1000000))
           sendToMaster(ExecutorStateChanged(appId, execId, manager.state, None, None))
           // scalastyle:on line.size.limit
         } catch {
