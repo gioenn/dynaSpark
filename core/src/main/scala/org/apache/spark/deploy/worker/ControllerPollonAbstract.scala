@@ -9,14 +9,15 @@ import scala.collection.mutable
 /**
   * Created by Simone Ripamonti on 07/06/2017.
   */
-abstract class ControllerPollonAbstract(val maximumCores: Int, val Ts: Long) extends Logging {
+abstract class ControllerPollonAbstract(val maximumCores: Int, val Ts: Long, val alpha: Double) extends Logging {
   type ApplicationId = String
   type ExecutorId = String
   type Cores = Double
   logInfo("Max cores allocable: " + maximumCores + ", TSample: " + Ts)
   private val timer = new Timer()
-  private var desiredCores = new mutable.HashMap[(ApplicationId, ExecutorId), Cores]()
-  private var correctedCores = new mutable.HashMap[(ApplicationId, ExecutorId), Cores]()
+  private var csForRate = new mutable.HashMap[(ApplicationId, ExecutorId), Cores]()
+  private var csAllCores = new mutable.HashMap[(ApplicationId, ExecutorId), Cores]()
+  private var cs = new mutable.HashMap[(ApplicationId, ExecutorId), Cores]()
   protected var activeExecutors = new mutable.HashMap[(ApplicationId, ExecutorId), ControllerExecutor]()
 
   def function2TimerTask(f: () => Unit): TimerTask = new TimerTask {
@@ -27,25 +28,39 @@ abstract class ControllerPollonAbstract(val maximumCores: Int, val Ts: Long) ext
     def timerTask() = {
       activeExecutors.synchronized {
         if (activeExecutors.size > 0) {
-          desiredCores = new mutable.HashMap[(ApplicationId, ExecutorId), Cores]()
+          csForRate = new mutable.HashMap[(ApplicationId, ExecutorId), Cores]()
+          cs = new mutable.HashMap[(ApplicationId, ExecutorId), Cores]()
           // obtain desired cores from all registered executors
           activeExecutors.foreach { case (id, controllerExecutor) =>
-            desiredCores += ((id, controllerExecutor.computeDesiredCore()))
+            csForRate += ((id, controllerExecutor.computeDesiredCore()))
           }
 
-          // correct desired cores
-          val totalRequestedCores = desiredCores.values.sum
-          if (totalRequestedCores > maximumCores) {
-            correctedCores = correctCores(desiredCores)
+          val sumCoresForRate = csForRate.values.sum
+
+          if (sumCoresForRate == 0){
+            csAllCores = csForRate.map{case (id,_) => (id, 0d)}
           } else {
-            correctedCores = desiredCores
+            var correctedCores = correctCores(csForRate)
+            val correctedCoresSum = correctedCores.values.sum
+            if((0.99 * maximumCores) > correctedCoresSum){
+              correctedCores = correctedCores.map{case (id,core) => (id, (core/correctedCoresSum)*maximumCores)}
+            }
+            csAllCores = correctedCores
           }
 
-          logInfo("corrected cores: " + correctedCores)
+          if (sumCoresForRate <= maximumCores){
+            // no contention
+            cs = csForRate.map{case (id, thisCsForRate) => (id, alpha*csAllCores.get(id).get + (1-alpha)*thisCsForRate)}
+          } else {
+            // contention
+            cs = csAllCores
+          }
+
+          logInfo("corrected cores: " + cs)
 
           // apply desired cores
           activeExecutors.foreach { case (id, controllerExecutor) =>
-            controllerExecutor.applyNextCore(correctedCores(id), desiredCores(id))
+            controllerExecutor.applyNextCore(cs(id), csForRate(id))
           }
         }
       }

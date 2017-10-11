@@ -7,7 +7,7 @@ import scala.collection.mutable
   * priority in allocating its cores
   * Created by Simone Ripamonti on 02/10/2017.
   */
-class ControllerPollonPureEDF(override val maximumCores: Int, Ts: Long) extends ControllerPollonAbstract(maximumCores, Ts) {
+class ControllerPollonPureEDF(override val maximumCores: Int, Ts: Long, alpha: Double) extends ControllerPollonAbstract(maximumCores, Ts, alpha) {
   override def correctCores(desiredCores: mutable.HashMap[(ApplicationId, ExecutorId), Cores]): mutable.HashMap[(ApplicationId, ExecutorId), Cores] = {
     var correctedCores = new mutable.HashMap[(ApplicationId, ExecutorId), Cores]()
     val currentTimestamp = System.currentTimeMillis()

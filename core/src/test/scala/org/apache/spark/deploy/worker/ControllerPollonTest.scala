@@ -17,7 +17,7 @@ class ControllerPollonTest extends SparkFunSuite with Matchers {
   conf.set("spark.control.corequantum", "0.05")
 
   test("test ControllerPollonProportional"){
-    val pollon: ControllerPollonAbstract = new ControllerPollonProportional(16, 1000)
+    val pollon: ControllerPollonAbstract = new ControllerPollonProportional(16, 1000,1)
     val ce1: ControllerExecutor = new ControllerExecutor(conf, "1", "1", 3000, 0, 16, 1000, 5, 250000, 1000)
     val ce2: ControllerExecutor = new ControllerExecutor(conf, "2", "2", 4000, 0, 16, 1000, 15, 500000, 2000)
     val nc1 = ce1.nextAllocation()
@@ -32,7 +32,7 @@ class ControllerPollonTest extends SparkFunSuite with Matchers {
   }
 
   test("test ControllerPollonPureEDF"){
-    val pollon: ControllerPollonAbstract = new ControllerPollonPureEDF(16, 1000)
+    val pollon: ControllerPollonAbstract = new ControllerPollonPureEDF(16, 1000, 1)
     val ce1: ControllerExecutor = new ControllerExecutor(conf, "1", "1", 3000, 0, 16, 1000, 10, 250000, 1000)
     val ce2: ControllerExecutor = new ControllerExecutor(conf, "2", "2", 4000, 0, 16, 1000, 20, 500000, 2000)
     val nc1 = ce1.nextAllocation()
@@ -48,7 +48,7 @@ class ControllerPollonTest extends SparkFunSuite with Matchers {
 
   test("test ControllerPollonProportionalEDF"){
     val time = System.currentTimeMillis()
-    val pollon: ControllerPollonAbstract = new ControllerPollonProportionalEDF(16, 1000)
+    val pollon: ControllerPollonAbstract = new ControllerPollonProportionalEDF(16, 1000, 1)
     val ce1: ControllerExecutor = new ControllerExecutor(conf, "1", "1", 3000, 0, 16, 1000, 16, time+250000, 1000)
     val ce2: ControllerExecutor = new ControllerExecutor(conf, "2", "2", 4000, 0, 16, 1000, 16, time-250000, 2000)
     val nc1 = ce1.nextAllocation()
@@ -62,7 +62,7 @@ class ControllerPollonTest extends SparkFunSuite with Matchers {
   }
 
   test("test ControllerPollonSpeed"){
-    val pollon: ControllerPollonAbstract = new ControllerPollonSpeed(16, 1000, 1000)
+    val pollon: ControllerPollonAbstract = new ControllerPollonSpeed(16, 1000, 1000, 1)
     val ce1: ControllerExecutor = new ControllerExecutor(conf, "1", "1", 3000, 0, 16, 1000, 5, 250000, 1000)
     val ce2: ControllerExecutor = new ControllerExecutor(conf, "2", "2", 4000, 0, 16, 1000, 15, 500000, 3000)
     val nc1 = ce1.nextAllocation()
@@ -77,7 +77,7 @@ class ControllerPollonTest extends SparkFunSuite with Matchers {
   }
 
   test("test ControllerPollonMixedSpeedEDF speed"){
-    val pollon: ControllerPollonAbstract = new ControllerPollonMixedSpeedEDF(16, 1000, 1000)
+    val pollon: ControllerPollonAbstract = new ControllerPollonMixedSpeedEDF(16, 1000, 1000, 1)
     val time = System.currentTimeMillis()
     val ce1: ControllerExecutor = new ControllerExecutor(conf, "1", "1", 3000, 0, 16, 1000, 5, time+250000, 1000)
     val ce2: ControllerExecutor = new ControllerExecutor(conf, "2", "2", 4000, 0, 16, 1000, 15, time+250000, 3000)
@@ -94,7 +94,7 @@ class ControllerPollonTest extends SparkFunSuite with Matchers {
   }
 
   test("test ControllerPollonMixedSpeedEDF edf"){
-    val pollon: ControllerPollonAbstract = new ControllerPollonMixedSpeedEDF(16, 1000, 1000)
+    val pollon: ControllerPollonAbstract = new ControllerPollonMixedSpeedEDF(16, 1000, 1000, 1)
     val time = System.currentTimeMillis()
     val ce1: ControllerExecutor = new ControllerExecutor(conf, "1", "1", 3000, 0, 16, 1000, 16, time+250000, 1000)
     val ce2: ControllerExecutor = new ControllerExecutor(conf, "2", "2", 4000, 0, 16, 1000, 16, time-250000, 1000)
@@ -110,7 +110,7 @@ class ControllerPollonTest extends SparkFunSuite with Matchers {
   }
 
   test("test ControllerPollonMixedSpeedEDF"){
-    val pollon: ControllerPollonAbstract = new ControllerPollonMixedSpeedEDF(16, 1000, 1000)
+    val pollon: ControllerPollonAbstract = new ControllerPollonMixedSpeedEDF(16, 1000, 1000, 1)
     val time = System.currentTimeMillis()
     val ce1: ControllerExecutor = new ControllerExecutor(conf, "1", "1", 3000, 0, 16, 1000, 15, time+250000, 1500)
     val ce2: ControllerExecutor = new ControllerExecutor(conf, "2", "2", 4000, 0, 16, 1000, 15, time+260000, 1000)

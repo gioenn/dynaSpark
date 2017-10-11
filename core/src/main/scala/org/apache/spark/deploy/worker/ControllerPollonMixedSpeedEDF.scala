@@ -7,7 +7,7 @@ import scala.collection.mutable
   * to normalized time distance to the deadline
   * Created by Simone Ripamonti on 02/10/2017.
   */
-class ControllerPollonMixedSpeedEDF(override val maximumCores: Int, Ts: Long, val avgNominalRate: Long) extends ControllerPollonAbstract(maximumCores, Ts) {
+class ControllerPollonMixedSpeedEDF(override val maximumCores: Int, Ts: Long, alpha: Double, val avgNominalRate: Long) extends ControllerPollonAbstract(maximumCores, Ts, alpha) {
   override def correctCores(desiredCores: mutable.HashMap[(ApplicationId, ExecutorId), Cores]): mutable.HashMap[(ApplicationId, ExecutorId), Cores] = {
 
     var correctedCores = new mutable.HashMap[(ApplicationId, ExecutorId), Cores]()
