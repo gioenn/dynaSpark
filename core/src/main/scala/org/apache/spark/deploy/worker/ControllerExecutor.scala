@@ -47,7 +47,7 @@ class ControllerExecutor
   def nextAllocation(): Double = {
     csp = K * (SP - (completedTasks / tasks))
     val csi = csiOld + K * (Ts.toDouble / Ti) * (SP - (completedTasks / tasks))
-    val cs = math.min(math.min(math.max(coreMin.toDouble, csp + csi), coreMax), (tasks-completedTasks))
+    val cs = math.min(math.max(coreMin.toDouble, csp + csi), (tasks-completedTasks))
     cs
   }
 
