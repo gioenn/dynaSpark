@@ -242,7 +242,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
         deadlineApp,
         totalStageRemaining,
         totaldurationremaining,
-        stageIdToDeadline(stageId),
+        stageIdToDuration(stageId),
         stageId)
       stageIdToDeadline(stageId) = newDeadline
       val numRecord = stageIdToNumRecords.getOrElse(stageId, 0)
