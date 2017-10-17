@@ -66,8 +66,13 @@ class ControllerPollonProportionalEDF(override val maximumCores: Int, Ts: Long, 
     if (trasledSum == 0){
       trasledSum = 1
     }
-    val deadlineWeight = trasled.map{ case(id, trttc) =>
+
+    var deadlineWeight = trasled.map{ case(id, trttc) =>
       (id, 1 - (trttc/trasledSum))
+    }
+    // prevent single app to get weight zero
+    if(deadlineWeight.size == 1){
+      deadlineWeight = deadlineWeight.map{ case(id, _) => (id, 1d)}
     }
 
     logInfo("Weights: "+deadlineWeight)
