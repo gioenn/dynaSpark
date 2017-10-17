@@ -62,7 +62,10 @@ class ControllerPollonProportionalEDF(override val maximumCores: Int, Ts: Long, 
     val trasled: mutable.HashMap[(ApplicationId, ExecutorId), Double] = remainingTimeToComplete.map { case (id, ttc) =>
       (id, ttc - minTimeToComplete)
     }
-    val trasledSum = trasled.values.sum
+    var trasledSum = trasled.values.sum
+    if (trasledSum == 0){
+      trasledSum = 1
+    }
     val deadlineWeight = trasled.map{ case(id, trttc) =>
       (id, 1 - (trttc/trasledSum))
     }
