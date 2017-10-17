@@ -41,6 +41,7 @@ class ControllerPollonProportionalEDF(override val maximumCores: Int, Ts: Long, 
     val remainingTimeToComplete: mutable.HashMap[(ApplicationId, ExecutorId), Double] = activeExecutors.map { case (id, controllerExecutor) =>
       (id, ((controllerExecutor.deadlineAppTimestamp - currentTimestamp) / 1000).toDouble)
     }
+    logInfo("Remaining times to complete: "+ remainingTimeToComplete)
     val minTimeToComplete: Double = remainingTimeToComplete.values.toList.min
 
     //    val normalizedTimeToComplete: mutable.HashMap[(ApplicationId, ExecutorId), Double] = remainingTimeToComplete.map { case (id, ttc) =>
@@ -58,13 +59,15 @@ class ControllerPollonProportionalEDF(override val maximumCores: Int, Ts: Long, 
     //        }
     //      }
     //    }
-    val trasledReverseTTC: mutable.HashMap[(ApplicationId, ExecutorId), Double] = remainingTimeToComplete.map { case (id, ttc) =>
-      (id, (1/ttc)-(1/minTimeToComplete)+0.001)
+    val trasled: mutable.HashMap[(ApplicationId, ExecutorId), Double] = remainingTimeToComplete.map { case (id, ttc) =>
+      (id, ttc - minTimeToComplete)
     }
-    val TRTTCSum = trasledReverseTTC.values.sum
-    val deadlineWeight = trasledReverseTTC.map{ case(id, trttc) =>
-      (id, 1 - (trttc/TRTTCSum))
+    val trasledSum = trasled.values.sum
+    val deadlineWeight = trasled.map{ case(id, trttc) =>
+      (id, 1 - (trttc/trasledSum))
     }
+
+    logInfo("Weights: "+deadlineWeight)
     var desiredCoresLocal = desiredCores.clone()
     var remainingCores = maximumCores.toDouble
 
