@@ -42,7 +42,7 @@ class ControllerPollonProportionalEDF(override val maximumCores: Int, Ts: Long, 
       (id, ((controllerExecutor.deadlineAppTimestamp - currentTimestamp) / 1000).toDouble)
     }
     logInfo("Remaining times to complete: "+ remainingTimeToComplete)
-    val minTimeToComplete: Double = remainingTimeToComplete.values.toList.min
+    val minTimeToComplete: Double = remainingTimeToComplete.values.min
 
     //    val normalizedTimeToComplete: mutable.HashMap[(ApplicationId, ExecutorId), Double] = remainingTimeToComplete.map { case (id, ttc) =>
     //      if(minTimeToComplete <= 0){
@@ -60,7 +60,7 @@ class ControllerPollonProportionalEDF(override val maximumCores: Int, Ts: Long, 
     //      }
     //    }
     val trasled: mutable.HashMap[(ApplicationId, ExecutorId), Double] = remainingTimeToComplete.map { case (id, ttc) =>
-      (id, ttc - minTimeToComplete)
+      (id, ttc - minTimeToComplete + 1)
     }
     var trasledSum = trasled.values.sum
     if (trasledSum == 0){
