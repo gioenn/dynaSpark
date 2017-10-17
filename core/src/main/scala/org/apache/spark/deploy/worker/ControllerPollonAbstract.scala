@@ -32,7 +32,12 @@ abstract class ControllerPollonAbstract(val maximumCores: Int, val Ts: Long, val
           cs = new mutable.HashMap[(ApplicationId, ExecutorId), Cores]()
           // obtain desired cores from all registered executors
           activeExecutors.foreach { case (id, controllerExecutor) =>
-            csForRate += ((id, controllerExecutor.computeDesiredCore()))
+            var desiredCore = controllerExecutor.computeDesiredCore()
+            // fix NaN
+            if (desiredCore.isNaN){
+              desiredCore = maximumCores
+            }
+            csForRate += ((id, desiredCore))
           }
 
           val sumCoresForRate = csForRate.values.sum
