@@ -184,6 +184,7 @@ private[deploy] class Worker(
   val pollon: ControllerPollonAbstract = pollonType match {
     case "edf_pure" => new ControllerPollonPureEDF(cores, Ts, pollonAlpha)
     case "edf_proportional" => new ControllerPollonProportionalEDF(cores, Ts, pollonAlpha)
+    case "edf_all" => new ControllerPollonEDFAll(cores, Ts, pollonAlpha)
     case "speed" => new ControllerPollonSpeed(cores, Ts, pollonAlpha, conf.getLong("spark.control.avgnominalrate", 1000000))
     case "mixed_speed_edf" => new ControllerPollonMixedSpeedEDF(cores, Ts, pollonAlpha, conf.getLong("spark.control.avgnominalrate", 1000000))
     // default is proportional
