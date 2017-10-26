@@ -34,28 +34,30 @@ abstract class ControllerPollonAbstract(val maximumCores: Int, val Ts: Long, val
           activeExecutors.foreach { case (id, controllerExecutor) =>
             var desiredCore = controllerExecutor.computeDesiredCore()
             // fix NaN
-            if (desiredCore.isNaN){
-              desiredCore = maximumCores
+            if (desiredCore.isNaN) {
+              desiredCore = 0
             }
             csForRate += ((id, desiredCore))
           }
 
           val sumCoresForRate = csForRate.values.sum
 
-          if (sumCoresForRate == 0){
-            csAllCores = csForRate.map{case (id,_) => (id, 0d)}
+          if (sumCoresForRate == 0) {
+            csAllCores = csForRate.map { case (id, _) => (id, 0d) }
           } else {
-            var correctedCores = correctCores(csForRate)
+            var correctedCores = correctCores(csForRate).map { case (id, c) => if (c.isNaN) ((id, 0d))
+            else ((id, c))
+            }
             val correctedCoresSum = correctedCores.values.sum
-            if((0.99 * maximumCores) > correctedCoresSum){
-              correctedCores = correctedCores.map{case (id,core) => (id, (core/correctedCoresSum)*maximumCores)}
+            if ((0.99 * maximumCores) > correctedCoresSum && correctedCoresSum > 0) {
+              correctedCores = correctedCores.map { case (id, core) => (id, (core / correctedCoresSum) * maximumCores) }
             }
             csAllCores = correctedCores
           }
 
-          if (sumCoresForRate <= maximumCores){
+          if (sumCoresForRate <= maximumCores) {
             // no contention
-            cs = csForRate.map{case (id, thisCsForRate) => (id, alpha*csAllCores.get(id).get + (1-alpha)*thisCsForRate)}
+            cs = csForRate.map { case (id, thisCsForRate) => (id, alpha * csAllCores.get(id).get + (1 - alpha) * thisCsForRate) }
           } else {
             // contention
             cs = csAllCores
