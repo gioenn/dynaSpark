@@ -55,7 +55,7 @@ class ControllerExecutor
       var nextCore: Double = coreMin
       if (SP >= 1.0) {
         SP = 1.0
-        nextCore = coreMax
+        nextCore = math.min(coreMax, (tasks-completedTasks))
       } else {
         nextCore = nextAllocation()
       }
