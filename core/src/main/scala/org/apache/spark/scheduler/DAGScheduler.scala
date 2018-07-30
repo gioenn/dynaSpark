@@ -15,6 +15,11 @@
  * limitations under the License.
  */
 
+/* 
+ * Code tagged "DB - DagSymb enhancements" inserted by Davide Bertolotti 
+ * to support Dag Scheduling based on Symbolic Execution Heuristic
+ */
+
 package org.apache.spark.scheduler
 
 import java.io.{FileInputStream, NotSerializableException}
@@ -653,6 +658,9 @@ class DAGScheduler(
       callSite: CallSite,
       resultHandler: (Int, U) => Unit,
       properties: Properties): Unit = {
+    val actionCallSite = callSite.shortForm.replace(" at ", "_") // DB - DagSymb enhancements
+    symbolName = actionCallSite + "_" + symbolMap.getOrElseUpdate(actionCallSite, 0).toString() // DB - DagSymb enhancements
+    symbolMap(actionCallSite) += 1 // DB - DagSymb enhancements
     val start = System.nanoTime
     val waiter = submitJob(rdd, func, partitions, callSite, resultHandler, properties)
     // Note: Do not call Await.ready(future) because that calls `scala.concurrent.blocking`,
@@ -1675,7 +1683,17 @@ class DAGScheduler(
     eventProcessLoop.stop()
     taskScheduler.stop()
   }
-
+  
+  def resultComputed(result: Any ): Unit = { // DB - DagSymb enhancements
+    val resultType = ClassTag(result.getClass)
+    println("Symbol: " + symbolName + ", Type: " + resultType.toString()) 
+    resultType.toString() match {
+      case "java.lang.Long" => {/* function body of return type java.lang.Long */}
+      case "java.lang.List" => {/* function body of return type java.lang.List */}
+      case _ => { /* Raise exception for return type not implemented */ }
+    }    
+  }
+  
   eventProcessLoop.start()
 }
 
