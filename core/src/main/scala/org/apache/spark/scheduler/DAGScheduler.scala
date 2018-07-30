@@ -193,7 +193,7 @@ class DAGScheduler(
   var iter: Int = 0   // DB - DagSymb enhancements
   if (Files.exists(Paths.get(argsFile))) {
     for (line <- Source.fromFile(argsFile).getLines) {   // DB - DagSymb enhancements
-        println(line)
+        println(iter + " - " + line)
         symbolsMap.getOrElseUpdate("arg" + iter, line)
         iter += iter
     }
