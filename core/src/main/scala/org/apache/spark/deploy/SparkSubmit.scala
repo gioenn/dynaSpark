@@ -23,6 +23,7 @@
 package org.apache.spark.deploy
 
 import java.io.{File, PrintStream}
+import scala.io.Source
 import java.lang.reflect.{InvocationTargetException, Modifier, UndeclaredThrowableException}
 import java.net.URL
 import java.security.PrivilegedExceptionAction
