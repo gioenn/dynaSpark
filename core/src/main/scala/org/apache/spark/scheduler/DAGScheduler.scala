@@ -197,6 +197,7 @@ class DAGScheduler(
         symbolsMap.update("arg" + iter, line)
         iter += iter
     }
+  println(symbolsMap)
   }
   
   /**
