@@ -212,7 +212,10 @@ class DAGScheduler(
 
   private val messageScheduler =
     ThreadUtils.newDaemonSingleThreadScheduledExecutor("dag-scheduler-message")
-
+  
+  var symbolMap = HashMap[String, Int]() // DB - DagSymb enhancements
+  var symbolName: String = ""            // DB - DagSymb enhancements
+  
   private[scheduler] val eventProcessLoop = new DAGSchedulerEventProcessLoop(this)
   taskScheduler.setDAGScheduler(this)
 
