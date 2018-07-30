@@ -197,7 +197,7 @@ class DAGScheduler(
         symbolsMap += ("arg" + iter -> line)
         iter += iter
     }
-  println(symbolsMap)
+  for ((k,v) <- symbolsMap) println(k + " -> " + v + "\n")
   }
   
   /**
