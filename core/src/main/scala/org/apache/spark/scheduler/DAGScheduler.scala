@@ -1701,7 +1701,7 @@ class DAGScheduler(
   }
   
   def resultComputed(result: Any ): Unit = { // DB - DagSymb enhancements
-    symbolsMap(symbolName, result)
+    symbolsMap(symbolName) = result
     val resultType = ClassTag(result.getClass)
     println("Symbol: " + symbolName + ", Type: " + resultType.toString()) 
     resultType.toString() match {
