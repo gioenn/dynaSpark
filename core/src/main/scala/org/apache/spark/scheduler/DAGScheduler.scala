@@ -49,7 +49,7 @@ import org.apache.spark.util._
 import spray.json._
 import DefaultJsonProtocol._
 import scala.reflect.{classTag, ClassTag} // DB - DagSymb enhancements
-import java.util.Map; // DB - DagSymb enhancements
+import scala.io.Source // DB - DagSymb enhancements
 
 import scala.io
 import java.nio.file.{Files, Paths}
