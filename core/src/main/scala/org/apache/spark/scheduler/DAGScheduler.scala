@@ -49,6 +49,7 @@ import org.apache.spark.util._
 import spray.json._
 import DefaultJsonProtocol._
 import scala.reflect.{classTag, ClassTag} // DB - DagSymb enhancements
+import java.util.Map; // DB - DagSymb enhancements
 
 import scala.io
 import java.nio.file.{Files, Paths}
@@ -185,6 +186,19 @@ class DAGScheduler(
     else
       new HeuristicControl(sc.conf)
 
+  var symbolMap = HashMap[String, Int]() // DB - DagSymb enhancements
+  var symbolsMap = HashMap[String, Any]() // DB - DagSymb enhancements
+  var symbolName: String = ""            // DB - DagSymb enhancements
+  val argsFile = sys.env.getOrElse("SPARK_HOME", ".") + "/conf/args.txt"  // DB - DagSymb enhancements
+  var iter: Int = 0   // DB - DagSymb enhancements
+  if (Files.exists(Paths.get(argsFile))) {
+    for (line <- Source.fromFile(argsFile).getLines) {   // DB - DagSymb enhancements
+        println(line)
+        symbolsMap.update("arg" + iter, line)
+        iter += iter
+    }
+  }
+  
   /**
    * Contains the locations that each RDD's partitions are cached on.  This map's keys are RDD ids
    * and its values are arrays indexed by partition numbers. Each array value is the set of
@@ -213,9 +227,6 @@ class DAGScheduler(
 
   private val messageScheduler =
     ThreadUtils.newDaemonSingleThreadScheduledExecutor("dag-scheduler-message")
-  
-  var symbolMap = HashMap[String, Int]() // DB - DagSymb enhancements
-  var symbolName: String = ""            // DB - DagSymb enhancements
   
   private[scheduler] val eventProcessLoop = new DAGSchedulerEventProcessLoop(this)
   taskScheduler.setDAGScheduler(this)
@@ -664,6 +675,7 @@ class DAGScheduler(
       properties: Properties): Unit = {
     val actionCallSite = callSite.shortForm.replace(" at ", "_") // DB - DagSymb enhancements
     symbolName = actionCallSite + "_" + symbolMap.getOrElseUpdate(actionCallSite, 0).toString() // DB - DagSymb enhancements
+    symbolsMap.update(symbolName, null)
     symbolMap(actionCallSite) += 1 // DB - DagSymb enhancements
     val start = System.nanoTime
     val waiter = submitJob(rdd, func, partitions, callSite, resultHandler, properties)
@@ -1689,6 +1701,7 @@ class DAGScheduler(
   }
   
   def resultComputed(result: Any ): Unit = { // DB - DagSymb enhancements
+    symbolsMap(symbolName, result)
     val resultType = ClassTag(result.getClass)
     println("Symbol: " + symbolName + ", Type: " + resultType.toString()) 
     resultType.toString() match {

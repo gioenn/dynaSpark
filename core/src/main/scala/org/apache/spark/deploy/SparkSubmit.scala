@@ -171,7 +171,7 @@ object SparkSubmit {
     }
     //println(childArgs);
     bw.close()   // DB - DagSymb enhancements
-    println("Press any key to continue"); readChar() //waits for any key to be pressed
+    //println("Press any key to continue"); readChar() //waits for any key to be pressed
     
     def doRunMain(): Unit = {
       if (args.proxyUser != null) {
