@@ -26,6 +26,8 @@ import java.io.{FileInputStream, NotSerializableException}
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
+import java.net.{URI, URL, URLClassLoader} // DB - DagSymb enhancements
+import java.util.Collections._ // DB - DagSymb enhancements 
 
 import scala.annotation.tailrec
 import scala.collection.{Map, mutable}
@@ -50,7 +52,7 @@ import spray.json._
 import DefaultJsonProtocol._
 import scala.reflect.{classTag, ClassTag} // DB - DagSymb enhancements
 import scala.io.Source // DB - DagSymb enhancements
-
+import scala.collection.JavaConversions._  // DB - DagSymb enhancements
 import scala.io
 import java.nio.file.{Files, Paths}
 
@@ -187,19 +189,35 @@ class DAGScheduler(
       new HeuristicControl(sc.conf)
 
   var symbolMap = HashMap[String, Int]() // DB - DagSymb enhancements
-  var symbolsMap = HashMap[String, Any]() // DB - DagSymb enhancements
+  //var symbolsMap = HashMap[String, Any]() // DB - DagSymb enhancements
+  //var symbolsMap: java.util.Map[String, Any] = java.util.Collections.emptyMap() // DB - DagSymb enhancements
+  var symbolsMap = new java.util.HashMap[String, Any]()// DB - DagSymb enhancements
   var symbolName: String = ""            // DB - DagSymb enhancements
   val argsFile = sys.env.getOrElse("SPARK_HOME", ".") + "/conf/args.txt"  // DB - DagSymb enhancements
   var iter: Int = 0   // DB - DagSymb enhancements
   if (Files.exists(Paths.get(argsFile))) {
-    for (line <- Source.fromFile(argsFile).getLines) {   // DB - DagSymb enhancements
+    for (line <- Source.fromFile(argsFile).getLines) { // DB - DagSymb enhancements
         println(iter + " - " + line)
-        symbolsMap.getOrElseUpdate("arg" + iter, line)
+        //symbolsMap.getOrElseUpdate("arg" + iter, line)
+        symbolsMap.put("arg" + iter, line)
         iter += 1
     }
-  println(symbolsMap)
-  for ((k,v) <- symbolsMap) println(k + " => " + v + "\n")
+  println(symbolsMap) // DB - DagSymb enhancements
+  for ((k,v) <- symbolsMap) println(k + " => " + v + "\n") // DB - DagSymb enhancements
   }
+  
+  /*
+   * DB - DagSymb enhancements
+   * The following variables are needed to load the GuardEvaluator class from the application jar
+   */
+  val jarfile = new File("/home/bertolotti/dagsymb/target/dagsymb-1.0-jar-with-dependencies.jar") // DB - DagSymb enhancements
+  val classLoader = new URLClassLoader(Array(jarfile.toURI.toURL)) // DB - DagSymb enhancements
+  val guardEvalClass = classLoader.loadClass("it.polimi.deepse.dagsymb.examples.GuardEvaluatorPromoCallsFile") // DB - DagSymb enhancements
+  val guardEvalConstructor = guardEvalClass.getConstructor() // DB - DagSymb enhancements
+  val guardEvalObj = guardEvalConstructor.newInstance() // DB - DagSymb enhancements
+  val guardEvalMethod = guardEvalClass.getMethods()(0) // DB - DagSymb enhancements
+  //var validExecFlows:List[Integer] = List() // DB - DagSymb enhancements
+  var validExecFlows = new java.util.ArrayList[Integer] // DB - DagSymb enhancements
   
   /**
    * Contains the locations that each RDD's partitions are cached on.  This map's keys are RDD ids
@@ -677,7 +695,8 @@ class DAGScheduler(
       properties: Properties): Unit = {
     val actionCallSite = callSite.shortForm.replace(" at ", "_") // DB - DagSymb enhancements
     symbolName = actionCallSite + "_" + symbolMap.getOrElseUpdate(actionCallSite, 0).toString() // DB - DagSymb enhancements
-    symbolsMap.update(symbolName, null)
+    //symbolsMap.update(symbolName, null) // DB - DagSymb enhancements
+    symbolsMap.put(symbolName, null) // DB - DagSymb enhancements
     symbolMap(actionCallSite) += 1 // DB - DagSymb enhancements
     val start = System.nanoTime
     val waiter = submitJob(rdd, func, partitions, callSite, resultHandler, properties)
@@ -1705,11 +1724,16 @@ class DAGScheduler(
   def resultComputed(result: Any ): Unit = { // DB - DagSymb enhancements
     symbolsMap(symbolName) = result
     val resultType = ClassTag(result.getClass)
-    println("Symbol: " + symbolName + ", Type: " + resultType.toString()) 
+    println("Symbol: " + symbolName + ", Type: " + resultType.toString())
+    /*
     resultType.toString() match {
       case "java.lang.Long" => {/* function body of return type java.lang.Long */}
       case "java.lang.List" => {/* function body of return type java.lang.List */}
       case _ => { /* Raise exception for return type not implemented */ }
+      * 
+      */
+    validExecFlows = guardEvalMethod.invoke(guardEvalObj, symbolsMap).asInstanceOf[java.util.ArrayList[Integer]]
+    println(validExecFlows)
     }    
   }
   

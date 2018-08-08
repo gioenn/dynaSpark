@@ -408,7 +408,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
         onExecutorAssigned(SparkListenerExecutorAssigned(exec, stage.stageId))
       }
     } else {
-      logError("NOT ENOUGH RESOURSE TO DO START STAGE NEED " +
+      logError("NOT ENOUGH RESOURCES TO DO START STAGE NEED " +
         (executorNeeded - executorAvailable.size).toString + " EXEC")
       logInfo("Waiting for executor available...")
       activePendingStages(stage.stageId) = stage
