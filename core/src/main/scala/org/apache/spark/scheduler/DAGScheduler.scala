@@ -23,6 +23,7 @@
 package org.apache.spark.scheduler
 
 import java.io.{FileInputStream, NotSerializableException}
+import java.io.File // DB - DagSymb enhancements
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
