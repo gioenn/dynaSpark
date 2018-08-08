@@ -1733,8 +1733,7 @@ class DAGScheduler(
       * 
       */
     validExecFlows = guardEvalMethod.invoke(guardEvalObj, symbolsMap).asInstanceOf[java.util.ArrayList[Integer]]
-    println(validExecFlows)
-    }    
+    println(validExecFlows)    
   }
   
   eventProcessLoop.start()
