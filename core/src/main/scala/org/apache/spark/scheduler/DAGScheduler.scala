@@ -1726,6 +1726,7 @@ class DAGScheduler(
     symbolsMap(symbolName) = result
     val resultType = ClassTag(result.getClass)
     println("Symbol: " + symbolName + ", Type: " + resultType.toString())
+    println("SymbolsMap: ", symbolsMap)
     /*
     resultType.toString() match {
       case "java.lang.Long" => {/* function body of return type java.lang.Long */}
