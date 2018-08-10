@@ -266,8 +266,7 @@ class DAGScheduler(
   /**
    * Called by the TaskSetManager to report task's starting.
    */
-  def worstCaseProfile[jsValue](appJJ:spray.json.jsValue , 
-      valExFlows:java.util.ArrayList[Integer] = null) {
+  def worstCaseProfile[jsValue](appJJ, valExFlows:java.util.ArrayList[Integer] = null) {
     var setP = appJJ.asJsObject.fields
     if (valExFlows != null) 
       setP.filter({case (k,v) => valExFlows.exists(x => x == k.toInt)})
