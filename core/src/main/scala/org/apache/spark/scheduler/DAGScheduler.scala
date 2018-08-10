@@ -266,7 +266,7 @@ class DAGScheduler(
   /**
    * Called by the TaskSetManager to report task's starting.
    */
-  def worstCaseProfile[spray.json.jsValue](appJJ:spray.json.jsValue , 
+  def worstCaseProfile[jsValue](appJJ:spray.json.jsValue , 
       valExFlows:java.util.ArrayList[Integer] = null)) {
     var setP = appJJ.asJsObject.fields
     if (valExFlows != null) 
