@@ -271,7 +271,7 @@ class DAGScheduler(
       valExFlows: java.util.ArrayList[Integer]): JsValue = {
     var setP = appJJ.asJsObject.fields
     if (valExFlows != null) 
-      setP.filter({case (k,v) => valExFlows.exists(x => x == k.toInt)})
+      setP = setP.filter({case (k,v) => valExFlows.exists(x => x == k.toInt)})
     var wCaseProfId = setP.keys.toList.zip(setP.toList.map(
                       {case (k, v) => v.asJsObject.fields.count(_ => true)})
                       ).filter({case (id, ns) => ns == setP.toList.map(
