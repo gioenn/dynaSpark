@@ -283,7 +283,7 @@ class DAGScheduler(
                                                      .max})
                                    (0)._1
     println("Worst case json profile number: ", wCaseProfId)
-    setP.asJsObject.fields(wCaseProfId) 
+    setP(wCaseProfId) 
   }
   
   /**
