@@ -265,10 +265,11 @@ class DAGScheduler(
   }
 
   /**
-   * Called by the TaskSetManager to report task's starting.
+   * Called with appJumboJson and validExecFlows list to return worst case json DAG profile.
+   * // DB - DagSymb enhancements
    */
   def worstCaseProfile[jsValue](appJJ:jsValue , 
-      valExFlows:java.util.ArrayList[Integer] = null) {
+      valExFlows:java.util.ArrayList[Integer] = null): jsValue = {
     var setP = appJJ.asJsObject.fields
     if (valExFlows != null) 
       setP.filter({case (k,v) => valExFlows.exists(x => x == k.toInt)})
