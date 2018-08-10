@@ -180,7 +180,7 @@ class DAGScheduler(
     io.Source.fromFile(jsonFile).mkString.parseJson
   } else null
   
-  var appJson:spray.json.jsValue = if (appJumboJson != null )
+  var appJson = if (appJumboJson != null )
     worstCaseProfile(appJumboJson, null)
     else null
 
