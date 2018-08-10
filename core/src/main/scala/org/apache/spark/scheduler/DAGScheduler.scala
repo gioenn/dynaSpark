@@ -50,6 +50,7 @@ import org.apache.spark.storage._
 import org.apache.spark.storage.BlockManagerMessages.BlockManagerHeartbeat
 import org.apache.spark.util._
 import spray.json._
+import spray.json.jsValue
 import DefaultJsonProtocol._
 import scala.reflect.{classTag, ClassTag} // DB - DagSymb enhancements
 import scala.io.Source // DB - DagSymb enhancements
