@@ -50,6 +50,7 @@ import org.apache.spark.storage._
 import org.apache.spark.storage.BlockManagerMessages.BlockManagerHeartbeat
 import org.apache.spark.util._
 import spray.json._
+import spray.json.JsValue
 import DefaultJsonProtocol._
 import scala.reflect.{classTag, ClassTag} // DB - DagSymb enhancements
 import scala.io.Source // DB - DagSymb enhancements
@@ -266,7 +267,7 @@ class DAGScheduler(
   /**
    * Called by the TaskSetManager to report task's starting.
    */
-  def worstCaseProfile[jsValue](appJJ:spray.json.jsValue , 
+  def worstCaseProfile[jsValue](appJJ:jsValue , 
       valExFlows:java.util.ArrayList[Integer] = null) {
     var setP = appJJ.asJsObject.fields
     if (valExFlows != null) 
@@ -283,7 +284,7 @@ class DAGScheduler(
                                                      .max})
                                    (0)._1
     println("Worst case json profile number: ", wCaseProfId)
-    setP(wCaseProfId) 
+    setP(wCaseProfId)
   }
   
   /**
