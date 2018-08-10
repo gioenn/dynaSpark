@@ -50,7 +50,6 @@ import org.apache.spark.storage._
 import org.apache.spark.storage.BlockManagerMessages.BlockManagerHeartbeat
 import org.apache.spark.util._
 import spray.json._
-import spray.json.JsValue
 import DefaultJsonProtocol._
 import scala.reflect.{classTag, ClassTag} // DB - DagSymb enhancements
 import scala.io.Source // DB - DagSymb enhancements
@@ -268,8 +267,8 @@ class DAGScheduler(
    * Called with appJumboJson and validExecFlows list to return worst case json DAG profile.
    * // DB - DagSymb enhancements
    */
-  def worstCaseProfile[jsValue](appJJ:jsValue , 
-      valExFlows:java.util.ArrayList[Integer] = null): jsValue = {
+  def worstCaseProfile(appJJ: jsValue, 
+      valExFlows: java.util.ArrayList[Integer] = null): jsValue = {
     var setP = appJJ.asJsObject.fields
     if (valExFlows != null) 
       setP.filter({case (k,v) => valExFlows.exists(x => x == k.toInt)})
