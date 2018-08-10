@@ -176,9 +176,13 @@ class DAGScheduler(
   val jsonFile = sys.env.getOrElse("SPARK_HOME", ".") + "/conf/" +
     sc.appName.replaceAll("[^a-zA-Z0-9.-]", "_") + ".json"
 
-  val appJson = if (Files.exists(Paths.get(jsonFile))) {
+  val appJumboJson = if (Files.exists(Paths.get(jsonFile))) {
     io.Source.fromFile(jsonFile).mkString.parseJson
   } else null
+  
+  var appJson:spray.json.jsValue = if (appJumboJson != null )
+    worstCaseProfile(appJumboJson, null)
+    else null
 
   val heuristicType = sc.conf.getInt("spark.control.heuristic", 0)
   val heuristic: HeuristicBase =
@@ -259,6 +263,29 @@ class DAGScheduler(
     }
   }
 
+  /**
+   * Called by the TaskSetManager to report task's starting.
+   */
+  def worstCaseProfile[spray.json.jsValue](appJJ:spray.json.jsValue , 
+      valExFlows:java.util.ArrayList[Integer] = null)) {
+    var setP = appJJ.asJsObject.fields
+    if (valExFlows != null) 
+      setP.filter({case (k,v) => valExFlows.exists(x => x == k.toInt)})
+    val wCaseProfId = 
+      setP.keys.toList.zip(setP.toList.map(
+                              {case (k, v) => 
+                                v.asJsObject.fields.count(_ => true)})
+                          ).filter(
+                              {case (id, ns) => 
+                                ns == setP.toList.map(
+                                              {case (k, v) => 
+                                                v.asJsObject.fields.count(_ => true)})
+                                                     .max})
+                                   (0)._1
+    println("Worst case json profile number: ", wCaseProfId)
+    setP.asJsObject.fields(wCaseProfId) 
+  }
+  
   /**
    * Called by the TaskSetManager to report task's starting.
    */
@@ -1735,7 +1762,8 @@ class DAGScheduler(
       * 
       */
     validExecFlows = guardEvalMethod.invoke(guardEvalObj, symbolsMap).asInstanceOf[java.util.ArrayList[Integer]]
-    println(validExecFlows)    
+    println(validExecFlows)
+    appJson = worstCaseProfile(appJumboJson, validExecFlows)
   }
   
   eventProcessLoop.start()
