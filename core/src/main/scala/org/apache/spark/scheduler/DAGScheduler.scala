@@ -280,9 +280,10 @@ class DAGScheduler(
       valExFlows: java.util.ArrayList[Integer] = null, 
       jobId: Int = 0): JsValue = {
     var setP = appJJ.asJsObject.fields
+    println(jobIdToStageIds)/*
     val stageId = if (jobId == 0) "0" else jobIdToStageIds(jobId).min
     println("Next stage id: " + stageId)
-    println("numTotalJobs: " + numTotalJobs)
+    println("numTotalJobs: " + numTotalJobs)*/
     if (valExFlows != null) 
       setP = setP.filter({case (k,v) => valExFlows.exists(x => x == k.toInt)})
     var wCaseProfId = setP.keys.toList.zip(setP.toList.map(
