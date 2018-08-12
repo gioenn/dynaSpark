@@ -258,7 +258,7 @@ class DAGScheduler(
 
   if (appJson != null) {
     logInfo("LOADED JSON FOR APP: " + jsonFile)
-    if (!heuristic.checkDeadline(appJson) && sc.conf.getBoolean("spark.control.checkdeadline", false)) {
+    if (sc.conf.getBoolean("spark.control.checkdeadline", false) && !heuristic.checkDeadline(appJson)) {
       stop()
     }
   }
