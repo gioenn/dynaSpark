@@ -71,7 +71,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
   var execIdToStageId = new HashMap[ExecutorId, Long].withDefaultValue(0)
   var stageIdToExecId = new HashMap[Int, Set[ExecutorId]].withDefaultValue(Set())
   var executorIdToInfo = new HashMap[ExecutorId, ExecutorInfo]
-  var executorNeededIndexAvaiable = List[Int]()
+  var executorNeededIndexAvailable = List[Int]()
   var executorNeededPendingStages = new HashMap[StageId, Int]
   var deadlineApp: Long = 0
 
@@ -259,7 +259,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
         stageId == lastStageId).size
       if (executorAvailable.size >= stageExecNeeded) {
         totalStageRemaining -= 1
-        executorNeededIndexAvaiable = (0 until stageExecNeeded).toList
+        executorNeededIndexAvailable = (0 until stageExecNeeded).toList
         // LAUNCH BIND
         for (exec <- executorAvailable.toList.take(stageExecNeeded)) {
           onExecutorAssigned(SparkListenerExecutorAssigned(exec, stage._2.stageId))
@@ -402,7 +402,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
         jobData.completedStageIndices.remove(stage.stageId)
       }
 
-      executorNeededIndexAvaiable = (0 until executorNeeded).toList
+      executorNeededIndexAvailable = (0 until executorNeeded).toList
       // LAUNCH BIND
       for (exec <- executorAvailable.toList.take(executorNeeded)) {
         onExecutorAssigned(SparkListenerExecutorAssigned(exec, stage.stageId))
@@ -515,7 +515,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
         stageId == lastStageId).size
       if (executorAvailable.size >= stageExecNeeded) {
         totalStageRemaining -= 1
-        executorNeededIndexAvaiable = (0 until stageExecNeeded).toList
+        executorNeededIndexAvailable = (0 until stageExecNeeded).toList
         // LAUNCH BIND
         for (exec <- executorAvailable.toList.take(stageExecNeeded)) {
           onExecutorAssigned(SparkListenerExecutorAssigned(exec, stage._2.stageId))
@@ -537,8 +537,8 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
     val controller = jobIdToController.getOrElse(jobId.head,
       new ControllerJob(conf, deadlineApp))
     jobIdToController(jobId.head) = controller
-    val index = executorNeededIndexAvaiable.last
-    executorNeededIndexAvaiable = executorNeededIndexAvaiable.dropRight(1)
+    val index = executorNeededIndexAvailable.last
+    executorNeededIndexAvailable = executorNeededIndexAvailable.dropRight(1)
     val lastStage = stageId == lastStageId
     if (stageId != firstStageId && !stageIdsToComputeNominalRecord.contains(stageId)) {
 

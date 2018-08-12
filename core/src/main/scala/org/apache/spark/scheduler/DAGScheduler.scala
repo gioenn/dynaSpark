@@ -181,7 +181,7 @@ class DAGScheduler(
   } else null
   
   var appJson = if (appJumboJson != null )
-    worstCaseProfile(appJumboJson, null)
+    worstCaseProfile(appJumboJson)
     else null
 
   val heuristicType = sc.conf.getInt("spark.control.heuristic", 0)
@@ -256,20 +256,32 @@ class DAGScheduler(
   private[scheduler] val eventProcessLoop = new DAGSchedulerEventProcessLoop(this)
   taskScheduler.setDAGScheduler(this)
 
+  if (appJson != null) {
+    logInfo("LOADED JSON FOR APP: " + jsonFile)
+    if (!heuristic.checkDeadline(appJson) && sc.conf.getBoolean("spark.control.checkdeadline", false)) {
+      stop()
+    }
+  }
+  
+  /*
   if (appJson != null && sc.conf.getBoolean("spark.control.checkdeadline", false)) {
     logInfo("LOADED JSON FOR APP: " + jsonFile)
     if (!heuristic.checkDeadline(appJson)) {
       stop()
     }
   }
+  */
 
   /**
    * Called with appJumboJson and validExecFlows list to return worst case json DAG profile.
    * // DB - DagSymb enhancements
    */
   def worstCaseProfile(appJJ: JsValue, 
-      valExFlows: java.util.ArrayList[Integer]): JsValue = {
+      valExFlows: java.util.ArrayList[Integer]: null, 
+      jobId: Int = 0): JsValue = {
     var setP = appJJ.asJsObject.fields
+    val stageId = jobIdToStageIds(jobId).min
+    println("Next stage id: " + stageId)
     if (valExFlows != null) 
       setP = setP.filter({case (k,v) => valExFlows.exists(x => x == k.toInt)})
     var wCaseProfId = setP.keys.toList.zip(setP.toList.map(
@@ -1757,7 +1769,7 @@ class DAGScheduler(
       */
     validExecFlows = guardEvalMethod.invoke(guardEvalObj, symbolsMap).asInstanceOf[java.util.ArrayList[Integer]]
     println(validExecFlows)
-    appJson = worstCaseProfile(appJumboJson, validExecFlows)
+    appJson = worstCaseProfile(appJumboJson, validExecFlows, nextJobId.get())
   }
   
   eventProcessLoop.start()
