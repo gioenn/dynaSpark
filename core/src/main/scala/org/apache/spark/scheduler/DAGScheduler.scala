@@ -277,7 +277,7 @@ class DAGScheduler(
    * // DB - DagSymb enhancements
    */
   def worstCaseProfile(appJJ: JsValue, 
-      valExFlows: java.util.ArrayList[Integer]: null, 
+      valExFlows: java.util.ArrayList[Integer] = null, 
       jobId: Int = 0): JsValue = {
     var setP = appJJ.asJsObject.fields
     val stageId = jobIdToStageIds(jobId).min
