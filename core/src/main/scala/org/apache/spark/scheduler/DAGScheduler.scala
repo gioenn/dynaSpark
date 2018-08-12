@@ -283,7 +283,7 @@ class DAGScheduler(
     val stageId = setP("0").asJsObject.fields("jobs")
                       .asJsObject.fields(jobId.toString())
                       .asJsObject.fields("stages")
-                      .asJsObject.fields.toList.min
+                      .asJsObject.fields.toList.apply(0)
     println("Next stage id: " + stageId)
     println("jobId, numTotalJobs: " + numTotalJobs + ", " + jobId)
     if (valExFlows != null) 
