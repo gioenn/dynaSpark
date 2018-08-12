@@ -280,11 +280,13 @@ class DAGScheduler(
       valExFlows: java.util.ArrayList[Integer] = null, 
       jobId: Int = 0): JsValue = {
     var setP = appJJ.asJsObject.fields
-    val stageId = setP(validExecFlows.get(0).toString()).asJsObject.fields("0")
+    val stageId = if (valExFlows != null) 
+                      setP(valExFlows.get(0).toString()).asJsObject.fields("0")
                       .asJsObject.fields("jobs")
                       .asJsObject.fields(jobId.toString())
                       .asJsObject.fields("stages")
                       .convertTo[List[Int]].apply(0)
+                  else 0
     println("Next stage id: " + stageId)
     println("jobId, numTotalJobs: " + numTotalJobs + ", " + jobId)
     if (valExFlows != null) 
