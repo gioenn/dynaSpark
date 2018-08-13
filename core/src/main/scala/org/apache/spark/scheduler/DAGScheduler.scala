@@ -1774,10 +1774,16 @@ class DAGScheduler(
       case _ => { /* Raise exception for return type not implemented */ }
       * 
       */
-    validExecFlows = guardEvalMethod.invoke(guardEvalObj, symbolsMap).asInstanceOf[java.util.ArrayList[Integer]]
+    validExecFlows = guardEvalMethod.invoke(guardEvalObj, 
+        symbolsMap).asInstanceOf[java.util.ArrayList[Integer]]
     println(validExecFlows)
-    println("jobId, numTotalJobs: " + numTotalJobs + ", " + nextJobId.get())
-    appJson = worstCaseProfile(appJumboJson, validExecFlows, numTotalJobs)
+    
+    val highestJobId = if (valExFlows != null) 
+      appJumboJson.asJsObject.fields.(valExFlows.get(0).toString())
+      .asJsObject.fields("0").asJsObject.fields("jobs")
+      .asJsObject.fields.keys.max.toInt
+    println("numTotalJobs, highestJobId: " + numTotalJobs + ", " + highestJobId)
+    appJson = if (numTotalJobs <= highestJobId) worstCaseProfile(appJumboJson, validExecFlows, nextJobId.get())
   }
   
   eventProcessLoop.start()
