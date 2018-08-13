@@ -1779,7 +1779,7 @@ class DAGScheduler(
     println(validExecFlows)
     
     val highestJobId = if (valExFlows != null) 
-      appJumboJson.asJsObject.fields.(valExFlows.get(0).toString())
+      appJumboJson.asJsObject.fields(valExFlows.get(0).toString())
       .asJsObject.fields("0").asJsObject.fields("jobs")
       .asJsObject.fields.keys.max.toInt
     println("numTotalJobs, highestJobId: " + numTotalJobs + ", " + highestJobId)
