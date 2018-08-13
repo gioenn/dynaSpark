@@ -173,6 +173,17 @@ class DAGScheduler(
 
   val stageIdToWeight = new HashMap[Int, Int]
 
+  val heuristicType = sc.conf.getInt("spark.control.heuristic", 0)
+  val heuristic: HeuristicBase =
+    if (heuristicType == 1 && sc.conf.contains("spark.control.stagecores") && sc.conf.contains("spark.control.stagedeadlines") && sc.conf.contains("spark.control.stage"))
+      new HeuristicFixed(sc.conf)
+    else if (heuristicType == 2)
+      new HeuristicControlUnlimited(sc.conf)
+    else if (heuristicType == 3)
+      new HeuristicSymExControlUnlimited(sc.conf)
+    else
+      new HeuristicControl(sc.conf)
+
   val jsonFile = sys.env.getOrElse("SPARK_HOME", ".") + "/conf/" +
     sc.appName.replaceAll("[^a-zA-Z0-9.-]", "_") + ".json"
 
@@ -181,18 +192,8 @@ class DAGScheduler(
   } else null
   
   var appJson = if (appJumboJson != null )
-    worstCaseProfile(appJumboJson)
+    heuristic.nextProfile(appJumboJson)
     else null
-
-  val heuristicType = sc.conf.getInt("spark.control.heuristic", 0)
-  val heuristic: HeuristicBase =
-    if (heuristicType == 1 && sc.conf.contains("spark.control.stagecores") && sc.conf.contains("spark.control.stagedeadlines") && sc.conf.contains("spark.control.stage"))
-      new HeuristicFixed(sc.conf)
-    else if (heuristicType == 2)
-      new HeuristicControlUnlimited(sc.conf)
-    else
-      new HeuristicControl(sc.conf)
-
   var symbolMap = HashMap[String, Int]() // DB - DagSymb enhancements
   //var symbolsMap = HashMap[String, Any]() // DB - DagSymb enhancements
   //var symbolsMap: java.util.Map[String, Any] = java.util.Collections.emptyMap() // DB - DagSymb enhancements
@@ -276,7 +277,9 @@ class DAGScheduler(
    * Called with appJumboJson and validExecFlows list to return worst case json DAG profile.
    * // DB - DagSymb enhancements
    */
-  def worstCaseProfile(appJJ: JsValue, 
+  /*       ///DB - following code moved to newly created class HeuristicSymExControlUnlimited///
+   * 
+  def nextProfile(appJJ: JsValue, 
       valExFlows: java.util.ArrayList[Integer] = null, 
       jobId: Int = 0): JsValue = {
     var setP = appJJ.asJsObject.fields
@@ -298,6 +301,7 @@ class DAGScheduler(
     println("Worst case json profile number: " + wCaseProfId)
     setP(wCaseProfId)
   }
+  */
   
   /**
    * Called by the TaskSetManager to report task's starting.
@@ -1787,7 +1791,7 @@ class DAGScheduler(
     
     println("numTotalJobs, highestJobId: " + numTotalJobs + ", " + highestJobId)
     appJson = if (numTotalJobs <= highestJobId) {
-                worstCaseProfile(appJumboJson, validExecFlows, nextJobId.get())}
+                heuristic.nextProfile(appJumboJson, validExecFlows, nextJobId.get())}
               else appJson
   }
   
