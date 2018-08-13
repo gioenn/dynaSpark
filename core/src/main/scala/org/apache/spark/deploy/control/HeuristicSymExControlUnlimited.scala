@@ -16,7 +16,7 @@ class HeuristicSymExControlUnlimited(conf: SparkConf) extends HeuristicControlUn
     * for the 'worst case' execution.
     * DB - DagSymb enhancements
     */
-  private def nextProfile(appJJ: JsValue, 
+  override def nextProfile(appJJ: JsValue, 
       valExFlows: java.util.ArrayList[Integer] = null, 
       jobId: Int = 0): JsValue = {
     var setP = appJJ.asJsObject.fields
