@@ -3,7 +3,8 @@ package org.apache.spark.deploy.control
 import org.apache.spark.SparkConf
 import org.apache.spark.internal.Logging
 import org.apache.spark.scheduler.StageInfo
-import spray.json.JsValue
+import java.util.ArrayList // DB - DagSymb enhancements 
+import spray.json.JsValue // DB - DagSymb enhancements
 
 import scala.collection.mutable.ListBuffer
 
@@ -75,5 +76,5 @@ abstract class HeuristicBase(conf: SparkConf) extends Logging{
 
   def checkDeadline(appJson: JsValue) : Boolean
   
-  def nextProfile(appJJ: JsValue, valExFlows: java.util.ArrayList[Integer] = null, jobId: Int = 0): JsValue
+  def nextProfile(appJJ: JsValue, valExFlows: java.util.ArrayList[Integer] = null, jobId: Int = 0): JsValue // DB - DagSymb enhancements
 }

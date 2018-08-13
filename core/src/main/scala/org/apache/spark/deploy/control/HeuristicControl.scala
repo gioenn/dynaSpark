@@ -2,6 +2,7 @@ package org.apache.spark.deploy.control
 
 import org.apache.spark.SparkConf
 import org.apache.spark.internal.Logging
+import java.util.ArrayList // DB - DagSymb enhancements 
 import spray.json._
 import DefaultJsonProtocol._
 
@@ -256,5 +257,5 @@ class HeuristicControl(conf: SparkConf) extends HeuristicBase(conf) with Logging
     feasibility
   }
 
-
+  override def nextProfile(appJJ: JsValue, valExFlows: java.util.ArrayList[Integer] = null, jobId: Int = 0): JsValue {null: JsValue  }
 }
