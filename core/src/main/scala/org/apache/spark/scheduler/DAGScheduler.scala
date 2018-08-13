@@ -1778,10 +1778,11 @@ class DAGScheduler(
         symbolsMap).asInstanceOf[java.util.ArrayList[Integer]]
     println(validExecFlows)
     
-    val highestJobId: Int = if (validExecFlows != null) 
+    val highestJobId: Int = if (validExecFlows != null) {
       appJumboJson.asJsObject.fields(validExecFlows.get(0).toString())
       .asJsObject.fields("0").asJsObject.fields("jobs")
-      .asJsObject.fields.keys.max.toInt
+      .asJsObject.fields.keys.max.toInt}
+    
     println("numTotalJobs, highestJobId: " + numTotalJobs + ", " + highestJobId)
     appJson = if (numTotalJobs <= highestJobId) worstCaseProfile(appJumboJson, validExecFlows, nextJobId.get())
   }
