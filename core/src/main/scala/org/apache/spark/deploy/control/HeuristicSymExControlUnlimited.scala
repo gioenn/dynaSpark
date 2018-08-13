@@ -5,7 +5,7 @@
 package org.apache.spark.deploy.control
 
 import org.apache.spark.SparkConf
-import spray.json.JsValue
+import spray.json._
 
 class HeuristicSymExControlUnlimited(conf: SparkConf) extends HeuristicControlUnlimited(conf) {
   
