@@ -6,6 +6,7 @@ package org.apache.spark.deploy.control
 
 import org.apache.spark.SparkConf
 import java.util.ArrayList
+import scala.collection.JavaConversions._
 import spray.json._
 import DefaultJsonProtocol._
 
