@@ -5,6 +5,7 @@
 package org.apache.spark.deploy.control
 
 import org.apache.spark.SparkConf
+import java.util.ArrayList
 import spray.json._
 import DefaultJsonProtocol._
 
@@ -14,7 +15,7 @@ class HeuristicSymExControlUnlimited(conf: SparkConf) extends HeuristicControlUn
     * for the 'worst case' execution.
     * DB - DagSymb enhancements
     */
-  def nextProfile(appJJ: JsValue, 
+  override def nextProfile(appJJ: JsValue, 
       valExFlows: java.util.ArrayList[Integer] = null, 
       jobId: Int = 0): JsValue = {
     var setP = appJJ.asJsObject.fields
