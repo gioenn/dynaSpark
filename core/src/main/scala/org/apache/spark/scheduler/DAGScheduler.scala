@@ -1786,7 +1786,9 @@ class DAGScheduler(
       else 0
     
     println("numTotalJobs, highestJobId: " + numTotalJobs + ", " + highestJobId)
-    appJson = if (numTotalJobs <= highestJobId) worstCaseProfile(appJumboJson, validExecFlows, nextJobId.get())
+    appJson = if (numTotalJobs <= highestJobId) {
+                worstCaseProfile(appJumboJson, validExecFlows, nextJobId.get())}
+              else appJson
   }
   
   eventProcessLoop.start()
