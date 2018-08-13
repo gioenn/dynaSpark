@@ -54,5 +54,5 @@ class HeuristicFixed(conf: SparkConf) extends HeuristicBase(conf) with Logging {
 
   override def checkDeadline(appJson: JsValue): Boolean = true
   
-  override def nextProfile(appJJ: JsValue, valExFlows: java.util.ArrayList[Integer] = null, jobId: Int = 0): JsValue {null: JsValue  }
+  override def nextProfile(appJJ: JsValue, valExFlows: java.util.ArrayList[Integer] = null, jobId: Int = 0): JsValue = null
 }

@@ -57,5 +57,5 @@ class HeuristicControlUnlimited(conf: SparkConf) extends HeuristicControl(conf) 
 
   }
 
-  override def nextProfile(appJJ: JsValue, valExFlows: java.util.ArrayList[Integer] = null, jobId: Int = 0): JsValue {null: JsValue  }
+  override def nextProfile(appJJ: JsValue, valExFlows: java.util.ArrayList[Integer] = null, jobId: Int = 0): JsValue = null
 }
