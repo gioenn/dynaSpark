@@ -81,6 +81,8 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
       new HeuristicFixed(conf)
     else if (heuristicType == 2)
       new HeuristicControlUnlimited(conf)
+    else if (heuristicType == 3)
+      new HeuristicSymExControlUnlimited(sc.conf)
     else
       new HeuristicControl(conf)
 
