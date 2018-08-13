@@ -1776,7 +1776,7 @@ class DAGScheduler(
       */
     validExecFlows = guardEvalMethod.invoke(guardEvalObj, symbolsMap).asInstanceOf[java.util.ArrayList[Integer]]
     println(validExecFlows)
-    appJson = worstCaseProfile(appJumboJson, validExecFlows, nextJobId.get())
+    appJson = worstCaseProfile(appJumboJson, validExecFlows, numTotalJobs)//nextJobId.get())
   }
   
   eventProcessLoop.start()
