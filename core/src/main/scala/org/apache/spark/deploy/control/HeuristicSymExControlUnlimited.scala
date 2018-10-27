@@ -12,8 +12,8 @@ import DefaultJsonProtocol._
 
 class HeuristicSymExControlUnlimited(conf: SparkConf) extends HeuristicControlUnlimited(conf) {
   
-   /*Called with appJumboJson and validExecFlows list to return json DAG profile
-    * for the 'worst case' execution.
+   /*Called with appJumboJson,validExecFlows list and jobId to return json of DAG profile
+    * for 'worst case' execution.
     * DB - DagSymb enhancements
     */
   override def nextProfile(appJJ: JsValue, 
@@ -25,8 +25,7 @@ class HeuristicSymExControlUnlimited(conf: SparkConf) extends HeuristicControlUn
                       .asJsObject.fields("jobs")
                       .asJsObject.fields(jobId.toString())
                       .asJsObject.fields("stages")
-                      .convertTo[List[Int]].apply(0)
-                  else 0
+                      .convertTo[List[Int]].sortWith((x, y) => x < y).apply(0)
     println("Next stage id: " + stageId)
     println("jobId: " + jobId)
     if (valExFlows != null) 
@@ -34,7 +33,9 @@ class HeuristicSymExControlUnlimited(conf: SparkConf) extends HeuristicControlUn
     var wCaseProfId = setP.keys.toList.zip(setP.toList.map(
                       {case (k, v) => v.asJsObject.fields.count(_ => true)})
                       ).filter({case (id, ns) => ns == setP.toList.map(
-                          {case (k, v) => v.asJsObject.fields.count(_ => true)}).max})(0)._1
+                          {case (k, v) => v.asJsObject.fields
+                            .filter(x => !x.asJsObject.fields("skipped").convertTo[Boolean])
+                            .count(_ => true)}).max})(0)._1
     println("Worst case json profile number: " + wCaseProfId)
     setP(wCaseProfId)
   }
