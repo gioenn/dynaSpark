@@ -31,10 +31,12 @@ class HeuristicSymExControlUnlimited(conf: SparkConf) extends HeuristicControlUn
     if (valExFlows != null) 
       setP = setP.filter({case (k,v) => valExFlows.exists(x => x == k.toInt)})
     var wCaseProfId = setP.keys.toList.zip(setP.toList.map(
-                      {case (k, v) => v.asJsObject.fields.count(_ => true)}))
-                      .filter({case (id, ns) => ns == setP.toList.map(
+                      {case (k, v) => v.asJsObject.fields
+                        .filter({case (k, v) => !v.asJsObject.fields("skipped").convertTo[Boolean]}) 
+                        .count(_ => true)})
+                      ).filter({case (id, ns) => ns == setP.toList.map(
                           {case (k, v) => v.asJsObject.fields
-                            //.filter(x => !x.asJsObject.fields("skipped").convertTo[Boolean])
+                            .filter({case (k, v) => !v.asJsObject.fields("skipped").convertTo[Boolean]})
                             .count(_ => true)}).max})(0)._1
     println("Worst case json profile number: " + wCaseProfId)
     setP(wCaseProfId)
