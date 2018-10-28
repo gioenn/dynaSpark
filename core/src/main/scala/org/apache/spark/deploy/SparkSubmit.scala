@@ -167,8 +167,8 @@ object SparkSubmit {
     val bw = new BufferedWriter(new FileWriter(argsFile)) // DB - DagSymb enhancements
     bw.write(args.mainClass + "\n")  // DB - DagSymb enhancements
     println("class: " + args.mainClass)  // DB - DagSymb enhancements
-    bw.write(args.jars + "\n")  // DB - DagSymb enhancements
-    println("jar: " + args.jars)  // DB - DagSymb enhancements
+    bw.write(args.primaryResource + "\n")  // DB - DagSymb enhancements
+    println("jar: " + args.primaryResource)  // DB - DagSymb enhancements
     for ( i <- 0 to childArgs.size - 1 ) {   // DB - DagSymb enhancements                                   
       bw.write(childArgs(i)+"\n")
       println("Path condition input arg" + i + ": " + childArgs(i))
