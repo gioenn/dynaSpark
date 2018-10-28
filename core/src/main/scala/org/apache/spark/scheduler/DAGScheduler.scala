@@ -199,7 +199,7 @@ class DAGScheduler(
   //var symbolsMap: java.util.Map[String, Any] = java.util.Collections.emptyMap() // DB - DagSymb enhancements
   var symbolsMap = new java.util.HashMap[String, Any]()// DB - DagSymb enhancements
   var symbolName: String = ""            // DB - DagSymb enhancements
-  var appClass: String = ""            // DB - DagSymb enhancements
+  var guardEvalClassname: String = ""            // DB - DagSymb enhancements
   var appJar: String = ""            // DB - DagSymb enhancements
   val argsFile = sys.env.getOrElse("SPARK_HOME", ".") + "/conf/args.txt"  // DB - DagSymb enhancements
   var iter: Int = -2   // DB - DagSymb enhancements
@@ -207,7 +207,7 @@ class DAGScheduler(
     for (line <- Source.fromFile(argsFile).getLines) { // DB - DagSymb enhancements
         println(iter + " - " + line)
         iter match { 
-          case -2 => appClass = line
+          case -2 => guardEvalClassname = line
           case -1 => appJar = line
           case _  =>  symbolsMap.put("arg" + iter, line)  //symbolsMap.getOrElseUpdate("arg" + iter, line)  
         }
@@ -225,7 +225,7 @@ class DAGScheduler(
   val jarfile = new File(appJar) // DB - DagSymb enhancements
   val classLoader = new URLClassLoader(Array(jarfile.toURI.toURL)) // DB - DagSymb enhancements
   //val guardEvalClass = classLoader.loadClass("it.polimi.deepse.dagsymb.examples.GuardEvaluatorPromoCallsFile") // DB - DagSymb enhancements
-  val guardEvalClass = classLoader.loadClass(appClass) // DB - DagSymb enhancements
+  val guardEvalClass = classLoader.loadClass(guardEvalClassname) // DB - DagSymb enhancements
   val guardEvalConstructor = guardEvalClass.getConstructor() // DB - DagSymb enhancements
   val guardEvalObj = guardEvalConstructor.newInstance() // DB - DagSymb enhancements
   val guardEvalMethod = guardEvalClass.getMethods()(0) // DB - DagSymb enhancements
