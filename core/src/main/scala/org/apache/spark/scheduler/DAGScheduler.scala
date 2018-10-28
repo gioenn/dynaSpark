@@ -224,8 +224,8 @@ class DAGScheduler(
   //val jarfile = new File("/home/bertolotti/dagsymb/target/dagsymb-1.0-jar-with-dependencies.jar") // DB - DagSymb enhancements
   val jarfile = new File(appJar) // DB - DagSymb enhancements
   val classLoader = new URLClassLoader(Array(jarfile.toURI.toURL)) // DB - DagSymb enhancements
-  //val guardEvalClass = classLoader.loadClass("it.polimi.deepse.dagsymb.examples.GuardEvaluatorPromoCallsFile") // DB - DagSymb enhancements
-  val guardEvalClass = classLoader.loadClass(guardEvalClassname) // DB - DagSymb enhancements
+  val guardEvalClass = classLoader.loadClass("it.polimi.deepse.dagsymb.examples.GuardEvaluatorPromoCallsFile") // DB - DagSymb enhancements
+  //val guardEvalClass = classLoader.loadClass(guardEvalClassname) // DB - DagSymb enhancements
   val guardEvalConstructor = guardEvalClass.getConstructor() // DB - DagSymb enhancements
   val guardEvalObj = guardEvalConstructor.newInstance() // DB - DagSymb enhancements
   val guardEvalMethod = guardEvalClass.getMethods()(0) // DB - DagSymb enhancements
