@@ -209,11 +209,11 @@ class DAGScheduler(
         iter match { 
           case -2 => guardEvalClassname = line
           case -1 => appJar = line.split(":")(1)
-          case _  =>  symbolsMap.put("arg" + iter, line)  //symbolsMap.getOrElseUpdate("arg" + iter, line)  
+          case _  => symbolsMap.put("arg" + iter, line)  //symbolsMap.getOrElseUpdate("arg" + iter, line)  
         }
         iter += 1
     }
-  println(symbolsMap) // DB - DagSymb enhancements
+  println("guardEvalClassname" + guardEvalClassname + "\n" + symbolsMap) // DB - DagSymb enhancements
   for ((k,v) <- symbolsMap) println(k + " => " + v + "\n") // DB - DagSymb enhancements
   }
   
