@@ -213,7 +213,7 @@ class DAGScheduler(
         }
         iter += 1
     }
-  println("guardEvalClassname" + guardEvalClassname + "\n" + symbolsMap) // DB - DagSymb enhancements
+  println(symbolsMap) // DB - DagSymb enhancements
   for ((k,v) <- symbolsMap) println(k + " => " + v + "\n") // DB - DagSymb enhancements
   }
   
