@@ -70,11 +70,11 @@ object CommandUtils extends Logging {
     val cmd = new WorkerCommandBuilder(sparkHome, memory, command).buildCommand()
     val app_id = command.arguments(command.arguments.indexOf("--app-id") + 1)
     val executor_id = command.arguments(command.arguments.indexOf("--executor-id") + 1)
-    val docker_cmd = Seq("docker", "run", "-P", "--net=host", "-v", "/tmp:/tmp", "-v", "/usr/local/spark/conf:/usr/local/spark/conf")
-    // DB - DagSymb enhancements - to run on Poli workstations
-    //val docker_cmd = Seq("docker", "run", "-P", "--net=host", "-v", "/tmp:/tmp",
-    //    "-v", "/home/bertolotti/xSpark/conf:/home/bertolotti/xSpark/conf",
-    //    "-v", "/home/bertolotti/xSpark/assembly:/home/bertolotti/xSpark/assembly")
+    //val docker_cmd = Seq("docker", "run", "-P", "--net=host", "-v", "/tmp:/tmp", "-v", "/usr/local/spark/conf:/usr/local/spark/conf")
+    // DB - DagSymb enhancements
+    val docker_cmd = Seq("docker", "run", "-P", "--net=host", "-v", "/tmp:/tmp",
+        "-v", "/usr/local/spark/conf:/usr/local/spark/conf",
+        "-v", "/usr/local/spark/assembly:/usr/local/spark/assembly")
     val docker_resource = Seq("-m", s"${memory + 10240 }m", s"--cpu-period=${cpuperiod}", s"--cpu-quota=${cpuquota}")
     val docker_name = Seq("--name=" + app_id + "." + executor_id)
     val docker_image_name = Seq("elfolink/spark:2.0")
