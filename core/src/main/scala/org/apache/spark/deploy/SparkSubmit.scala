@@ -165,15 +165,17 @@ object SparkSubmit {
     
     val argsFile = sys.env.getOrElse("SPARK_HOME", ".") + "/conf/args.txt"  // DB - DagSymb enhancements
     val bw = new BufferedWriter(new FileWriter(argsFile)) // DB - DagSymb enhancements
-    //bw.write(args.mainClass + "\n")  // DB - DagSymb enhancements
-    //println("class: " + args.mainClass)  // DB - DagSymb enhancements
-    bw.write(childArgs(0) + "\n")  // DB - DagSymb enhancements
-    println("class: " + childArgs(0))  // DB - DagSymb enhancements
-    bw.write(args.primaryResource + "\n")  // DB - DagSymb enhancements
-    println("jar: " + args.primaryResource)  // DB - DagSymb enhancements
-    for ( i <- 1 to childArgs.size - 1 ) {   // DB - DagSymb enhancements                                   
-      bw.write(childArgs(i)+"\n")
-      println("Path condition input arg" + (i-1) + ": " + childArgs(i))
+    if (childArgs.size > 0) {
+      //bw.write(args.mainClass + "\n")  // DB - DagSymb enhancements
+      //println("class: " + args.mainClass)  // DB - DagSymb enhancements
+      bw.write(childArgs(0) + "\n")  // DB - DagSymb enhancements
+      println("class: " + childArgs(0))  // DB - DagSymb enhancements
+      bw.write(args.primaryResource + "\n")  // DB - DagSymb enhancements
+      println("jar: " + args.primaryResource)  // DB - DagSymb enhancements
+      for ( i <- 1 to childArgs.size - 1 ) {   // DB - DagSymb enhancements                                   
+        bw.write(childArgs(i)+"\n")
+        println("Path condition input arg" + (i-1) + ": " + childArgs(i))
+      }
     }
     //println(childArgs);
     bw.close()   // DB - DagSymb enhancements

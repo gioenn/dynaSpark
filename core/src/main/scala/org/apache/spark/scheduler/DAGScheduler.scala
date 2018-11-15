@@ -191,9 +191,10 @@ class DAGScheduler(
     io.Source.fromFile(jsonFile).mkString.parseJson
   } else null
   
-  var appJson = if (appJumboJson != null )
+  var appJson = if (appJumboJson != null && heuristicType > 2)
     heuristic.nextProfile(appJumboJson)
-    else null
+    else appJumboJson
+    
   var symbolMap = HashMap[String, Int]() // DB - DagSymb enhancements
   //var symbolsMap = HashMap[String, Any]() // DB - DagSymb enhancements
   //var symbolsMap: java.util.Map[String, Any] = java.util.Collections.emptyMap() // DB - DagSymb enhancements
@@ -217,20 +218,22 @@ class DAGScheduler(
   for ((k,v) <- symbolsMap) println(k + " => " + v + "\n") // DB - DagSymb enhancements
   }
   
-  /*
-   * DB - DagSymb enhancements
-   * The following variables are needed to load the GuardEvaluator class from the application jar
-   */
-  //val jarfile = new File("/home/bertolotti/dagsymb/target/dagsymb-1.0-jar-with-dependencies.jar") // DB - DagSymb enhancements
-  val jarfile = new File(appJar) // DB - DagSymb enhancements
-  val classLoader = new URLClassLoader(Array(jarfile.toURI.toURL)) // DB - DagSymb enhancements
-  //val guardEvalClass = classLoader.loadClass("it.polimi.deepse.dagsymb.examples.GuardEvaluatorPromoCallsFile") // DB - DagSymb enhancements
-  val guardEvalClass = classLoader.loadClass(guardEvalClassname) // DB - DagSymb enhancements
-  val guardEvalConstructor = guardEvalClass.getConstructor() // DB - DagSymb enhancements
-  val guardEvalObj = guardEvalConstructor.newInstance() // DB - DagSymb enhancements
-  val guardEvalMethod = guardEvalClass.getMethods()(0) // DB - DagSymb enhancements
-  //var validExecFlows:List[Integer] = List() // DB - DagSymb enhancements
-  var validExecFlows = new java.util.ArrayList[Integer] // DB - DagSymb enhancements
+  if (heuristicType > 2) {
+    /*
+     * DB - DagSymb enhancements
+     * The following variables are needed to load the GuardEvaluator class from the application jar
+     */
+    //val jarfile = new File("/home/bertolotti/dagsymb/target/dagsymb-1.0-jar-with-dependencies.jar") // DB - DagSymb enhancements
+    val jarfile = new File(appJar) // DB - DagSymb enhancements
+    val classLoader = new URLClassLoader(Array(jarfile.toURI.toURL)) // DB - DagSymb enhancements
+    //val guardEvalClass = classLoader.loadClass("it.polimi.deepse.dagsymb.examples.GuardEvaluatorPromoCallsFile") // DB - DagSymb enhancements
+    val guardEvalClass = classLoader.loadClass(guardEvalClassname) // DB - DagSymb enhancements
+    val guardEvalConstructor = guardEvalClass.getConstructor() // DB - DagSymb enhancements
+    val guardEvalObj = guardEvalConstructor.newInstance() // DB - DagSymb enhancements
+    val guardEvalMethod = guardEvalClass.getMethods()(0) // DB - DagSymb enhancements
+    //var validExecFlows:List[Integer] = List() // DB - DagSymb enhancements
+    var validExecFlows = new java.util.ArrayList[Integer] // DB - DagSymb enhancements
+  }
   
   /**
    * Contains the locations that each RDD's partitions are cached on.  This map's keys are RDD ids
@@ -1774,32 +1777,34 @@ class DAGScheduler(
   }
   
   def resultComputed(result: Any ): Unit = { // DB - DagSymb enhancements
-    symbolsMap(symbolName) = result
-    val resultType = ClassTag(result.getClass)
-    println("Symbol: " + symbolName + ", Type: " + resultType.toString())
-    println("SymbolsMap: ", symbolsMap)
-    /*
-    resultType.toString() match {
-      case "java.lang.Long" => {/* function body of return type java.lang.Long */}
-      case "java.lang.List" => {/* function body of return type java.lang.List */}
-      case _ => { /* Raise exception for return type not implemented */ }
-      * 
-      */
-    validExecFlows = guardEvalMethod.invoke(guardEvalObj, 
-        symbolsMap).asInstanceOf[java.util.ArrayList[Integer]]
-    println(validExecFlows)
-    
-    val highestJobId: Int = 
-      if (validExecFlows != null) {
-      appJumboJson.asJsObject.fields(validExecFlows.get(0).toString())
-      .asJsObject.fields("0").asJsObject.fields("jobs")
-      .asJsObject.fields.keys.max.toInt}
-      else 0
-    
-    println("numTotalJobs, highestJobId: " + numTotalJobs + ", " + highestJobId)
-    appJson = if (numTotalJobs <= highestJobId) {
-                heuristic.nextProfile(appJumboJson, validExecFlows, nextJobId.get())}
-              else appJson
+    if (heuristicType > 2) {
+      symbolsMap(symbolName) = result
+      val resultType = ClassTag(result.getClass)
+      println("Symbol: " + symbolName + ", Type: " + resultType.toString())
+      println("SymbolsMap: ", symbolsMap)
+      /*
+      resultType.toString() match {
+        case "java.lang.Long" => {/* function body of return type java.lang.Long */}
+        case "java.lang.List" => {/* function body of return type java.lang.List */}
+        case _ => { /* Raise exception for return type not implemented */ }
+        * 
+        */
+      validExecFlows = guardEvalMethod.invoke(guardEvalObj, 
+          symbolsMap).asInstanceOf[java.util.ArrayList[Integer]]
+      println(validExecFlows)
+      
+      val highestJobId: Int = 
+        if (validExecFlows != null) {
+        appJumboJson.asJsObject.fields(validExecFlows.get(0).toString())
+        .asJsObject.fields("0").asJsObject.fields("jobs")
+        .asJsObject.fields.keys.max.toInt}
+        else 0
+      
+      println("numTotalJobs, highestJobId: " + numTotalJobs + ", " + highestJobId)
+      appJson = if (numTotalJobs <= highestJobId) {
+                  heuristic.nextProfile(appJumboJson, validExecFlows, nextJobId.get())}
+                else appJson
+    }
   }
   
   eventProcessLoop.start()
