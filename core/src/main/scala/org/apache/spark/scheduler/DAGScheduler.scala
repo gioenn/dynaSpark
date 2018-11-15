@@ -218,7 +218,7 @@ class DAGScheduler(
   for ((k,v) <- symbolsMap) println(k + " => " + v + "\n") // DB - DagSymb enhancements
   }
   
-  if (heuristicType > 2) {
+  //if (heuristicType > 2) {
     /*
      * DB - DagSymb enhancements
      * The following variables are needed to load the GuardEvaluator class from the application jar
@@ -231,10 +231,12 @@ class DAGScheduler(
     val guardEvalConstructor = guardEvalClass.getConstructor() // DB - DagSymb enhancements
     val guardEvalObj = guardEvalConstructor.newInstance() // DB - DagSymb enhancements
     val guardEvalMethod = guardEvalClass.getMethods()(0) // DB - DagSymb enhancements
-    //var validExecFlows:List[Integer] = List() // DB - DagSymb enhancements
-    var validExecFlows = new java.util.ArrayList[Integer] // DB - DagSymb enhancements
-  }
+    //var validExecFlows:List[Integer] = List() // DB - DagSymb enhancements 
+  //} else {
+  //  val guardEvalClass = new GuardEvaluator(symbolsMap)
+  //}
   
+  var validExecFlows = new java.util.ArrayList[Integer] // DB - DagSymb enhancements
   /**
    * Contains the locations that each RDD's partitions are cached on.  This map's keys are RDD ids
    * and its values are arrays indexed by partition numbers. Each array value is the set of
