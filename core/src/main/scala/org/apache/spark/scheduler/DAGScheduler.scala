@@ -218,7 +218,15 @@ class DAGScheduler(
   for ((k,v) <- symbolsMap) println(k + " => " + v + "\n") // DB - DagSymb enhancements
   }
   
-  //if (heuristicType > 2) {
+  //var jarfile = new File(appJar) // DB - DagSymb enhancements
+  //var classLoader = new URLClassLoader(Array(jarfile.toURI.toURL)) // DB - DagSymb enhancements
+  //var guardEvalClass = classLoader.loadClass(guardEvalClassname) // DB - DagSymb enhancements
+  //var guardEvalConstructor = guardEvalClass.getConstructor() // DB - DagSymb enhancements
+  //var guardEvalObj = guardEvalConstructor.newInstance().asInstanceOf[core.src.main.scala.org.apache.spark.scheduler.IGuardEvaluator] // DB - DagSymb enhancements
+  var guardEvalObj:core.src.main.scala.org.apache.spark.scheduler.IGuardEvaluator
+  //guardEvalObj = guardEvalObj.asInstanceOf[core.src.main.scala.org.apache.spark.scheduler.IGuardEvaluator]
+  
+  if (heuristicType > 2) {
     /*
      * DB - DagSymb enhancements
      * The following variables are needed to load the GuardEvaluator class from the application jar
@@ -229,12 +237,12 @@ class DAGScheduler(
     //val guardEvalClass = classLoader.loadClass("it.polimi.deepse.dagsymb.examples.GuardEvaluatorPromoCallsFile") // DB - DagSymb enhancements
     val guardEvalClass = classLoader.loadClass(guardEvalClassname) // DB - DagSymb enhancements
     val guardEvalConstructor = guardEvalClass.getConstructor() // DB - DagSymb enhancements
-    val guardEvalObj = guardEvalConstructor.newInstance() // DB - DagSymb enhancements
-    val guardEvalMethod = guardEvalClass.getMethods()(0) // DB - DagSymb enhancements
+    guardEvalObj = guardEvalConstructor.newInstance().asInstanceOf[core.src.main.scala.org.apache.spark.scheduler.IGuardEvaluator] // DB - DagSymb enhancements
+    //val guardEvalMethod = guardEvalClass.getMethods()(0) // DB - DagSymb enhancements
     //var validExecFlows:List[Integer] = List() // DB - DagSymb enhancements 
   //} else {
   //  val guardEvalClass = new GuardEvaluator(symbolsMap)
-  //}
+  }
   
   var validExecFlows = new java.util.ArrayList[Integer] // DB - DagSymb enhancements
   /**
@@ -1791,9 +1799,15 @@ class DAGScheduler(
         case _ => { /* Raise exception for return type not implemented */ }
         * 
         */
+      /*
       validExecFlows = guardEvalMethod.invoke(guardEvalObj, 
           symbolsMap).asInstanceOf[java.util.ArrayList[Integer]]
+      */
+      //validExecFlows = guardEvalObj.asInstanceOf[core.src.main.scala.org.apache.spark.scheduler.IGuardEvaluator].evaluateGuards( 
+      validExecFlows = guardEvalObj.evaluateGuards( 
+          symbolsMap.asInstanceOf[java.util.Map[String, Object]]).asInstanceOf[java.util.ArrayList[Integer]]
       println(validExecFlows)
+      
       
       val highestJobId: Int = 
         if (validExecFlows != null) {

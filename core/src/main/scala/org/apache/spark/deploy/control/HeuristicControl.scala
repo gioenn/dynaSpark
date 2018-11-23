@@ -257,5 +257,5 @@ class HeuristicControl(conf: SparkConf) extends HeuristicBase(conf) with Logging
     feasibility
   }
 
-  override def nextProfile(appJJ: JsValue, valExFlows: java.util.ArrayList[Integer] = null, jobId: Int = 0): JsValue = null
+  override def nextProfile(appJJ: JsValue, valExFlows: java.util.ArrayList[Integer] = null, jobId: Int = 0): JsValue = {appJJ}//null
 }

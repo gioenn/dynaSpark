@@ -76,5 +76,5 @@ abstract class HeuristicBase(conf: SparkConf) extends Logging{
 
   def checkDeadline(appJson: JsValue) : Boolean
   
-  def nextProfile(appJJ: JsValue, valExFlows: java.util.ArrayList[Integer] = null, jobId: Int = 0): JsValue // DB - DagSymb enhancements
+  def nextProfile(appJJ: JsValue, valExFlows: java.util.ArrayList[Integer] = null, jobId: Int = 0): JsValue = {appJJ} // DB - DagSymb enhancements
 }
