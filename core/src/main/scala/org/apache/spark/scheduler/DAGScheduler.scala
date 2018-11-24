@@ -241,7 +241,7 @@ class DAGScheduler(
     //val guardEvalClass = classLoader.loadClass("it.polimi.deepse.dagsymb.examples.GuardEvaluatorPromoCallsFile") // DB - DagSymb enhancements
     val guardEvalClass = classLoader.loadClass(guardEvalClassname) // DB - DagSymb enhancements
     val guardEvalConstructor = guardEvalClass.getConstructor() // DB - DagSymb enhancements
-    guardEvalObj = guardEvalConstructor.newInstance().asInstanceOf[core.src.main.scala.org.apache.spark.scheduler.IGuardEvaluator] // DB - DagSymb enhancements
+    guardEvalObj = guardEvalConstructor.newInstance().asInstanceOf[core.src.main.scala.org.apache.spark.scheduler.GuardEvaluator] // DB - DagSymb enhancements
     //guardEvalMethod = guardEvalClass.getMethods()(0) // DB - DagSymb enhancements
     //var validExecFlows:List[Integer] = List() // DB - DagSymb enhancements 
   //} else {
