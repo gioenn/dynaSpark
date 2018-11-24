@@ -227,7 +227,7 @@ class DAGScheduler(
     //new core.src.main.scala.org.apache.spark.scheduler.GuardEvaluator
   var guardEvalObj:Any = null
   //guardEvalObj = guardEvalObj.asInstanceOf[core.src.main.scala.org.apache.spark.scheduler.IGuardEvaluator]
-  var guardEvalMethod: java.lang.reflect.Method
+  var guardEvalMethod: java.lang.reflect.Method = null
   if (heuristicType > 2) {
     /*
      * DB - DagSymb enhancements
