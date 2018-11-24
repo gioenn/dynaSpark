@@ -223,7 +223,8 @@ class DAGScheduler(
   //var guardEvalClass = classLoader.loadClass(guardEvalClassname) // DB - DagSymb enhancements
   //var guardEvalConstructor = guardEvalClass.getConstructor() // DB - DagSymb enhancements
   //var guardEvalObj = guardEvalConstructor.newInstance().asInstanceOf[core.src.main.scala.org.apache.spark.scheduler.IGuardEvaluator] // DB - DagSymb enhancements
-  var guardEvalObj:core.src.main.scala.org.apache.spark.scheduler.IGuardEvaluator = null
+  var guardEvalObj:core.src.main.scala.org.apache.spark.scheduler.GuardEvaluator = 
+    new core.src.main.scala.org.apache.spark.scheduler.GuardEvaluator
   //var guardEvalObj:Any = null
   //guardEvalObj = guardEvalObj.asInstanceOf[core.src.main.scala.org.apache.spark.scheduler.IGuardEvaluator]
   //var guardEvalMethod = null
@@ -236,7 +237,7 @@ class DAGScheduler(
     val jarfile = new File(appJar) // DB - DagSymb enhancements
     //var klass = new core.src.main.scala.org.apache.spark.scheduler.GuardEvaluator
     //val parent = core.src.main.scala.org.apache.spark.scheduler.GuardEvaluator.getClass.getClassLoader()
-    val parent = this.getClass.getClassLoader()
+    val parent = guardEvalObj.getClass.getClassLoader()
     val classLoader = new URLClassLoader(Array(jarfile.toURI.toURL), parent) // DB - DagSymb enhancements
     //val guardEvalClass = classLoader.loadClass("it.polimi.deepse.dagsymb.examples.GuardEvaluatorPromoCallsFile") // DB - DagSymb enhancements
     val guardEvalClass = classLoader.loadClass(guardEvalClassname) // DB - DagSymb enhancements
