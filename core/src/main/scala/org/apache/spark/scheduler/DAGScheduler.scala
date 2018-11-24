@@ -235,7 +235,7 @@ class DAGScheduler(
     //val jarfile = new File("/home/bertolotti/dagsymb/target/dagsymb-1.0-jar-with-dependencies.jar") // DB - DagSymb enhancements
     val jarfile = new File(appJar) // DB - DagSymb enhancements
     //var klass = new core.src.main.scala.org.apache.spark.scheduler.GuardEvaluator
-    val parent = core.src.main.scala.org.apache.spark.scheduler.IGuardEvaluator.getClass.getClassLoader()
+    val parent = core.src.main.scala.org.apache.spark.scheduler.GuardEvaluator.getClass.getClassLoader()
     val classLoader = new URLClassLoader(Array(jarfile.toURI.toURL), parent) // DB - DagSymb enhancements
     //val guardEvalClass = classLoader.loadClass("it.polimi.deepse.dagsymb.examples.GuardEvaluatorPromoCallsFile") // DB - DagSymb enhancements
     val guardEvalClass = classLoader.loadClass(guardEvalClassname) // DB - DagSymb enhancements
