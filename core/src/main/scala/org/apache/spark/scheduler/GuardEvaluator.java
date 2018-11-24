@@ -5,9 +5,24 @@ import java.util.Map;
 
 public class GuardEvaluator implements IGuardEvaluator {
 
+	private List<Integer> satisfiableGuards;
+
     @Override
     public List<Integer> evaluateGuards(Map<String, Object> knownValues) {
- 
-        return new ArrayList<>();
-    }	
+        satisfiableGuards = new ArrayList<>();
+
+        extractValues(knownValues);
+
+        evaluateActualGuards();
+
+        return satisfiableGuards;
+    }
+    
+    private void evaluateActualGuards() {
+        //path condition evaluation
+    }
+    
+    private void extractValues(Map<String, Object> knownValues) {
+    	//extract valid values
+    }
 }
