@@ -223,7 +223,7 @@ class DAGScheduler(
   //var guardEvalClass = classLoader.loadClass(guardEvalClassname) // DB - DagSymb enhancements
   //var guardEvalConstructor = guardEvalClass.getConstructor() // DB - DagSymb enhancements
   //var guardEvalObj = guardEvalConstructor.newInstance().asInstanceOf[core.src.main.scala.org.apache.spark.scheduler.IGuardEvaluator] // DB - DagSymb enhancements
-  var guardEvalObj:core.src.main.scala.org.apache.spark.scheduler.IGuardEvaluator = null
+  var guardEvalObj:core.src.main.scala.org.apache.spark.scheduler.GuardEvaluator = null
   //guardEvalObj = guardEvalObj.asInstanceOf[core.src.main.scala.org.apache.spark.scheduler.IGuardEvaluator]
   
   if (heuristicType > 2) {
@@ -237,7 +237,7 @@ class DAGScheduler(
     //val guardEvalClass = classLoader.loadClass("it.polimi.deepse.dagsymb.examples.GuardEvaluatorPromoCallsFile") // DB - DagSymb enhancements
     val guardEvalClass = classLoader.loadClass(guardEvalClassname) // DB - DagSymb enhancements
     val guardEvalConstructor = guardEvalClass.getConstructor() // DB - DagSymb enhancements
-    guardEvalObj = guardEvalConstructor.newInstance().asInstanceOf[core.src.main.scala.org.apache.spark.scheduler.IGuardEvaluator] // DB - DagSymb enhancements
+    guardEvalObj = guardEvalConstructor.newInstance().asInstanceOf[core.src.main.scala.org.apache.spark.scheduler.GuardEvaluator] // DB - DagSymb enhancements
     //val guardEvalMethod = guardEvalClass.getMethods()(0) // DB - DagSymb enhancements
     //var validExecFlows:List[Integer] = List() // DB - DagSymb enhancements 
   //} else {
