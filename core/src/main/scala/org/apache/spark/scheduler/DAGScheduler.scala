@@ -243,7 +243,14 @@ class DAGScheduler(
     val guardEvalClass = classLoader.loadClass(guardEvalClassname) // DB - DagSymb enhancements
     val guardEvalConstructor = guardEvalClass.getConstructor() // DB - DagSymb enhancements
     guardEvalObj = guardEvalConstructor.newInstance()//.asInstanceOf[core.src.main.scala.org.apache.spark.scheduler.GuardEvaluator] // DB - DagSymb enhancements
-    guardEvalMethod = guardEvalClass.getMethods()(0) // DB - DagSymb enhancements
+    val methods = guardEvalClass.getDeclaredMethods // DB - DagSymb enhancements
+    for (m <- methods) {  // DB - DagSymb enhancements
+      m.getName match {
+        case "evaluateGuards" => guardEvalMethod = m
+        case _ => 
+      }
+    }
+    //guardEvalMethod = guardEvalClass.getMethods()(0) // DB - DagSymb enhancements
     //var validExecFlows:List[Integer] = List() // DB - DagSymb enhancements 
   } else {
     guardEvalObj = new core.src.main.scala.org.apache.spark.scheduler.GuardEvaluator
