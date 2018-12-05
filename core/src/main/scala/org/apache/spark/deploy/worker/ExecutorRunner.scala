@@ -142,6 +142,9 @@ private[deploy] class ExecutorRunner(
    * Download and run the executor described in our ApplicationDescription
    */
   private def fetchAndRunExecutor() {
+    var ex_start_time_ns = 0L
+    var ex_end_time_ns = 0L
+    var ex_duration_ns = 0L
     try {
       // Launch the process
       val builder = CommandUtils.buildProcessBuilder(appDesc.command, new SecurityManager(conf),
@@ -163,8 +166,8 @@ private[deploy] class ExecutorRunner(
       builder.environment.put("SPARK_LOG_URL_STDOUT", s"${baseUrl}stdout")
 
       process = builder.start()
-      val ex_start_time_ns = System.nanoTime  // DB - DagSymb enhancements
-      logInfo(s"Executor started (ex_start_time_ns): $ex_start_time_ns") // DB - DagSymb enhancements
+      ex_start_time_ns = System.nanoTime  // DB - DagSymb enhancements
+      logInfo(s"Executor started @(ex_start_time_ns): $ex_start_time_ns") // DB - DagSymb enhancements
       val header = "Spark Executor Command: %s\n%s\n\n".format(
         formattedCommand, "=" * 40)
 
@@ -179,9 +182,9 @@ private[deploy] class ExecutorRunner(
       // Wait for it to exit; executor may exit with code 0 (when driver instructs it to shutdown)
       // or with nonzero exit code
       val exitCode = process.waitFor()
-      val ex_end_time_ns = System.nanoTime  // DB - DagSymb enhancements
-      val ex_duration_ns = ex_end_time_ns - ex_start_time_ns  // DB - DagSymb enhancements
-      logInfo(s"Executor ended (ex_end_time_ns): $ex_end_time_ns with Exit Code: $exitCode")  // DB - DagSymb enhancements
+      ex_end_time_ns = System.nanoTime  // DB - DagSymb enhancements
+      ex_duration_ns = ex_end_time_ns - ex_start_time_ns  // DB - DagSymb enhancements
+      logInfo(s"Executor ended @(ex_end_time_ns): $ex_end_time_ns with Exit Code: $exitCode")  // DB - DagSymb enhancements
       logInfo(s"Executor processing time (ns): $ex_duration_ns")  // DB - DagSymb enhancements
       
       state = ExecutorState.EXITED
@@ -189,13 +192,20 @@ private[deploy] class ExecutorRunner(
       worker.send(ExecutorStateChanged(appId, execId, state, Some(message), Some(exitCode)))
     } catch {
       case interrupted: InterruptedException =>
+        ex_end_time_ns = System.nanoTime  // DB - DagSymb enhancements
+        ex_duration_ns = ex_end_time_ns - ex_start_time_ns  // DB - DagSymb enhancements
         logInfo("Runner thread for executor " + fullId + " interrupted")
         state = ExecutorState.KILLED
         killProcess(None)
+        logInfo(s"Executor ended @(ex_end_time_ns): $ex_end_time_ns (Interrupted)")  // DB - DagSymb enhancements
+        logInfo(s"Executor processing time (ns): $ex_duration_ns")  // DB - DagSymb enhancements
       case e: Exception =>
-        logError("Error running executor", e)
+        ex_end_time_ns = System.nanoTime  // DB - DagSymb enhancements
+        ex_duration_ns = ex_end_time_ns - ex_start_time_ns  // DB - DagSymb enhancements
         state = ExecutorState.FAILED
         killProcess(Some(e.toString))
+        logInfo(s"Executor ended @(ex_end_time_ns): $ex_end_time_ns (in Error)")  // DB - DagSymb enhancements
+        logInfo(s"Executor processing time (ns): $ex_duration_ns")  // DB - DagSymb enhancementslogError("Error running executor", e)
     }
   }
 }
