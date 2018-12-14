@@ -30,6 +30,8 @@ class HeuristicSymExControlUnlimited(conf: SparkConf) extends HeuristicControlUn
     println("jobId: " + jobId)
     if (valExFlows != null) 
       setP = setP.filter({case (k,v) => valExFlows.exists(x => x == k.toInt)})
+    
+    /*  
     var wCaseProfId = setP.keys.toList.zip(setP.toList.map(
                       {case (k, v) => v.asJsObject.fields
                         .filter({case (k, v) => !v.asJsObject.fields("skipped").convertTo[Boolean]}) 
@@ -38,6 +40,20 @@ class HeuristicSymExControlUnlimited(conf: SparkConf) extends HeuristicControlUn
                           {case (k, v) => v.asJsObject.fields
                             .filter({case (k, v) => !v.asJsObject.fields("skipped").convertTo[Boolean]})
                             .count(_ => true)}).max})(0)._1
+                            */
+     val findMax = (x: (Int, Int), y: (Int, Int)) => {
+       if (x._2 > y._2){
+         return x
+       }
+       else {
+         return y;
+       }
+     }
+     
+     var wCaseProfId = setP.keys.toList.zip(setP.toList.map(
+                      {case (k, v) => v.asJsObject.fields
+                        .filter({case (k, v) => !v.asJsObject.fields("skipped").convertTo[Boolean]}) 
+                        .count(_ => true)})).reduce(findMax)._1;
     println("Worst case json profile number: " + wCaseProfId)
     setP(wCaseProfId)
   }
