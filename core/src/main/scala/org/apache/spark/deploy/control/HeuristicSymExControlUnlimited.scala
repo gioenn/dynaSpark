@@ -53,7 +53,7 @@ class HeuristicSymExControlUnlimited(conf: SparkConf) extends HeuristicControlUn
      var wCaseProfId = setP.keys.toList.zip(setP.toList.map(
                       {case (k, v) => v.asJsObject.fields
                         .filter({case (k, v) => !v.asJsObject.fields("skipped").convertTo[Boolean]}) 
-                        .count(_ => true)})).reduce(findMax)._1;
+                        .count(_ => true)}).reduce(findMax)._1);
     println("Worst case json profile number: " + wCaseProfId)
     setP(wCaseProfId)
   }
