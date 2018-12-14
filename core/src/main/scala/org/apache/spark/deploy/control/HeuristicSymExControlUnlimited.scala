@@ -41,20 +41,15 @@ class HeuristicSymExControlUnlimited(conf: SparkConf) extends HeuristicControlUn
                             .filter({case (k, v) => !v.asJsObject.fields("skipped").convertTo[Boolean]})
                             .count(_ => true)}).max})(0)._1
                             */
-     val findMax = (x: (String, Int), y: (String, Int)) => {
-       if (x._2 > y._2){
-         return x
-       }
-       else {
-         return y;
-       }
-     }
      
      var wCaseProfId = setP.toList.map({ case (k, profile) =>  {
                              val numStage = profile.asJsObject.fields.filter({ case (k, stage) => {
                                 !stage.asJsObject.fields("skipped").convertTo[Boolean]
                                  }}).size()
-                             (k, numStage)}}).reduce(findMax)._1;
+                             (k, numStage)}})
+                             .reduce({ (x, y) => {
+                               x._2 > y._2 ? x : y
+                             }})._1;
      
     println("Worst case json profile number: " + wCaseProfId)
     setP(wCaseProfId)
