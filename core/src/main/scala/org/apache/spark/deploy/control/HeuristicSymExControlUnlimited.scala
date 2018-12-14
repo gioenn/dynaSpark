@@ -48,7 +48,7 @@ class HeuristicSymExControlUnlimited(conf: SparkConf) extends HeuristicControlUn
                                  }}).size()
                              (k, numStage)}})
                              .reduce({ (x, y) => {
-                               x._2 > y._2 ? x : y
+                               if (x._2 > y._2)  x else y
                              }})._1;
      
     println("Worst case json profile number: " + wCaseProfId)
