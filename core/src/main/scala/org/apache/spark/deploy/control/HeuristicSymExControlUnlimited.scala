@@ -50,11 +50,11 @@ class HeuristicSymExControlUnlimited(conf: SparkConf) extends HeuristicControlUn
        }
      }
      
-     var wCaseProfId = setP.toList.map((k, profile) =>  {
-                             val numStage = profile.asJsObject.fields.filter((k, stage) => {
+     var wCaseProfId = setP.toList.map({ case (k, profile) =>  {
+                             val numStage = profile.asJsObject.fields.filter({ case (k, stage) => {
                                 !stage.asJsObject.fields("skipped").convertTo[Boolean]
-                                 }).size()
-                             (k, numStage)}).reduce(findMax)._1;
+                                 }}).size()
+                             (k, numStage)}}).reduce(findMax)._1;
      
     println("Worst case json profile number: " + wCaseProfId)
     setP(wCaseProfId)
