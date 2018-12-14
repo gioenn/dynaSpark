@@ -41,7 +41,7 @@ class HeuristicSymExControlUnlimited(conf: SparkConf) extends HeuristicControlUn
                             .filter({case (k, v) => !v.asJsObject.fields("skipped").convertTo[Boolean]})
                             .count(_ => true)}).max})(0)._1
                             */
-     val findMax = (x: (Int, Int), y: (Int, Int)) => {
+     val findMax = (x: (String, Int), y: (String, Int)) => {
        if (x._2 > y._2){
          return x
        }
