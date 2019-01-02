@@ -282,7 +282,6 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
       previous_profile_totalduration = totaldurationremaining 
     } else {
       totaldurationremaining += stageSubmitted.totalduration - previous_profile_totalduration
-      previous_profile_totalduration = stageSubmitted.totalduration
     }
     if (totalStageRemaining == -1L) {
       totalStageRemaining = stageSubmitted.stageIds.size - 1 + genstage
@@ -386,6 +385,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
     logInfo("EXEC AVAIL: " + executorAvailable.toString)
     logInfo("ACTIVE STAGES: " + activeStages.toString)
     logInfo("ACTIVE PENDING STAGES: " + activePendingStages.toString)
+    
     if (executorAvailable.size >= executorNeeded) {
       activeStages(stage.stageId) = stage
       totalStageRemaining -= 1
@@ -423,7 +423,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
       activePendingStages(stage.stageId) = stage
       executorNeededPendingStages(stage.stageId) = executorNeeded
     }
-
+    previous_profile_totalduration = stageSubmitted.totalduration
   }
 
   override def onTaskEnd(taskEnd: SparkListenerTaskEnd): Unit = synchronized {
