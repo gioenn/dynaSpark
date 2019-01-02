@@ -40,6 +40,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
   // Application:
   var totaldurationremaining = -1L
   var totalStageRemaining = -1L
+  var previous_profile_totalduration = 0L
 
   // Data from spark-defaults.conf
   val ALPHA: Double = conf.get("spark.control.alpha").toDouble
@@ -278,6 +279,10 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
 
     if (totaldurationremaining == -1L) {
       totaldurationremaining = stageSubmitted.totalduration
+      previous_profile_totalduration = totaldurationremaining 
+    } else {
+      totaldurationremaining += stageSubmitted.totalduration - previous_profile_totalduration
+      previous_profile_totalduration = stageSubmitted.totalduration
     }
     if (totalStageRemaining == -1L) {
       totalStageRemaining = stageSubmitted.stageIds.size - 1 + genstage
@@ -374,6 +379,8 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
 
     }
 
+    logInfo("PREVIOUS PROFILE TOTALDURATION: " + previous_profile_totalduration.toString)
+    logInfo("CURRENT PROFILE TOTALDURATION: " + stageSubmitted.totalduration.toString)
     logInfo("DEADLINE STAGES: " + stageIdToDeadline.toString)
     logInfo("CORE STAGES: " + stageIdToCore.toString)
     logInfo("EXEC AVAIL: " + executorAvailable.toString)
