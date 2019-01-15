@@ -1232,6 +1232,15 @@ class DAGScheduler(
         val weight = stageJson.asJsObject.fields("weight").convertTo[Long]
         val stageJsonIds = appJson.asJsObject.fields.keys.toList.filter(id =>
           appJson.asJsObject.fields(id).asJsObject.fields("nominalrate").convertTo[Double] != 0.0)
+        /*val stageId = appJson.asJsObject.fields("0")
+                      .asJsObject.fields("jobs")
+                      .asJsObject.fields(nextJobId.get().toString())
+                      .asJsObject.fields("stages")
+                      .convertTo[List[Int]].sortWith((x, y) => x < y).apply(0)*/
+        val stageId = stage.id
+        val executedstagesduration = appJson.asJsObject.fields.filter(stage =>
+                                          stage.keys[0].convertTo[Int] <= stageId.convertTo[Int])
+                                    .foldLeft(0L){ (acc, elem) => acc + elem.fields("duration").convertTo[Long] }          
         listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties,
           weight,
           duration,
@@ -1239,7 +1248,8 @@ class DAGScheduler(
           stageJson.asJsObject.fields("parentsIds").convertTo[List[Int]],
           stageJson.asJsObject.fields("nominalrate").convertTo[Double],
           stageJson.asJsObject.fields("genstage").convertTo[Boolean],
-          stageJsonIds))
+          stageJsonIds,
+          executedstagesduration))
       }
       else {
         logError("NO JSON FOR APP: " + jsonFile)
