@@ -381,7 +381,6 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
 
     logInfo("PREVIOUS PROFILE TOTALDURATION: " + previous_profile_totalduration.toString)
     logInfo("CURRENT PROFILE TOTALDURATION: " + stageSubmitted.totalduration.toString)
-    logInfo("EXECUTED PROFILES DURATION: " + stageSubmitted.executedstagesduration.toString)
     logInfo("DEADLINE STAGES: " + stageIdToDeadline.toString)
     logInfo("CORE STAGES: " + stageIdToCore.toString)
     logInfo("EXEC AVAIL: " + executorAvailable.toString)
