@@ -40,6 +40,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
   // Application:
   var totaldurationremaining = -1L
   var totalStageRemaining = -1L
+  var previous_profile_totalStages = 0L
   var previous_profile_totalduration = 0L
 
   // Data from spark-defaults.conf
@@ -286,6 +287,9 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
     }
     if (totalStageRemaining == -1L) {
       totalStageRemaining = stageSubmitted.stageIds.size - 1 + genstage
+      previous_profile_totalStages = totalStageRemaining
+    } else {
+      totalStageRemaining += stageSubmitted.stageIds.size - 1 + genstage - previous_profile_totalStages
     }
     stageIdToDuration(stage.stageId) = stageSubmitted.duration
 
