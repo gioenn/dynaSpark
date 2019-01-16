@@ -430,7 +430,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
       executorNeededPendingStages(stage.stageId) = executorNeeded
     }
     previous_profile_totalduration = stageSubmitted.totalduration
-    totalStageRemaining = previous_profile_totalStages
+    previous_profile_totalStages = stageSubmitted.stageIds.size - 1 + genstage
   }
 
   override def onTaskEnd(taskEnd: SparkListenerTaskEnd): Unit = synchronized {
