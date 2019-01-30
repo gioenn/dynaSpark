@@ -1235,7 +1235,7 @@ class DAGScheduler(
             s"Highest Stage ID in appJSON profile: $highestStageIdInProfile" )
         }
 
-        val stageJson = appJson.asJsObject.fields(stage.id.toString)
+        val stageJson = appJson.asJsObject.fields(stageId.toString)
         val totalduration = appJson.asJsObject.fields("0").asJsObject.fields("totalduration").convertTo[Long]
         val duration = stageJson.asJsObject.fields("duration").convertTo[Long]
         val weight = stageJson.asJsObject.fields("weight").convertTo[Long]
@@ -1247,7 +1247,7 @@ class DAGScheduler(
                       .asJsObject.fields("stages")
                       .convertTo[List[Int]].sortWith((x, y) => x < y).apply(0)*/
         val executedstagesduration = appJson.asJsObject.fields.filter(stage =>
-                                          stage._1.toInt < stageId.toInt)
+                                          stage._1.toInt < stageId)
                                     .foldLeft(0L){ (acc, elem) => acc + elem._2.asJsObject.fields("duration").convertTo[Long] }          
         listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties,
           weight,
