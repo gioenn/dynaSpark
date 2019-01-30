@@ -1228,11 +1228,11 @@ class DAGScheduler(
       if (appJson != null) {
         val submittedStageId = stage.id
         var stageId = stage.id
-        val highestStageIdInProfile: Int = appJson.asJsObject.fields.keys.size.toInt + 1
-        if (stage.id.toInt > highestStageIdInProfile) {
+        val highestStageIdInProfile = (appJson.asJsObject.fields.keys.size.toInt + 1).toString
+        if (stage.id.toInt > highestStageIdInProfile.toInt) {
+          stageId = highestStageIdInProfile
           logInfo(s"Submitted Stage ID not contained in appJSON profile. Submitted Stage ID: $submittedStageId, " +
             s"Highest Stage ID in appJSON profile: $highestStageIdInProfile" )
-          stageId = highestStageIdInProfile.toString
         }
 
         val stageJson = appJson.asJsObject.fields(stage.id.toString)
