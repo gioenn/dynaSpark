@@ -185,7 +185,8 @@ class DAGScheduler(
       new HeuristicControl(sc.conf)
 
   val jsonFile = sys.env.getOrElse("SPARK_HOME", ".") + "/conf/" +
-    sc.appName.replaceAll("[^a-zA-Z0-9.-]", "_") + ".json"
+    sc.appName + ".json"
+    //sc.appName.replaceAll("[^a-zA-Z0-9.-]", "_") + ".json"
 
   val appJumboJson = if (Files.exists(Paths.get(jsonFile))) {
     io.Source.fromFile(jsonFile).mkString.parseJson
