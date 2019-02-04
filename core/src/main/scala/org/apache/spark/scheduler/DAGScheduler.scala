@@ -1228,6 +1228,8 @@ class DAGScheduler(
       stage.latestInfo.submissionTime = Some(clock.getTimeMillis())
       if (appJson != null) {
         val submittedStageId = stage.id
+        val stageId = stage.id
+        /*
         var stageId = stage.id
         // Davide Bertolotti - manage case when profile hss less stages than required
         if (heuristicType != 3) {
@@ -1238,6 +1240,7 @@ class DAGScheduler(
               s"Highest Stage ID in appJSON profile: $highestStageIdInProfile" )
           }
         }
+        */
         val stageJson = appJson.asJsObject.fields(stageId.toString)
         val totalduration = appJson.asJsObject.fields("0").asJsObject.fields("totalduration").convertTo[Long]
         val duration = stageJson.asJsObject.fields("duration").convertTo[Long]
