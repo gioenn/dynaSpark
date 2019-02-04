@@ -1250,7 +1250,7 @@ class DAGScheduler(
                       .asJsObject.fields("stages")
                       .convertTo[List[Int]].sortWith((x, y) => x < y).apply(0)*/
         val executedstagesduration = appJson.asJsObject.fields.filter(stage =>
-                                          stage._1.toInt < stageId)
+                                          stage._1.toInt < stageId.toInt)
                                     .foldLeft(0L){ (acc, elem) => acc + elem._2.asJsObject.fields("duration").convertTo[Long] }          
         listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties,
           weight,
