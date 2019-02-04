@@ -1228,19 +1228,16 @@ class DAGScheduler(
       stage.latestInfo.submissionTime = Some(clock.getTimeMillis())
       if (appJson != null) {
         val submittedStageId = stage.id
-        val stageId = stage.id
-        /*
         var stageId = stage.id
-        // Davide Bertolotti - manage case when profile hss less stages than required
-        if (heuristicType != 3) {
-          val highestStageIdInProfile = appJson.asJsObject.fields.keys.size - 1
-          if (stage.id > highestStageIdInProfile) {
+        //if (heuristicType != 3) {
+        // Davide Bertolotti - reilience in case of profile do not match no. stages
+        val highestStageIdInProfile = appJson.asJsObject.fields.keys.size - 1
+        if (stage.id > highestStageIdInProfile) {
             stageId = highestStageIdInProfile
             logInfo(s"Submitted Stage ID not contained in appJSON profile. Submitted Stage ID: $submittedStageId, " +
               s"Highest Stage ID in appJSON profile: $highestStageIdInProfile" )
           }
-        }
-        */
+        //}
         val stageJson = appJson.asJsObject.fields(stageId.toString)
         val totalduration = appJson.asJsObject.fields("0").asJsObject.fields("totalduration").convertTo[Long]
         val duration = stageJson.asJsObject.fields("duration").convertTo[Long]
@@ -1253,7 +1250,7 @@ class DAGScheduler(
                       .asJsObject.fields("stages")
                       .convertTo[List[Int]].sortWith((x, y) => x < y).apply(0)*/
         val executedstagesduration = appJson.asJsObject.fields.filter(stage =>
-                                          stage._1.toInt < stageId.toInt)
+                                          stage._1.toInt < stageId)
                                     .foldLeft(0L){ (acc, elem) => acc + elem._2.asJsObject.fields("duration").convertTo[Long] }          
         listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties,
           weight,
