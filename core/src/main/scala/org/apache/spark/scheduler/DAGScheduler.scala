@@ -1833,10 +1833,14 @@ class DAGScheduler(
         case _ => { /* Raise exception for return type not implemented */ }
         * 
         */
-      
-      validExecFlows = guardEvalMethod.invoke(guardEvalObj, 
+
+      var new_validExecFlows = guardEvalMethod.invoke(guardEvalObj,
           symbolsMap).asInstanceOf[java.util.ArrayList[Integer]]
-      
+
+      if new_validExecFlows.size() > 0
+        validExecFlows = new_validExecFlows
+      else
+        println("Warning! GuardEvaluator returned an empty set of profile ids")
       //validExecFlows = guardEvalObj.asInstanceOf[core.src.main.scala.org.apache.spark.scheduler.IGuardEvaluator].evaluateGuards( 
       /*/
       validExecFlows = guardEvalObj.evaluateGuards( 
