@@ -990,7 +990,12 @@ abstract class RDD[T: ClassTag](
    * Reduces the elements of this RDD using the specified commutative and
    * associative binary operator.
    */
-  def reduce(f: (T, T) => T): T = withScope {
+  /**
+    * Modified by Davide Bertolotti for symbolic execution processing:
+    * put symbol associated to the action and the computed result in sparkContext object sc.
+    * Return the result of the reduce operation applied to the elements in the RDD.
+    */
+  def reduce(f: (T, T) => T): T = withScope { // DB - DagSymb enhancements
     val cleanF = sc.clean(f)
     val reducePartition: Iterator[T] => Option[T] = iter => {
       if (iter.hasNext) {
@@ -1010,7 +1015,9 @@ abstract class RDD[T: ClassTag](
     }
     sc.runJob(this, reducePartition, mergeResult)
     // Get the final result out of our Option, or throw an exception if the RDD was empty
-    jobResult.getOrElse(throw new UnsupportedOperationException("empty collection"))
+    val res = jobResult.getOrElse(throw new UnsupportedOperationException("empty collection"))
+    sc.resultComputed(res)
+    res
   }
 
   /**
