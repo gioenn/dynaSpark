@@ -1837,19 +1837,18 @@ class DAGScheduler(
       var new_validExecFlows = guardEvalMethod.invoke(guardEvalObj,
           symbolsMap).asInstanceOf[java.util.ArrayList[Integer]]
 
-      if new_validExecFlows.size() > 0
+      if (new_validExecFlows.size() > 0)
         validExecFlows = new_validExecFlows
       else
         println("Warning! GuardEvaluator returned an empty set of profile ids")
+      
       //validExecFlows = guardEvalObj.asInstanceOf[core.src.main.scala.org.apache.spark.scheduler.IGuardEvaluator].evaluateGuards( 
       /*/
       validExecFlows = guardEvalObj.evaluateGuards( 
           symbolsMap.asInstanceOf[java.util.Map[String, Object]]).asInstanceOf[java.util.ArrayList[Integer]]
       */
       println(validExecFlows)
-      
-      
-      
+
       val highestJobId: Int = 
         if (validExecFlows != null) {
         appJumboJson.asJsObject.fields(validExecFlows.get(0).toString())
