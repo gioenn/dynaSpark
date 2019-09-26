@@ -15,9 +15,15 @@
  * limitations under the License.
  */
 
+/* 
+ * Code tagged "DB - DagSymb enhancements" inserted by Davide Bertolotti 
+ * to support Dag Scheduling based on Symbolic Execution Heuristic
+ */
+
 package org.apache.spark.deploy
 
-import java.io.{File, PrintStream}
+import java.io.{File, PrintStream, FileWriter, BufferedWriter}
+import scala.io.Source
 import java.lang.reflect.{InvocationTargetException, Modifier, UndeclaredThrowableException}
 import java.net.URL
 import java.security.PrivilegedExceptionAction
@@ -156,7 +162,25 @@ object SparkSubmit {
   @tailrec
   private def submit(args: SparkSubmitArguments): Unit = {
     val (childArgs, childClasspath, sysProps, childMainClass) = prepareSubmitEnvironment(args)
-
+    
+    val argsFile = sys.env.getOrElse("SPARK_HOME", ".") + "/conf/args.txt"  // DB - DagSymb enhancements
+    val bw = new BufferedWriter(new FileWriter(argsFile)) // DB - DagSymb enhancements
+    if (childArgs.size > 0) {
+      //bw.write(args.mainClass + "\n")  // DB - DagSymb enhancements
+      //println("class: " + args.mainClass)  // DB - DagSymb enhancements
+      bw.write(childArgs(0) + "\n")  // DB - DagSymb enhancements
+      println("class: " + childArgs(0))  // DB - DagSymb enhancements
+      bw.write(args.primaryResource + "\n")  // DB - DagSymb enhancements
+      println("jar: " + args.primaryResource)  // DB - DagSymb enhancements
+      for ( i <- 1 to childArgs.size - 1 ) {   // DB - DagSymb enhancements                                   
+        bw.write(childArgs(i)+"\n")
+        println("Path condition input arg" + (i-1) + ": " + childArgs(i))
+      }
+    }
+    //println(childArgs);
+    bw.close()   // DB - DagSymb enhancements
+    //println("Press any key to continue"); readChar() //waits for any key to be pressed
+    
     def doRunMain(): Unit = {
       if (args.proxyUser != null) {
         val proxyUser = UserGroupInformation.createProxyUser(args.proxyUser,

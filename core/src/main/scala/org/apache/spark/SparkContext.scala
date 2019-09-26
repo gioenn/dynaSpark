@@ -15,6 +15,11 @@
  * limitations under the License.
  */
 
+/* 
+ * Code tagged "DB - DagSymb enhancements" inserted by Davide Bertolotti 
+ * to support Dag Scheduling based on Symbolic Execution Heuristic
+ */
+
 package org.apache.spark
 
 import java.io._
@@ -76,6 +81,10 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   // The call site where this SparkContext was constructed.
   private val creationSite: CallSite = Utils.getCallSite()
+  
+  def resultComputed(result: Any ): Unit = {  // DB - DagSymb enhancements
+      dagScheduler.resultComputed(result)
+      }
 
   // If true, log warnings instead of throwing exceptions when multiple SparkContexts are active
   private val allowMultipleContexts: Boolean =

@@ -15,6 +15,11 @@
  * limitations under the License.
  */
 
+/* 
+ * Code tagged "DB - DagSymb enhancements" inserted by Davide Bertolotti 
+ * to support Dag Scheduling based on Symbolic Execution Heuristic
+ */
+
 package org.apache.spark.rdd
 
 import java.util.Random
@@ -903,14 +908,18 @@ abstract class RDD[T: ClassTag](
   }
 
   /**
+   * Modified by Davide Bertolotti for symbolic execution processing:
+   * put symbol associated to the action and the computed result in sparkContext object sc.
    * Return an array that contains all of the elements in this RDD.
    *
    * @note this method should only be used if the resulting array is expected to be small, as
    * all the data is loaded into the driver's memory.
    */
-  def collect(): Array[T] = withScope {
+  def collect(): Array[T] = withScope { // DB - DagSymb enhancements
     val results = sc.runJob(this, (iter: Iterator[T]) => iter.toArray)
-    Array.concat(results: _*)
+    val res = Array.concat(results: _*)
+    sc.resultComputed(res)
+    res
   }
 
   /**
@@ -981,7 +990,12 @@ abstract class RDD[T: ClassTag](
    * Reduces the elements of this RDD using the specified commutative and
    * associative binary operator.
    */
-  def reduce(f: (T, T) => T): T = withScope {
+  /**
+    * Modified by Davide Bertolotti for symbolic execution processing:
+    * put symbol associated to the action and the computed result in sparkContext object sc.
+    * Return the result of the reduce operation applied to the elements in the RDD.
+    */
+  def reduce(f: (T, T) => T): T = withScope { // DB - DagSymb enhancements
     val cleanF = sc.clean(f)
     val reducePartition: Iterator[T] => Option[T] = iter => {
       if (iter.hasNext) {
@@ -1001,7 +1015,9 @@ abstract class RDD[T: ClassTag](
     }
     sc.runJob(this, reducePartition, mergeResult)
     // Get the final result out of our Option, or throw an exception if the RDD was empty
-    jobResult.getOrElse(throw new UnsupportedOperationException("empty collection"))
+    val res = jobResult.getOrElse(throw new UnsupportedOperationException("empty collection"))
+    sc.resultComputed(res)
+    res
   }
 
   /**
@@ -1129,9 +1145,15 @@ abstract class RDD[T: ClassTag](
   }
 
   /**
+   * Modified by Davide Bertolotti for symbolic execution processing:
+   * put symbol associated to the action and the computed result in sparkContext object sc.
    * Return the number of elements in the RDD.
    */
-  def count(): Long = sc.runJob(this, Utils.getIteratorSize _).sum
+  def count(): Long = { // DB - DagSymb enhancements
+    val res = sc.runJob(this, Utils.getIteratorSize _).sum
+    sc.resultComputed(res)
+    res
+  }
 
   /**
    * Approximate version of count() that returns a potentially incomplete result

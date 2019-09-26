@@ -1,6 +1,8 @@
 package org.apache.spark.deploy.control
 
 import org.apache.spark.SparkConf
+import java.util.ArrayList // DB - DagSymb enhancements 
+import spray.json.JsValue // DB - DagSymb enhancements
 
 /**
   * Created by Simone Ripamonti on 23/05/2017.
@@ -54,4 +56,6 @@ class HeuristicControlUnlimited(conf: SparkConf) extends HeuristicControl(conf) 
     }
 
   }
+
+  override def nextProfile(appJJ: JsValue, valExFlows: java.util.ArrayList[Integer] = null, jobId: Int = 0): JsValue = null
 }

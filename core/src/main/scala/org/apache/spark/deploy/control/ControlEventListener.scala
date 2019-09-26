@@ -40,6 +40,8 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
   // Application:
   var totaldurationremaining = -1L
   var totalStageRemaining = -1L
+  var previous_profile_totalStages = 0L
+  var previous_profile_totalduration = 0L
 
   // Data from spark-defaults.conf
   val ALPHA: Double = conf.get("spark.control.alpha").toDouble
@@ -71,7 +73,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
   var execIdToStageId = new HashMap[ExecutorId, Long].withDefaultValue(0)
   var stageIdToExecId = new HashMap[Int, Set[ExecutorId]].withDefaultValue(Set())
   var executorIdToInfo = new HashMap[ExecutorId, ExecutorInfo]
-  var executorNeededIndexAvaiable = List[Int]()
+  var executorNeededIndexAvailable = List[Int]()
   var executorNeededPendingStages = new HashMap[StageId, Int]
   var deadlineApp: Long = 0
 
@@ -81,6 +83,8 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
       new HeuristicFixed(conf)
     else if (heuristicType == 2)
       new HeuristicControlUnlimited(conf)
+    else if (heuristicType == 3)
+      new HeuristicSymExControlUnlimited(conf)
     else
       new HeuristicControl(conf)
 
@@ -259,7 +263,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
         stageId == lastStageId).size
       if (executorAvailable.size >= stageExecNeeded) {
         totalStageRemaining -= 1
-        executorNeededIndexAvaiable = (0 until stageExecNeeded).toList
+        executorNeededIndexAvailable = (0 until stageExecNeeded).toList
         // LAUNCH BIND
         for (exec <- executorAvailable.toList.take(stageExecNeeded)) {
           onExecutorAssigned(SparkListenerExecutorAssigned(exec, stage._2.stageId))
@@ -276,9 +280,16 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
 
     if (totaldurationremaining == -1L) {
       totaldurationremaining = stageSubmitted.totalduration
+      previous_profile_totalduration = totaldurationremaining 
+    } else {
+      //totaldurationremaining += stageSubmitted.totalduration - previous_profile_totalduration
+      totaldurationremaining = stageSubmitted.totalduration - stageSubmitted.executedstagesduration
     }
     if (totalStageRemaining == -1L) {
       totalStageRemaining = stageSubmitted.stageIds.size - 1 + genstage
+      previous_profile_totalStages = totalStageRemaining
+    } else {
+      totalStageRemaining += stageSubmitted.stageIds.size - 1 + genstage - previous_profile_totalStages
     }
     stageIdToDuration(stage.stageId) = stageSubmitted.duration
 
@@ -372,11 +383,15 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
 
     }
 
+    logInfo("PREVIOUS PROFILE TOTALDURATION: " + previous_profile_totalduration.toString)
+    logInfo("CURRENT PROFILE TOTALDURATION: " + stageSubmitted.totalduration.toString)
+    logInfo("EXECUTED PROFILES DURATION: " + stageSubmitted.executedstagesduration.toString)
     logInfo("DEADLINE STAGES: " + stageIdToDeadline.toString)
     logInfo("CORE STAGES: " + stageIdToCore.toString)
     logInfo("EXEC AVAIL: " + executorAvailable.toString)
     logInfo("ACTIVE STAGES: " + activeStages.toString)
     logInfo("ACTIVE PENDING STAGES: " + activePendingStages.toString)
+    
     if (executorAvailable.size >= executorNeeded) {
       activeStages(stage.stageId) = stage
       totalStageRemaining -= 1
@@ -402,19 +417,20 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
         jobData.completedStageIndices.remove(stage.stageId)
       }
 
-      executorNeededIndexAvaiable = (0 until executorNeeded).toList
+      executorNeededIndexAvailable = (0 until executorNeeded).toList
       // LAUNCH BIND
       for (exec <- executorAvailable.toList.take(executorNeeded)) {
         onExecutorAssigned(SparkListenerExecutorAssigned(exec, stage.stageId))
       }
     } else {
-      logError("NOT ENOUGH RESOURSE TO DO START STAGE NEED " +
+      logError("NOT ENOUGH RESOURCES TO DO START STAGE NEED " +
         (executorNeeded - executorAvailable.size).toString + " EXEC")
       logInfo("Waiting for executor available...")
       activePendingStages(stage.stageId) = stage
       executorNeededPendingStages(stage.stageId) = executorNeeded
     }
-
+    previous_profile_totalduration = stageSubmitted.totalduration
+    previous_profile_totalStages = stageSubmitted.stageIds.size - 1 + genstage
   }
 
   override def onTaskEnd(taskEnd: SparkListenerTaskEnd): Unit = synchronized {
@@ -515,7 +531,7 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
         stageId == lastStageId).size
       if (executorAvailable.size >= stageExecNeeded) {
         totalStageRemaining -= 1
-        executorNeededIndexAvaiable = (0 until stageExecNeeded).toList
+        executorNeededIndexAvailable = (0 until stageExecNeeded).toList
         // LAUNCH BIND
         for (exec <- executorAvailable.toList.take(stageExecNeeded)) {
           onExecutorAssigned(SparkListenerExecutorAssigned(exec, stage._2.stageId))
@@ -537,8 +553,8 @@ class ControlEventListener(conf: SparkConf) extends JobProgressListener(conf) wi
     val controller = jobIdToController.getOrElse(jobId.head,
       new ControllerJob(conf, deadlineApp))
     jobIdToController(jobId.head) = controller
-    val index = executorNeededIndexAvaiable.last
-    executorNeededIndexAvaiable = executorNeededIndexAvaiable.dropRight(1)
+    val index = executorNeededIndexAvailable.last
+    executorNeededIndexAvailable = executorNeededIndexAvailable.dropRight(1)
     val lastStage = stageId == lastStageId
     if (stageId != firstStageId && !stageIdsToComputeNominalRecord.contains(stageId)) {
 

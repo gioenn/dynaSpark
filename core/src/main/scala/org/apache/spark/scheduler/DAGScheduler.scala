@@ -15,12 +15,20 @@
  * limitations under the License.
  */
 
+/* 
+ * Code tagged "DB - DagSymb enhancements" inserted by Davide Bertolotti 
+ * to support Dag Scheduling based on Symbolic Execution Heuristic
+ */
+
 package org.apache.spark.scheduler
 
 import java.io.{FileInputStream, NotSerializableException}
+import java.io.File // DB - DagSymb enhancements
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
+import java.net.{URI, URL, URLClassLoader} // DB - DagSymb enhancements
+import java.util.Collections._ // DB - DagSymb enhancements 
 
 import scala.annotation.tailrec
 import scala.collection.{Map, mutable}
@@ -43,7 +51,9 @@ import org.apache.spark.storage.BlockManagerMessages.BlockManagerHeartbeat
 import org.apache.spark.util._
 import spray.json._
 import DefaultJsonProtocol._
-
+import scala.reflect.{classTag, ClassTag} // DB - DagSymb enhancements
+import scala.io.Source // DB - DagSymb enhancements
+import scala.collection.JavaConversions._  // DB - DagSymb enhancements
 import scala.io
 import java.nio.file.{Files, Paths}
 
@@ -163,22 +173,92 @@ class DAGScheduler(
 
   val stageIdToWeight = new HashMap[Int, Int]
 
-  val jsonFile = sys.env.getOrElse("SPARK_HOME", ".") + "/conf/" +
-    sc.appName.replaceAll("[^a-zA-Z0-9.-]", "_") + ".json"
-
-  val appJson = if (Files.exists(Paths.get(jsonFile))) {
-    io.Source.fromFile(jsonFile).mkString.parseJson
-  } else null
-
   val heuristicType = sc.conf.getInt("spark.control.heuristic", 0)
   val heuristic: HeuristicBase =
     if (heuristicType == 1 && sc.conf.contains("spark.control.stagecores") && sc.conf.contains("spark.control.stagedeadlines") && sc.conf.contains("spark.control.stage"))
       new HeuristicFixed(sc.conf)
     else if (heuristicType == 2)
       new HeuristicControlUnlimited(sc.conf)
+    else if (heuristicType == 3)
+      new HeuristicSymExControlUnlimited(sc.conf)
     else
       new HeuristicControl(sc.conf)
 
+  val jsonFile = sys.env.getOrElse("SPARK_HOME", ".") + "/conf/" +
+    sc.appName + ".json"
+    //sc.appName.replaceAll("[^a-zA-Z0-9.-]", "_") + ".json"
+
+  val appJumboJson = if (Files.exists(Paths.get(jsonFile))) {
+    io.Source.fromFile(jsonFile).mkString.parseJson
+  } else null
+  
+  var appJson = if (appJumboJson != null && heuristicType > 2)
+    heuristic.nextProfile(appJumboJson)
+    else appJumboJson
+    
+  var symbolMap = HashMap[String, Int]() // DB - DagSymb enhancements
+  //var symbolsMap = HashMap[String, Any]() // DB - DagSymb enhancements
+  //var symbolsMap: java.util.Map[String, Any] = java.util.Collections.emptyMap() // DB - DagSymb enhancements
+  var symbolsMap = new java.util.HashMap[String, Any]()// DB - DagSymb enhancements
+  var symbolName: String = ""            // DB - DagSymb enhancements
+  var guardEvalClassname: String = ""            // DB - DagSymb enhancements
+  var appJar: String = ""            // DB - DagSymb enhancements
+  val argsFile = sys.env.getOrElse("SPARK_HOME", ".") + "/conf/args.txt"  // DB - DagSymb enhancements
+  var iter: Int = -2   // DB - DagSymb enhancements
+  if (Files.exists(Paths.get(argsFile))) {
+    for (line <- Source.fromFile(argsFile).getLines) { // DB - DagSymb enhancements
+        println(iter + " - " + line)
+        iter match { 
+          case -2 => guardEvalClassname = line
+          case -1 => appJar = line.split(":")(1)
+          case _  => symbolsMap.put("arg" + iter, line)  //symbolsMap.getOrElseUpdate("arg" + iter, line)  
+        }
+        iter += 1
+    }
+  println(symbolsMap) // DB - DagSymb enhancements
+  for ((k,v) <- symbolsMap) println(k + " => " + v + "\n") // DB - DagSymb enhancements
+  }
+  
+  //var jarfile = new File(appJar) // DB - DagSymb enhancements
+  //var classLoader = new URLClassLoader(Array(jarfile.toURI.toURL)) // DB - DagSymb enhancements
+  //var guardEvalClass = classLoader.loadClass(guardEvalClassname) // DB - DagSymb enhancements
+  //var guardEvalConstructor = guardEvalClass.getConstructor() // DB - DagSymb enhancements
+  //var guardEvalObj = guardEvalConstructor.newInstance().asInstanceOf[core.src.main.scala.org.apache.spark.scheduler.IGuardEvaluator] // DB - DagSymb enhancements
+  //var guardEvalObj:core.src.main.scala.org.apache.spark.scheduler.GuardEvaluator = 
+    //new core.src.main.scala.org.apache.spark.scheduler.GuardEvaluator
+  var guardEvalObj:Any = null
+  //guardEvalObj = guardEvalObj.asInstanceOf[core.src.main.scala.org.apache.spark.scheduler.IGuardEvaluator]
+  var guardEvalMethod: java.lang.reflect.Method = null
+  if (heuristicType > 2) {
+    /*
+     * DB - DagSymb enhancements
+     * The following variables are needed to load the GuardEvaluator class from the application jar
+     */
+    //val jarfile = new File("/home/bertolotti/dagsymb/target/dagsymb-1.0-jar-with-dependencies.jar") // DB - DagSymb enhancements
+    val jarfile = new File(appJar) // DB - DagSymb enhancements
+    //var klass = new core.src.main.scala.org.apache.spark.scheduler.GuardEvaluator
+    //val parent = core.src.main.scala.org.apache.spark.scheduler.GuardEvaluator.getClass.getClassLoader()
+    //val parent = guardEvalObj.getClass.getClassLoader()
+    val classLoader = new URLClassLoader(Array(jarfile.toURI.toURL)/*, parent*/) // DB - DagSymb enhancements
+    //val guardEvalClass = classLoader.loadClass("it.polimi.deepse.dagsymb.examples.GuardEvaluatorPromoCallsFile") // DB - DagSymb enhancements
+    val guardEvalClass = classLoader.loadClass(guardEvalClassname) // DB - DagSymb enhancements
+    val guardEvalConstructor = guardEvalClass.getConstructor() // DB - DagSymb enhancements
+    guardEvalObj = guardEvalConstructor.newInstance()//.asInstanceOf[core.src.main.scala.org.apache.spark.scheduler.GuardEvaluator] // DB - DagSymb enhancements
+    val methods = guardEvalClass.getDeclaredMethods // DB - DagSymb enhancements
+    for (m <- methods) {  // DB - DagSymb enhancements
+      m.getName match {
+        case "evaluateGuards" => guardEvalMethod = m
+        case _ => 
+      }
+    }
+    //guardEvalMethod = guardEvalClass.getMethods()(0) // DB - DagSymb enhancements
+    //var validExecFlows:List[Integer] = List() // DB - DagSymb enhancements 
+  } else {
+    guardEvalObj = new core.src.main.scala.org.apache.spark.scheduler.GuardEvaluator
+    //  val guardEvalClass = new GuardEvaluator(symbolsMap)
+  }
+  
+  var validExecFlows = new java.util.ArrayList[Integer] // DB - DagSymb enhancements
   /**
    * Contains the locations that each RDD's partitions are cached on.  This map's keys are RDD ids
    * and its values are arrays indexed by partition numbers. Each array value is the set of
@@ -207,17 +287,56 @@ class DAGScheduler(
 
   private val messageScheduler =
     ThreadUtils.newDaemonSingleThreadScheduledExecutor("dag-scheduler-message")
-
+  
   private[scheduler] val eventProcessLoop = new DAGSchedulerEventProcessLoop(this)
   taskScheduler.setDAGScheduler(this)
 
+  if (appJson != null) {
+    logInfo("LOADED JSON FOR APP: " + jsonFile)
+    if (sc.conf.getBoolean("spark.control.checkdeadline", false) && !heuristic.checkDeadline(appJson)) {
+      stop()
+    }
+  }
+  
+  /*
   if (appJson != null && sc.conf.getBoolean("spark.control.checkdeadline", false)) {
     logInfo("LOADED JSON FOR APP: " + jsonFile)
     if (!heuristic.checkDeadline(appJson)) {
       stop()
     }
   }
+  */
 
+  /**
+   * Called with appJumboJson and validExecFlows list to return worst case json DAG profile.
+   * // DB - DagSymb enhancements
+   */
+  /*       ///DB - following code moved to newly created class HeuristicSymExControlUnlimited///
+   * 
+  def nextProfile(appJJ: JsValue, 
+      valExFlows: java.util.ArrayList[Integer] = null, 
+      jobId: Int = 0): JsValue = {
+    var setP = appJJ.asJsObject.fields
+    val stageId = if (valExFlows != null) 
+                      setP(valExFlows.get(0).toString()).asJsObject.fields("0")
+                      .asJsObject.fields("jobs")
+                      .asJsObject.fields(jobId.toString())
+                      .asJsObject.fields("stages")
+                      .convertTo[List[Int]].apply(0)
+                  else 0
+    println("Next stage id: " + stageId)
+    println("jobId, numTotalJobs: " + numTotalJobs + ", " + jobId)
+    if (valExFlows != null) 
+      setP = setP.filter({case (k,v) => valExFlows.exists(x => x == k.toInt)})
+    var wCaseProfId = setP.keys.toList.zip(setP.toList.map(
+                      {case (k, v) => v.asJsObject.fields.count(_ => true)})
+                      ).filter({case (id, ns) => ns == setP.toList.map(
+                          {case (k, v) => v.asJsObject.fields.count(_ => true)}).max})(0)._1
+    println("Worst case json profile number: " + wCaseProfId)
+    setP(wCaseProfId)
+  }
+  */
+  
   /**
    * Called by the TaskSetManager to report task's starting.
    */
@@ -653,6 +772,11 @@ class DAGScheduler(
       callSite: CallSite,
       resultHandler: (Int, U) => Unit,
       properties: Properties): Unit = {
+    val actionCallSite = callSite.shortForm.replace(" at ", "_") // DB - DagSymb enhancements
+    symbolName = actionCallSite + "_" + symbolMap.getOrElseUpdate(actionCallSite, 0).toString() // DB - DagSymb enhancements
+    //symbolsMap.update(symbolName, null) // DB - DagSymb enhancements
+    symbolsMap.put(symbolName, null) // DB - DagSymb enhancements
+    symbolMap(actionCallSite) += 1 // DB - DagSymb enhancements
     val start = System.nanoTime
     val waiter = submitJob(rdd, func, partitions, callSite, resultHandler, properties)
     // Note: Do not call Await.ready(future) because that calls `scala.concurrent.blocking`,
@@ -1103,12 +1227,31 @@ class DAGScheduler(
         tasks.toArray, stage.id, stage.latestInfo.attemptId, jobId, properties))
       stage.latestInfo.submissionTime = Some(clock.getTimeMillis())
       if (appJson != null) {
-        val stageJson = appJson.asJsObject.fields(stage.id.toString)
+        val submittedStageId = stage.id
+        var stageId = stage.id
+        //if (heuristicType != 3) {
+        // Davide Bertolotti - reilience in case of profile do not match no. stages
+        val highestStageIdInProfile = appJson.asJsObject.fields.keys.size - 1
+        if (stage.id > highestStageIdInProfile) {
+            stageId = highestStageIdInProfile
+            logInfo(s"Submitted Stage ID not contained in appJSON profile. Submitted Stage ID: $submittedStageId, " +
+              s"Highest Stage ID in appJSON profile: $highestStageIdInProfile" )
+          }
+        //}
+        val stageJson = appJson.asJsObject.fields(stageId.toString)
         val totalduration = appJson.asJsObject.fields("0").asJsObject.fields("totalduration").convertTo[Long]
         val duration = stageJson.asJsObject.fields("duration").convertTo[Long]
         val weight = stageJson.asJsObject.fields("weight").convertTo[Long]
         val stageJsonIds = appJson.asJsObject.fields.keys.toList.filter(id =>
           appJson.asJsObject.fields(id).asJsObject.fields("nominalrate").convertTo[Double] != 0.0)
+        /*val stageId = appJson.asJsObject.fields("0")
+                      .asJsObject.fields("jobs")
+                      .asJsObject.fields(nextJobId.get().toString())
+                      .asJsObject.fields("stages")
+                      .convertTo[List[Int]].sortWith((x, y) => x < y).apply(0)*/
+        val executedstagesduration = appJson.asJsObject.fields.filter(stage =>
+                                          stage._1.toInt < stageId)
+                                    .foldLeft(0L){ (acc, elem) => acc + elem._2.asJsObject.fields("duration").convertTo[Long] }          
         listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties,
           weight,
           duration,
@@ -1116,7 +1259,8 @@ class DAGScheduler(
           stageJson.asJsObject.fields("parentsIds").convertTo[List[Int]],
           stageJson.asJsObject.fields("nominalrate").convertTo[Double],
           stageJson.asJsObject.fields("genstage").convertTo[Boolean],
-          stageJsonIds))
+          stageJsonIds,
+          executedstagesduration))
       }
       else {
         logError("NO JSON FOR APP: " + jsonFile)
@@ -1675,7 +1819,50 @@ class DAGScheduler(
     eventProcessLoop.stop()
     taskScheduler.stop()
   }
+  
+  def resultComputed(result: Any ): Unit = { // DB - DagSymb enhancements
+    if (heuristicType > 2) {
+      symbolsMap(symbolName) = result
+      val resultType = ClassTag(result.getClass)
+      println("Symbol: " + symbolName + ", Type: " + resultType.toString())
+      println("SymbolsMap: ", symbolsMap)
+      /*
+      resultType.toString() match {
+        case "java.lang.Long" => {/* function body of return type java.lang.Long */}
+        case "java.lang.List" => {/* function body of return type java.lang.List */}
+        case _ => { /* Raise exception for return type not implemented */ }
+        * 
+        */
 
+      var new_validExecFlows = guardEvalMethod.invoke(guardEvalObj,
+          symbolsMap).asInstanceOf[java.util.ArrayList[Integer]]
+
+      if (new_validExecFlows.size() > 0)
+        validExecFlows = new_validExecFlows
+      else
+        println("Warning! GuardEvaluator returned an empty set of profile ids")
+      
+      //validExecFlows = guardEvalObj.asInstanceOf[core.src.main.scala.org.apache.spark.scheduler.IGuardEvaluator].evaluateGuards( 
+      /*/
+      validExecFlows = guardEvalObj.evaluateGuards( 
+          symbolsMap.asInstanceOf[java.util.Map[String, Object]]).asInstanceOf[java.util.ArrayList[Integer]]
+      */
+      println(validExecFlows)
+
+      val highestJobId: Int = 
+        if (validExecFlows != null) {
+        appJumboJson.asJsObject.fields(validExecFlows.get(0).toString())
+        .asJsObject.fields("0").asJsObject.fields("jobs")
+        .asJsObject.fields.keys.max.toInt}
+        else 0
+      
+      println("numTotalJobs, highestJobId: " + numTotalJobs + ", " + highestJobId)
+      appJson = if (numTotalJobs <= highestJobId) {
+                  heuristic.nextProfile(appJumboJson, validExecFlows, nextJobId.get())}
+                else appJson
+    }
+  }
+  
   eventProcessLoop.start()
 }
 
