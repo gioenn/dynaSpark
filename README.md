@@ -1,12 +1,12 @@
-# xSpark
+# dynaSpark
 
-xSpark (Extended Spark) is a research project started at Politecnico di Milano in 2016. It aims to add functionalities for managing the quality of service (QoS) of Spark applications. 
+dynaSpark (Extended Spark) is a research project started at Politecnico di Milano in 2016. It aims to add functionalities for managing the quality of service (QoS) of Spark applications. 
 
-With xSpark users can control Spark applications' duration by specifying a **deadline**. xSpark will dynamically allocate resources (cores) to meet the desired duration.
+With dynaSpark users can control Spark applications' duration by specifying a **deadline**. dynaSpark will dynamically allocate resources (cores) to meet the desired duration.
 
-xSpark is based on a novel _container- and stage-based architecture_ where executors are containerized using docker containers and dedicated to a single stage. Moreover xSpark uses a _centralized heuristic_ that computes local deadline for each stage and distributed _control theoretical planners_ for allocating in a fine-grained fashion cpu-time to each executor. 
+dynaSpark is based on a novel _container- and stage-based architecture_ where executors are containerized using docker containers and dedicated to a single stage. Moreover dynaSpark uses a _centralized heuristic_ that computes local deadline for each stage and distributed _control theoretical planners_ for allocating in a fine-grained fashion cpu-time to each executor. 
 
-In the experiments xSpark was able to meet deadlines with an error equals to less than 1%.
+In the experiments dynaSpark was able to meet deadlines with an error equals to less than 1%.
 
 ## Apache Spark
 
